@@ -21,7 +21,7 @@ CATEGORY_TREE = {
     "📦 기타": ["소스/드레싱", "가니쉬", "향신료 배합", "이유식/환자식"]
 }
 
-# 2. 식자재 DB (Master)
+# 2. 식자재 DB
 if 'ingredient_db' not in st.session_state:
     data = [
         {"품목명": "소갈비(Short Rib)", "규격": "kg", "단가": 35000, "수율": 100},
@@ -42,9 +42,8 @@ if 'ingredient_db' not in st.session_state:
     ]
     st.session_state.ingredient_db = pd.DataFrame(data)
 
-# 3. 재고 DB (Inventory)
+# 3. 재고 DB
 if 'inventory_db' not in st.session_state:
-    # 초기 재고는 10으로 세팅 (테스트용)
     inv_data = st.session_state.ingredient_db.copy()
     inv_data['현재고'] = 10.0 
     inv_data['최종변동일'] = "-"
@@ -55,10 +54,7 @@ if 'recipe_db' not in st.session_state:
     st.session_state.recipe_db = [
         {
             "name": "왕갈비탕", "main_cat": "🇰🇷 한식", "sub_cat": "국/찌개/전골/탕",
-            "ingredients": [
-                {"name": "소갈비(Short Rib)", "qty": 250}, {"name": "무", "qty": 150}, 
-                {"name": "대파", "qty": 40}, {"name": "깐마늘", "qty": 10}
-            ],
+            "ingredients": [{"name": "소갈비(Short Rib)", "qty": 250}, {"name": "무", "qty": 150}, {"name": "대파", "qty": 40}, {"name": "깐마늘", "qty": 10}],
             "tasks": [{"time": "08:00", "cat": "Prep", "desc": "핏물 빼기", "point": "찬물 유수"}]
         },
         {
@@ -73,7 +69,11 @@ if 'recipe_db' not in st.session_state:
         }
     ]
 
-# 5. 기타 상태
+# 5. 장바구니 세션 (원가용 / 판매용)
+if 'cost_cart' not in st.session_state: st.session_state.cost_cart = [] # 원가 분석용 장바구니
+if 'sell_cart' not in st.session_state: st.session_state.sell_cart = [] # 판매 등록용 장바구니
+
+# 6. 기타
 if 'schedule_df' not in st.session_state:
     st.session_state.schedule_df = pd.DataFrame([{"시작 시간": time(9,0), "종료 시간": time(9,30), "구분": "Prep", "세부 작업 내용": "오픈 준비", "체크 포인트": "온도", "완료": False}])
 if 'nav_depth' not in st.session_state: st.session_state.nav_depth = 0
@@ -131,8 +131,6 @@ with menu_tabs[1]: # 메뉴 책장
                 for i in r.get('ingredients', []):
                     ing_display.append(f"{i['name']} {i['qty']}g/ml/ea")
                 st.info(", ".join(ing_display) if ing_display else "등록된 재료 없음")
-                st.write("**[공정]**")
-                for t in r['tasks']: st.text(f"- {t['time']} {t['desc']}")
 
 with menu_tabs[2]: # R&D
     st.subheader("🧪 신규 레시피 등록")
@@ -163,165 +161,210 @@ with menu_tabs[2]: # R&D
                 st.session_state.recipe_db.append({"name": nm, "main_cat": main_c, "sub_cat": sub_c, "ingredients": final_ings, "tasks": final_tasks})
                 st.success(f"✅ [{nm}] 등록 완료!")
 
-with menu_tabs[3]: # 원가 관리
-    st.subheader("💰 원가 분석")
-    cost_t1, cost_t2 = st.tabs(["📊 식자재 단가표", "🧮 자동 원가 계산기"])
-    with cost_t1: st.data_editor(st.session_state.ingredient_db, num_rows="dynamic", use_container_width=True)
+# =========================================================
+# [TAB 4] 원가 관리 (장바구니 방식 적용)
+# =========================================================
+with menu_tabs[3]:
+    st.subheader("💰 원가 분석 및 마진율 계산기")
+    
+    cost_t1, cost_t2 = st.tabs(["📊 식자재 단가표", "🧮 메뉴 원가 분석(단품/코스)"])
+    
+    with cost_t1:
+        st.data_editor(st.session_state.ingredient_db, num_rows="dynamic", use_container_width=True)
+
     with cost_t2:
-        calc_mode = st.radio("분석 모드", ["단품 메뉴 분석", "세트/코스 메뉴 분석"], horizontal=True)
-        col_s, col_l = st.columns([1,2])
-        target_menus = []
-        with col_s:
-            q = st.text_input("🔍 메뉴 검색", placeholder="예: 갈비")
-            f_m = [m for m in [r['name'] for r in st.session_state.recipe_db] if q in m] if q else [r['name'] for r in st.session_state.recipe_db]
-        with col_l:
-            if calc_mode == "단품 메뉴 분석": 
-                s = st.selectbox("단품 메뉴 선택", f_m)
-                if s: target_menus = [s]
-            else: target_menus = st.multiselect("세트 메뉴 선택", f_m)
-        st.divider()
-        c1, c2, c3 = st.columns(3)
-        with c1: servings = st.number_input("인분수", 1, 1000, 1)
-        with c2: price = st.number_input("1인분/세트 판매가", 0, 1000000, 15000, 1000)
-        with c3: st.metric("총 예상 매출", f"{price*servings:,}원")
-        if target_menus:
-            rows = []
-            for m in target_menus:
-                rd = next((r for r in st.session_state.recipe_db if r['name']==m), None)
-                if rd and 'ingredients' in rd:
-                    for i in rd['ingredients']:
-                        info = st.session_state.ingredient_db[st.session_state.ingredient_db['품목명']==i['name']]
-                        if not info.empty:
-                            r_info = info.iloc[0]
-                            c = (r_info['단가']/1000*i['qty']) if str(r_info['규격']) in ['kg','l','리터'] else (r_info['단가']*i['qty'])
-                            if r_info['수율'] > 0: c *= (100/r_info['수율'])
-                            rows.append({"메뉴": m, "재료": i['name'], "투입량": i['qty'], "단위": "g/ml" if str(r_info['규격']) in ['kg','l'] else str(r_info['규격']), "원가": int(c)})
-            if rows:
-                df = pd.DataFrame(rows)
-                st.dataframe(df, use_container_width=True)
-                st.success("분석 완료")
+        # 2분할: 왼쪽(검색 및 담기) / 오른쪽(분석 결과)
+        c_left, c_right = st.columns([1, 1])
+        
+        with c_left:
+            st.markdown("#### 1. 메뉴 구성 (Search & Add)")
+            st.caption("단품이든 세트든 검색해서 목록에 담아주세요.")
+            
+            # [검색]
+            cost_search_q = st.text_input("🔍 메뉴 검색", placeholder="예: 갈비", key="cost_q")
+            all_menus = [r['name'] for r in st.session_state.recipe_db]
+            filtered_menus = [m for m in all_menus if cost_search_q in m] if cost_search_q else all_menus
+            
+            # [선택 & 담기]
+            cost_target = st.selectbox("검색 결과 선택", filtered_menus, key="cost_sel")
+            
+            if st.button("⬇️ 목록에 담기", key="add_cost"):
+                if cost_target not in st.session_state.cost_cart:
+                    st.session_state.cost_cart.append(cost_target)
+            
+            st.divider()
+            st.markdown("#### 2. 설정")
+            servings = st.number_input("인분수", 1, 1000, 1, key="cost_serv")
+            sales_price = st.number_input("총 판매가 (원)", 0, 10000000, 15000, 1000, key="cost_price")
+
+        with c_right:
+            st.markdown("#### 3. 분석 리스트 & 결과")
+            
+            # 장바구니 표시
+            if st.session_state.cost_cart:
+                st.write("📋 **분석 대상 목록**")
+                for i, m in enumerate(st.session_state.cost_cart):
+                    c1, c2 = st.columns([0.8, 0.2])
+                    c1.text(f"{i+1}. {m}")
+                    if c2.button("삭제", key=f"del_cost_{i}"):
+                        st.session_state.cost_cart.pop(i)
+                        st.rerun()
+                
+                if st.button("🗑️ 전체 비우기", key="clear_cost"):
+                    st.session_state.cost_cart = []
+                    st.rerun()
+                
+                st.divider()
+                
+                # 계산 로직
+                calculated_rows = []
+                for m_name in st.session_state.cost_cart:
+                    recipe_data = next((r for r in st.session_state.recipe_db if r['name'] == m_name), None)
+                    if recipe_data and 'ingredients' in recipe_data:
+                        for ing in recipe_data['ingredients']:
+                            ing_info = st.session_state.ingredient_db[st.session_state.ingredient_db['품목명'] == ing['name']]
+                            if not ing_info.empty:
+                                row = ing_info.iloc[0]
+                                unit = str(row['규격']).lower().strip()
+                                price = row['단가']
+                                yield_rate = row['수율']
+                                
+                                cost = (price / 1000 * ing['qty']) if unit in ['kg', 'l', '리터'] else (price * ing['qty'])
+                                if yield_rate > 0: cost = cost * (100/yield_rate)
+                                
+                                unit_display = "g/ml" if unit in ['kg', 'l', '리터'] else unit
+                                calculated_rows.append({
+                                    "구분": m_name, "재료명": ing['name'], 
+                                    "1인분 투입량": ing['qty'], "단위": unit_display, "1인분 원가": int(cost)
+                                })
+                
+                if calculated_rows:
+                    res_df = pd.DataFrame(calculated_rows)
+                    with st.expander("📝 상세 재료 원가 보기"):
+                        st.dataframe(res_df, use_container_width=True)
+                    
+                    total_cost_unit = res_df["1인분 원가"].sum()
+                    total_cost_final = total_cost_unit * servings
+                    margin_final = sales_price - total_cost_final
+                    rate_final = (total_cost_final / sales_price * 100) if sales_price > 0 else 0
+                    
+                    st.success(f"💰 분석 결과 ({servings}인분 기준)")
+                    m1, m2, m3 = st.columns(3)
+                    m1.metric("총 원가", f"{int(total_cost_final):,}원")
+                    m2.metric("예상 마진", f"{int(margin_final):,}원")
+                    m3.metric("원가율", f"{rate_final:.1f}%", delta_color="inverse")
+            else:
+                st.info("왼쪽에서 메뉴를 검색하여 담아주세요.")
 
 # =========================================================
-# [TAB 5] 입고 & 재고 (세트 메뉴 차감 기능 추가)
+# [TAB 5] 입고 & 재고 (장바구니 판매 방식 적용)
 # =========================================================
 with menu_tabs[4]:
     st.subheader("📸 스마트 입고 & 재고 관리")
     
     in_tab1, in_tab2, in_tab3 = st.tabs(["📥 입고 등록 (OCR)", "📤 판매/소진 등록 (차감)", "📦 재고 현황"])
     
-    # --- [5-1] 입고 등록 ---
+    # [5-1] 입고 (기존 유지)
     with in_tab1:
-        st.info("거래명세서를 등록하면 재고가 늘어나고(+) 단가표가 갱신됩니다.")
-        input_method = st.radio("입력 방식", ["📸 명세서 촬영(OCR)", "📝 수동 입력"], horizontal=True)
-        
-        if input_method == "📸 명세서 촬영(OCR)":
-            if st.button("🔍 OCR 시뮬레이션 (랜덤 입고)"):
-                st.toast("OCR 분석 완료!")
-                sample = st.session_state.ingredient_db.sample(3)
-                ocr_results = []
-                for _, row in sample.iterrows():
-                    new_price = row['단가'] + random.choice([-500, 0, 500])
-                    ocr_results.append({"품목명": row['품목명'], "입고수량": 10, "입고단가": new_price})
-                st.session_state.ocr_data = pd.DataFrame(ocr_results)
+        st.info("거래명세서 등록 (OCR 시뮬레이션)")
+        if st.button("🔍 OCR 시뮬레이션 (랜덤 입고)"):
+            sample = st.session_state.ingredient_db.sample(3)
+            ocr_results = []
+            for _, row in sample.iterrows():
+                new_price = row['단가'] + random.choice([-500, 0, 500])
+                ocr_results.append({"품목명": row['품목명'], "입고수량": 10, "입고단가": new_price})
+            st.session_state.ocr_data = pd.DataFrame(ocr_results)
 
-            if 'ocr_data' in st.session_state:
-                edited_in = st.data_editor(st.session_state.ocr_data, num_rows="dynamic", use_container_width=True)
-                if st.button("✅ 입고 확정"):
-                    for _, row in edited_in.iterrows():
-                        item, qty, price = row['품목명'], row['입고수량'], row['입고단가']
-                        # 재고 추가
-                        if item in st.session_state.inventory_db['품목명'].values:
-                            idx = st.session_state.inventory_db[st.session_state.inventory_db['품목명']==item].index[0]
-                            st.session_state.inventory_db.at[idx, '현재고'] += qty
-                            st.session_state.inventory_db.at[idx, '최종변동일'] = datetime.now().strftime('%Y-%m-%d')
-                        # 단가 갱신
-                        if item in st.session_state.ingredient_db['품목명'].values:
-                            idx_m = st.session_state.ingredient_db[st.session_state.ingredient_db['품목명']==item].index[0]
-                            st.session_state.ingredient_db.at[idx_m, '단가'] = price
-                    st.success("입고 완료 & 단가 갱신됨")
-                    del st.session_state.ocr_data
-                    st.rerun()
-        else:
-            st.write("수동 입력창 (생략)")
+        if 'ocr_data' in st.session_state:
+            edited_in = st.data_editor(st.session_state.ocr_data, num_rows="dynamic", use_container_width=True)
+            if st.button("✅ 입고 확정"):
+                for _, row in edited_in.iterrows():
+                    item, qty, price = row['품목명'], row['입고수량'], row['입고단가']
+                    if item in st.session_state.inventory_db['품목명'].values:
+                        idx = st.session_state.inventory_db[st.session_state.inventory_db['품목명']==item].index[0]
+                        st.session_state.inventory_db.at[idx, '현재고'] += qty
+                        st.session_state.inventory_db.at[idx, '최종변동일'] = datetime.now().strftime('%Y-%m-%d')
+                    if item in st.session_state.ingredient_db['품목명'].values:
+                        idx_m = st.session_state.ingredient_db[st.session_state.ingredient_db['품목명']==item].index[0]
+                        st.session_state.ingredient_db.at[idx_m, '단가'] = price
+                st.success("입고 완료")
+                del st.session_state.ocr_data
+                st.rerun()
 
-    # --- [5-2] 판매/소진 등록 (세트 메뉴 기능 추가) ---
+    # [5-2] 판매/소진 (장바구니 방식 적용 - 핵심 수정)
     with in_tab2:
-        st.info("판매된 메뉴(단품 또는 세트)를 입력하면 식자재가 자동 차감됩니다.")
+        st.info("판매된 메뉴를 검색하여 목록에 담은 후, 한 번에 재고를 차감하세요.")
         
-        # 1. 판매 유형 선택
-        sell_mode = st.radio("판매 유형", ["단품 메뉴 판매", "세트/코스 메뉴 판매"], horizontal=True)
+        col_sell_left, col_sell_right = st.columns([1, 1])
         
-        target_menus_to_sell = []
-        
-        col_m, col_q = st.columns([2, 1])
-        with col_m:
-            menu_list = [r['name'] for r in st.session_state.recipe_db]
+        with col_sell_left:
+            st.markdown("#### 1. 판매 메뉴 등록")
             
-            if sell_mode == "단품 메뉴 판매":
-                sel = st.selectbox("판매 메뉴 선택", menu_list)
-                if sel: target_menus_to_sell = [sel]
-            else:
-                sel = st.multiselect("세트/코스 구성 메뉴 선택", menu_list, placeholder="예: 갈비탕 + 공기밥 + 김치")
-                target_menus_to_sell = sel
-                
-        with col_q:
-            sell_qty = st.number_input("판매 수량 (세트/인분)", 1, 1000, 1)
+            # [검색]
+            sell_q = st.text_input("🔍 메뉴 검색", placeholder="예: 갈비", key="sell_q")
+            all_menus_sell = [r['name'] for r in st.session_state.recipe_db]
+            filtered_sell = [m for m in all_menus_sell if sell_q in m] if sell_q else all_menus_sell
             
-        if st.button("🚀 판매 처리 (재고 차감)"):
-            if target_menus_to_sell:
-                total_deduction_log = []
+            # [선택 & 수량]
+            c_sel, c_qty = st.columns([0.7, 0.3])
+            with c_sel:
+                sell_target = st.selectbox("메뉴 선택", filtered_sell, key="sell_sel")
+            with c_qty:
+                sell_qty_input = st.number_input("수량", 1, 1000, 1, key="sell_qty_in")
+            
+            # [담기]
+            if st.button("⬇️ 판매 리스트에 추가"):
+                st.session_state.sell_cart.append({"menu": sell_target, "qty": sell_qty_input})
+        
+        with col_sell_right:
+            st.markdown("#### 2. 판매 예정 리스트")
+            
+            if st.session_state.sell_cart:
+                # 리스트 표시 (Dataframe)
+                cart_df = pd.DataFrame(st.session_state.sell_cart)
+                st.dataframe(cart_df, use_container_width=True, hide_index=True)
                 
-                # 선택된 모든 메뉴(단품 1개든 세트 5개든)를 순회
-                for menu_name in target_menus_to_sell:
-                    recipe = next((r for r in st.session_state.recipe_db if r['name'] == menu_name), None)
-                    
-                    if recipe and 'ingredients' in recipe:
-                        for ing in recipe['ingredients']:
-                            ing_name = ing['name']
-                            # 재고 DB에서 찾기
-                            inv_row = st.session_state.inventory_db[st.session_state.inventory_db['품목명'] == ing_name]
+                c_clear, c_confirm = st.columns(2)
+                with c_clear:
+                    if st.button("🗑️ 리스트 비우기"):
+                        st.session_state.sell_cart = []
+                        st.rerun()
+                with c_confirm:
+                    if st.button("🚀 재고 차감 실행"):
+                        log_msg = []
+                        for item in st.session_state.sell_cart:
+                            m_name = item['menu']
+                            s_qty = item['qty']
                             
-                            if not inv_row.empty:
-                                idx = inv_row.index[0]
-                                current_unit = str(inv_row.iloc[0]['규격']).lower()
-                                
-                                # 차감량 계산 (레시피 사용량 * 판매수량)
-                                # 환산: 재고가 kg/L인데 레시피가 g/ml이면 /1000
-                                deduct_qty = 0
-                                if current_unit in ['kg', 'l', '리터']:
-                                    deduct_qty = (ing['qty'] * sell_qty) / 1000
-                                else:
-                                    deduct_qty = ing['qty'] * sell_qty
-                                    
-                                # 실제 차감
-                                st.session_state.inventory_db.at[idx, '현재고'] -= deduct_qty
-                                st.session_state.inventory_db.at[idx, '최종변동일'] = datetime.now().strftime('%Y-%m-%d')
-                                
-                                total_deduction_log.append(f"{ing_name}({menu_name}): -{deduct_qty:.2f}{current_unit}")
-                    else:
-                        st.warning(f"'{menu_name}'의 레시피 정보가 없어 차감되지 않았습니다.")
-
-                if total_deduction_log:
-                    st.success(f"✅ 총 {len(target_menus_to_sell)}개 메뉴(세트)에 대한 재고 차감 완료!")
-                    with st.expander("상세 차감 내역 보기"):
-                        st.write(", ".join(total_deduction_log))
+                            recipe = next((r for r in st.session_state.recipe_db if r['name'] == m_name), None)
+                            if recipe and 'ingredients' in recipe:
+                                for ing in recipe['ingredients']:
+                                    ing_name = ing['name']
+                                    inv_row = st.session_state.inventory_db[st.session_state.inventory_db['품목명'] == ing_name]
+                                    if not inv_row.empty:
+                                        idx = inv_row.index[0]
+                                        unit = str(inv_row.iloc[0]['규격']).lower()
+                                        deduct = (ing['qty'] * s_qty) / 1000 if unit in ['kg','l','리터'] else (ing['qty'] * s_qty)
+                                        
+                                        st.session_state.inventory_db.at[idx, '현재고'] -= deduct
+                                        st.session_state.inventory_db.at[idx, '최종변동일'] = datetime.now().strftime('%Y-%m-%d')
+                                        log_msg.append(f"{ing_name}: -{deduct:.1f}")
+                        
+                        st.session_state.sell_cart = [] # 처리 후 비움
+                        st.success("✅ 판매 처리 완료! 재고가 차감되었습니다.")
+                        with st.expander("차감 상세 로그"):
+                            st.write(", ".join(log_msg))
+                        st.rerun()
             else:
-                st.warning("메뉴를 선택해주세요.")
+                st.info("판매된 메뉴를 추가해주세요.")
 
-    # --- [5-3] 재고 현황 ---
+    # [5-3] 재고 현황
     with in_tab3:
-        st.write("📊 **실시간 재고 자산 현황**")
-        
-        def highlight_low_stock(val):
-            return f'color: red' if val < 2 else 'color: black'
-
+        st.write("📊 **실시간 재고 현황**")
+        def highlight_low_stock(val): return f'color: red' if val < 2 else 'color: black'
         st.dataframe(
             st.session_state.inventory_db.style.map(highlight_low_stock, subset=['현재고']), 
             use_container_width=True,
-            column_config={
-                "현재고": st.column_config.NumberColumn("현재고", format="%.2f", help="2 미만 시 붉은색 표시"),
-            }
+            column_config={"현재고": st.column_config.NumberColumn("현재고", format="%.2f", help="2 미만 시 붉은색")}
         )
-        
-        if st.button("🔄 재고 새로고침"):
-            st.rerun()
+        if st.button("🔄 재고 새로고침"): st.rerun()
