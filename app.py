@@ -1,32 +1,33 @@
 import streamlit as st
-import pandas as pd
 
-# 셰프님 마스터 데이터 (임시 데이터 - 추후 data.json 연동)
-master_ingredients = {
+# 셰프님 엑셀 데이터
+INGREDIENTS = {
     "갈비(원물)": {"price": 13000, "yield": 50.4},
     "차돌박이": {"price": 18000, "yield": 100},
     "쪽파(실파)": {"price": 4500, "yield": 85}
 }
 
-st.set_page_config(page_title="Chef_dskim MMS", layout="wide")
+st.set_page_config(page_title="Chef_dskim MMS", layout="wide") # 화면 넓게 쓰기
 st.title("👨‍🍳 Chef_dskim 통합 관리 시스템")
 
-tab1, tab2, tab3 = st.tabs(["📸 스마트 입고", "📊 수익성 분포", "📋 작업 리스트"])
+# 왼쪽/오른쪽 칸 나누기
+col1, col2 = st.columns([1, 1])
 
-with tab1:
-    st.header("식자재 명세표 등록")
-    img_file = st.camera_input("명세표를 촬영하세요")
-    if img_file:
-        st.info("비전 AI 분석 중... (테스트: 갈비 단가 상승 상황)")
-        # 시뮬레이션 결과
-        st.warning("⚠️ 갈비(원물) 단가 변동 감지: 13,000원 -> 14,500원 (+11.5%)")
-        if st.button("신규 단가 승인 및 전체 레시피 반영"):
-            st.success("147종 레시피 원가가 최신화되었습니다.")
+with col1:
+    st.header("📸 명세표 촬영")
+    img_file = st.camera_input("")
 
-with tab2:
-    st.header("메뉴별 수익성 분포")
-    st.info("판매 데이터 대기 중...")
-
-with tab3:
-    st.header("오늘의 준비 작업 리스트")
-    st.checkbox("차돌박이 10kg 손질 및 유자 제스트 전처리")
+with col2:
+    st.header("🔍 데이터 대조")
+    item = st.selectbox("품목을 선택하세요", list(INGREDIENTS.keys()))
+    
+    base = INGREDIENTS[item]
+    price_input = st.number_input("현재 입고가 입력", value=base["price"])
+    
+    # 셰프님 엑셀 수식 적용
+    real_cost = price_input / (base["yield"] / 100)
+    
+    st.divider()
+    st.subheader(f"📊 {item} 검증 결과")
+    st.metric("실질 정육 원가", f"{int(real_cost):,}원")
+    st.info(f"💡 엑셀 기준 수율: {base['yield']}%")
