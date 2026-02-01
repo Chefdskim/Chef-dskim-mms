@@ -44,9 +44,9 @@ if 'ingredient_db' not in st.session_state:
 
 # 3. 재고 DB (Inventory)
 if 'inventory_db' not in st.session_state:
-    # 초기 재고는 0, 테스트를 위해 일부 재고 넣어둠
+    # 초기 재고는 10으로 세팅 (테스트용)
     inv_data = st.session_state.ingredient_db.copy()
-    inv_data['현재고'] = 10.0 # 테스트용: 모두 10개씩 있다고 가정
+    inv_data['현재고'] = 10.0 
     inv_data['최종변동일'] = "-"
     st.session_state.inventory_db = inv_data[['품목명', '규격', '현재고', '최종변동일']]
 
@@ -60,6 +60,16 @@ if 'recipe_db' not in st.session_state:
                 {"name": "대파", "qty": 40}, {"name": "깐마늘", "qty": 10}
             ],
             "tasks": [{"time": "08:00", "cat": "Prep", "desc": "핏물 빼기", "point": "찬물 유수"}]
+        },
+        {
+            "name": "공기밥", "main_cat": "🇰🇷 한식", "sub_cat": "밥/죽/면",
+            "ingredients": [{"name": "쌀", "qty": 150}],
+            "tasks": []
+        },
+        {
+            "name": "배추김치(반찬)", "main_cat": "🇰🇷 한식", "sub_cat": "김치/장류",
+            "ingredients": [{"name": "김치", "qty": 80}],
+            "tasks": []
         }
     ]
 
@@ -116,7 +126,7 @@ with menu_tabs[1]: # 메뉴 책장
         cur = [r for r in st.session_state.recipe_db if r['main_cat']==st.session_state.selected_main and r['sub_cat']==st.session_state.selected_sub]
         for r in cur:
             with st.expander(f"🍽️ {r['name']}"):
-                st.write("**[재료 구성]**")
+                st.write("**[재료 구성 (1인분)]**")
                 ing_display = []
                 for i in r.get('ingredients', []):
                     ing_display.append(f"{i['name']} {i['qty']}g/ml/ea")
@@ -192,7 +202,7 @@ with menu_tabs[3]: # 원가 관리
                 st.success("분석 완료")
 
 # =========================================================
-# [TAB 5] 입고 & 재고 (핵심 업데이트)
+# [TAB 5] 입고 & 재고 (세트 메뉴 차감 기능 추가)
 # =========================================================
 with menu_tabs[4]:
     st.subheader("📸 스마트 입고 & 재고 관리")
@@ -234,60 +244,76 @@ with menu_tabs[4]:
         else:
             st.write("수동 입력창 (생략)")
 
-    # --- [5-2] 판매/소진 등록 (차감) - NEW ---
+    # --- [5-2] 판매/소진 등록 (세트 메뉴 기능 추가) ---
     with in_tab2:
-        st.info("판매된 메뉴를 입력하면 레시피대로 재료가 자동 차감됩니다(-).")
+        st.info("판매된 메뉴(단품 또는 세트)를 입력하면 식자재가 자동 차감됩니다.")
+        
+        # 1. 판매 유형 선택
+        sell_mode = st.radio("판매 유형", ["단품 메뉴 판매", "세트/코스 메뉴 판매"], horizontal=True)
+        
+        target_menus_to_sell = []
         
         col_m, col_q = st.columns([2, 1])
         with col_m:
-            sell_menu = st.selectbox("판매 메뉴 선택", [r['name'] for r in st.session_state.recipe_db])
+            menu_list = [r['name'] for r in st.session_state.recipe_db]
+            
+            if sell_mode == "단품 메뉴 판매":
+                sel = st.selectbox("판매 메뉴 선택", menu_list)
+                if sel: target_menus_to_sell = [sel]
+            else:
+                sel = st.multiselect("세트/코스 구성 메뉴 선택", menu_list, placeholder="예: 갈비탕 + 공기밥 + 김치")
+                target_menus_to_sell = sel
+                
         with col_q:
-            sell_qty = st.number_input("판매 수량 (인분)", 1, 1000, 1)
+            sell_qty = st.number_input("판매 수량 (세트/인분)", 1, 1000, 1)
             
         if st.button("🚀 판매 처리 (재고 차감)"):
-            # 레시피 찾기
-            recipe = next((r for r in st.session_state.recipe_db if r['name'] == sell_menu), None)
-            
-            if recipe and 'ingredients' in recipe:
-                log_msg = []
-                for ing in recipe['ingredients']:
-                    ing_name = ing['name']
-                    # 소모량 계산 (레시피 1인분량 * 판매수량)
-                    # 주의: 레시피 단위는 g, 재고 단위는 kg일 수 있음 -> 환산 필요
-                    
-                    # 1. 재고 DB에서 해당 재료 찾기
-                    inv_row = st.session_state.inventory_db[st.session_state.inventory_db['품목명'] == ing_name]
-                    
-                    if not inv_row.empty:
-                        idx = inv_row.index[0]
-                        current_unit = str(inv_row.iloc[0]['규격']).lower()
-                        deduct_qty = 0
-                        
-                        # 환산 로직: 레시피(g) -> 재고(kg) 이면 /1000
-                        if current_unit in ['kg', 'l', '리터']:
-                            deduct_qty = (ing['qty'] * sell_qty) / 1000
-                        else:
-                            # 개, ea 등은 그대로
-                            deduct_qty = ing['qty'] * sell_qty
-                            
-                        # 재고 차감
-                        st.session_state.inventory_db.at[idx, '현재고'] -= deduct_qty
-                        st.session_state.inventory_db.at[idx, '최종변동일'] = datetime.now().strftime('%Y-%m-%d')
-                        
-                        log_msg.append(f"{ing_name}: -{deduct_qty:.2f}{current_unit}")
+            if target_menus_to_sell:
+                total_deduction_log = []
                 
-                st.success(f"✅ 처리 완료! 재고 차감 내역: {', '.join(log_msg)}")
+                # 선택된 모든 메뉴(단품 1개든 세트 5개든)를 순회
+                for menu_name in target_menus_to_sell:
+                    recipe = next((r for r in st.session_state.recipe_db if r['name'] == menu_name), None)
+                    
+                    if recipe and 'ingredients' in recipe:
+                        for ing in recipe['ingredients']:
+                            ing_name = ing['name']
+                            # 재고 DB에서 찾기
+                            inv_row = st.session_state.inventory_db[st.session_state.inventory_db['품목명'] == ing_name]
+                            
+                            if not inv_row.empty:
+                                idx = inv_row.index[0]
+                                current_unit = str(inv_row.iloc[0]['규격']).lower()
+                                
+                                # 차감량 계산 (레시피 사용량 * 판매수량)
+                                # 환산: 재고가 kg/L인데 레시피가 g/ml이면 /1000
+                                deduct_qty = 0
+                                if current_unit in ['kg', 'l', '리터']:
+                                    deduct_qty = (ing['qty'] * sell_qty) / 1000
+                                else:
+                                    deduct_qty = ing['qty'] * sell_qty
+                                    
+                                # 실제 차감
+                                st.session_state.inventory_db.at[idx, '현재고'] -= deduct_qty
+                                st.session_state.inventory_db.at[idx, '최종변동일'] = datetime.now().strftime('%Y-%m-%d')
+                                
+                                total_deduction_log.append(f"{ing_name}({menu_name}): -{deduct_qty:.2f}{current_unit}")
+                    else:
+                        st.warning(f"'{menu_name}'의 레시피 정보가 없어 차감되지 않았습니다.")
+
+                if total_deduction_log:
+                    st.success(f"✅ 총 {len(target_menus_to_sell)}개 메뉴(세트)에 대한 재고 차감 완료!")
+                    with st.expander("상세 차감 내역 보기"):
+                        st.write(", ".join(total_deduction_log))
             else:
-                st.warning("해당 메뉴의 레시피 정보가 없습니다.")
+                st.warning("메뉴를 선택해주세요.")
 
     # --- [5-3] 재고 현황 ---
     with in_tab3:
         st.write("📊 **실시간 재고 자산 현황**")
         
-        # 재고 부족 알림 로직 (Style)
         def highlight_low_stock(val):
-            color = 'red' if val < 2 else 'black' # 2kg 미만이면 빨간색
-            return f'color: {color}'
+            return f'color: red' if val < 2 else 'color: black'
 
         st.dataframe(
             st.session_state.inventory_db.style.map(highlight_low_stock, subset=['현재고']), 
@@ -297,6 +323,5 @@ with menu_tabs[4]:
             }
         )
         
-        st.caption("※ 빨간색 숫자는 재고 부족 경고입니다.")
         if st.button("🔄 재고 새로고침"):
             st.rerun()
