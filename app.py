@@ -22,7 +22,6 @@ CATEGORY_TREE = {
 
 # 2. 식자재 단가 마스터 (기초 데이터 탑재)
 if 'ingredient_db' not in st.session_state:
-    # 셰프님이 바로 테스트하실 수 있도록 기본 재료를 미리 넣어둡니다.
     data = [
         {"품목명": "소갈비(Short Rib)", "규격": "kg", "단가": 35000, "수율": 100},
         {"품목명": "돼지갈비", "규격": "kg", "단가": 18000, "수율": 100},
@@ -90,14 +89,12 @@ with st.sidebar:
             st.rerun()
     with col_reset:
         if st.button("🔄 DB 초기화"):
-            # 세션 삭제 후 리로드 (기초 데이터 복구용)
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
 
 st.title("👨‍🍳 Chef_dskim 통합 관리 시스템")
 
-# 탭 구성
 menu_tabs = st.tabs(["⏱️ 오퍼레이션", "📖 메뉴 & 레시피", "🧪 R&D/레시피 등록", "💰 원가 관리", "📸 입고"])
 
 # =========================================================
@@ -106,7 +103,6 @@ menu_tabs = st.tabs(["⏱️ 오퍼레이션", "📖 메뉴 & 레시피", "🧪 
 with menu_tabs[0]:
     st.subheader("📅 현장 오퍼레이션 & 타임테이블")
     
-    # 공정 추가 기능
     with st.expander("➕ [작업 추가] 메뉴 검색", expanded=False):
         menu_names = [r['name'] for r in st.session_state.recipe_db]
         selected_menus_op = st.multiselect("메뉴 선택", menu_names)
@@ -117,18 +113,12 @@ with menu_tabs[0]:
                 target_recipe = next((item for item in st.session_state.recipe_db if item["name"] == m_name), None)
                 if target_recipe:
                     for task in target_recipe['tasks']:
-                        try:
-                            t_obj = datetime.strptime(task['time'], "%H:%M").time()
-                        except:
-                            t_obj = time(9,0) # 에러 시 기본값
+                        try: t_obj = datetime.strptime(task['time'], "%H:%M").time()
+                        except: t_obj = time(9,0)
                         
                         new_rows.append({
-                            "시작 시간": t_obj,
-                            "종료 시간": t_obj,
-                            "구분": task['cat'],
-                            "세부 작업 내용": f"[{m_name}] {task['desc']}",
-                            "체크 포인트": task['point'],
-                            "완료": False
+                            "시작 시간": t_obj, "종료 시간": t_obj, "구분": task['cat'],
+                            "세부 작업 내용": f"[{m_name}] {task['desc']}", "체크 포인트": task['point'], "완료": False
                         })
             
             if new_rows:
@@ -138,11 +128,9 @@ with menu_tabs[0]:
                 st.success("공정이 추가되었습니다.")
                 st.rerun()
                 
-    # 타임테이블 에디터
     edited_df = st.data_editor(
         st.session_state.schedule_df,
-        num_rows="dynamic",
-        use_container_width=True,
+        num_rows="dynamic", use_container_width=True, hide_index=True,
         column_config={
             "시작 시간": st.column_config.TimeColumn("Start", format="HH:mm"),
             "종료 시간": st.column_config.TimeColumn("End", format="HH:mm"),
@@ -150,13 +138,12 @@ with menu_tabs[0]:
             "세부 작업 내용": st.column_config.TextColumn("Task", width="large"),
             "체크 포인트": st.column_config.TextColumn("Check Point", width="medium"),
             "완료": st.column_config.CheckboxColumn("Done", default=False)
-        },
-        hide_index=True
+        }
     )
     st.session_state.schedule_df = edited_df
 
 # =========================================================
-# [TAB 2] 메뉴 & 레시피 (책장)
+# [TAB 2] 메뉴 & 레시피
 # =========================================================
 with menu_tabs[1]:
     if st.session_state.nav_depth == 0:
@@ -189,7 +176,7 @@ with menu_tabs[1]:
                            and r['sub_cat'] == st.session_state.selected_sub]
         
         if not current_recipes:
-            st.info("등록된 레시피가 없습니다. 'R&D' 탭에서 등록해주세요.")
+            st.info("등록된 레시피가 없습니다.")
         
         for recipe in current_recipes:
             with st.expander(f"🍽️ {recipe['name']} (상세 보기)"):
@@ -232,7 +219,7 @@ with menu_tabs[2]:
                 st.success("저장 완료!")
 
 # =========================================================
-# [TAB 4] 원가 관리 (검색 기능 + 기초 데이터 적용)
+# [TAB 4] 원가 관리 (인분수 계산 기능 적용)
 # =========================================================
 with menu_tabs[3]:
     st.subheader("💰 원가 분석 및 마진율 계산기")
@@ -255,49 +242,46 @@ with menu_tabs[3]:
         
     # 4-2 계산기
     with tab_cost2:
-        col_sel, col_info = st.columns([1, 2])
+        # [수정된 입력 UI] 메뉴명 / 판매가 / 인분수
+        col_sel, col_servings, col_info = st.columns([1, 1, 2])
         with col_sel:
-            # 레시피 선택
             r_list = [r['name'] for r in st.session_state.recipe_db]
             target_menu = st.selectbox("메뉴 선택", r_list) if r_list else "메뉴 없음"
-            sales_price = st.number_input("판매 예정가 (원)", value=15000, step=1000)
+        
+        with col_servings:
+            servings = st.number_input("인분수 (Servings)", value=1, min_value=1, step=1, help="몇 인분 기준으로 계산할까요?")
+            
+        with col_info:
+            sales_price_per_unit = st.number_input("1인분 판매 예정가 (원)", value=15000, step=1000)
             
         st.divider()
-        st.write(f"**[{target_menu}] 재료 투입 (검색)**")
+        st.write(f"**[{target_menu}] 재료 투입 (1인분 기준)**")
         
         if 'calc_df' not in st.session_state:
-            st.session_state.calc_df = pd.DataFrame(columns=["재료명", "단위", "투입량", "수율(%)", "실제원가"])
+            st.session_state.calc_df = pd.DataFrame(columns=["재료명", "단위", "1인분 투입량", "수율(%)", "1인분 원가"])
 
         c1, c2, c3, c4 = st.columns([2, 2, 2, 2])
         
         with c1:
-            # 1. 검색
             search_query = st.text_input("🔍 재료 검색 (엔터)", placeholder="예: 갈비")
             full_list = st.session_state.ingredient_db["품목명"].unique()
-            # 검색어가 있으면 필터링, 없으면 빈 리스트(공간 절약)
             filtered_list = [i for i in full_list if search_query in i] if search_query else []
 
         with c2:
-            # 2. 선택
             ing_name = None
             if filtered_list:
                 ing_name = st.selectbox("검색 결과", filtered_list)
-                
-                # 정보 로드
                 row = st.session_state.ingredient_db[st.session_state.ingredient_db["품목명"]==ing_name].iloc[0]
                 unit_type = str(row["규격"]).lower().strip()
                 base_price = row["단가"]
                 base_yield = row["수율"]
-                
-                # 단위 라벨
-                lbl = "투입량 (g/ml)" if unit_type in ['kg', 'l', '리터', 'g', 'ml'] else f"투입량 ({unit_type})"
+                lbl = "1인분당 투입량 (g/ml)" if unit_type in ['kg', 'l', '리터', 'g', 'ml'] else f"1인분당 투입량 ({unit_type})"
             elif search_query:
                 st.warning("결과 없음")
             else:
                 st.info("좌측에 검색어를 입력하세요.")
 
         with c3:
-            # 3. 입력
             if ing_name:
                 usage = st.number_input(lbl, value=0.0)
                 st.caption(f"단가: {base_price:,}원 / 수율: {base_yield}%")
@@ -307,40 +291,54 @@ with menu_tabs[3]:
             st.write("")
             if ing_name and st.button("➕ 투입"):
                 real_cost = 0
-                # 단위 환산 로직
                 if unit_type in ['kg', 'l', '리터']:
                     real_cost = (base_price / 1000) * usage
-                else: # g, ml, ea, can 등은 그대로 곱하기
+                else:
                     real_cost = base_price * usage
                 
-                # 수율 적용
                 if base_yield > 0:
                     real_cost = real_cost * (100 / base_yield)
                 
                 new_row = {
                     "재료명": ing_name, "단위": unit_type,
-                    "투입량": usage, "수율(%)": base_yield, "실제원가": int(real_cost)
+                    "1인분 투입량": usage, "수율(%)": base_yield, "1인분 원가": int(real_cost)
                 }
                 st.session_state.calc_df = pd.concat([st.session_state.calc_df, pd.DataFrame([new_row])], ignore_index=True)
 
         st.table(st.session_state.calc_df)
         
-        total = st.session_state.calc_df["실제원가"].sum()
-        margin = sales_price - total
-        rate = (total / sales_price * 100) if sales_price > 0 else 0
+        # [계산 로직 강화]
+        total_cost_per_unit = st.session_state.calc_df["1인분 원가"].sum()
+        margin_per_unit = sales_price_per_unit - total_cost_per_unit
+        rate = (total_cost_per_unit / sales_price_per_unit * 100) if sales_price_per_unit > 0 else 0
         
-        m1, m2, m3 = st.columns(3)
-        m1.metric("총 원가", f"{int(total):,}원")
-        m2.metric("예상 마진", f"{int(margin):,}원")
-        m3.metric("원가율", f"{rate:.1f}%", delta_color="inverse")
+        # 인분수 적용 총계
+        total_cost_all = total_cost_per_unit * servings
+        total_sales_all = sales_price_per_unit * servings
+        total_margin_all = margin_per_unit * servings
+        
+        st.divider()
+        st.subheader("💰 최종 수익성 분석 결과")
+        
+        # 탭을 나눠서 보여줌 (1인분 vs 전체)
+        res_tab1, res_tab2 = st.tabs([f"👤 1인분 기준", f"👥 {servings}인분 기준 (단체/예약)"])
+        
+        with res_tab1:
+            c1, c2, c3 = st.columns(3)
+            c1.metric("1인분 원가", f"{int(total_cost_per_unit):,}원")
+            c2.metric("1인분 마진", f"{int(margin_per_unit):,}원")
+            c3.metric("원가율", f"{rate:.1f}%", delta_color="inverse")
+            
+        with res_tab2:
+            c1, c2, c3 = st.columns(3)
+            c1.metric(f"총 원가 ({servings}인분)", f"{int(total_cost_all):,}원", help="재료비 총 예상 지출액")
+            c2.metric(f"총 예상 수익 ({servings}인분)", f"{int(total_margin_all):,}원", help="총 매출 - 총 재료비")
+            c3.metric("예상 총 매출", f"{int(total_sales_all):,}원")
         
         if st.button("🔄 계산기 초기화"):
             st.session_state.calc_df = st.session_state.calc_df.iloc[0:0]
             st.rerun()
 
-# =========================================================
-# [TAB 5] 입고 관리 (준비 중)
-# =========================================================
+# [TAB 5] 입고 관리
 with menu_tabs[4]:
     st.header("📸 스마트 입고 관리 (준비 중)")
-    st.info("다음 단계에서 이 기능을 완성할 예정입니다.")
