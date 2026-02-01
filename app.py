@@ -215,4 +215,11 @@ with menu_tabs[3]:
         m1, m2, m3 = st.columns(3)
         m1.metric("총 원가", f"{int(total_cost):,}원")
         m2.metric("예상 마진", f"{int(margin):,}원")
-        m3.metric("
+        m3.metric("원가율", f"{cost_rate:.1f}%", delta_color="inverse")
+        
+        if st.button("🔄 계산기 초기화"):
+            st.session_state.calc_df = st.session_state.calc_df.iloc[0:0]
+            st.rerun()
+
+# [TAB 5] 입고 관리
+with menu_tabs[4]: st.write("입고 관리 준비 중")
