@@ -41,16 +41,16 @@ if 'ingredient_db' not in st.session_state:
     ]
     st.session_state.ingredient_db = pd.DataFrame(data)
 
-# 3. 레시피 DB (재료 정보 'ingredients' 포함 구조로 변경)
+# 3. 레시피 DB (재료 정보 포함)
 if 'recipe_db' not in st.session_state:
     st.session_state.recipe_db = [
         {
             "name": "왕갈비탕", 
             "main_cat": "🇰🇷 한식", 
             "sub_cat": "국/찌개/전골/탕",
-            "ingredients": [ # [자동 연동용] 레시피에 재료가 미리 정의됨
-                {"name": "소갈비(Short Rib)", "qty": 250}, # 1인분 기준
-                {"name": "무", "qty": 0.1}, # 0.1개
+            "ingredients": [
+                {"name": "소갈비(Short Rib)", "qty": 250},
+                {"name": "무", "qty": 0.1},
                 {"name": "대파", "qty": 0.1},
                 {"name": "깐마늘", "qty": 10}
             ],
@@ -98,7 +98,7 @@ st.title("👨‍🍳 Chef_dskim 통합 관리 시스템")
 menu_tabs = st.tabs(["⏱️ 오퍼레이션", "📖 메뉴 & 레시피", "🧪 R&D/레시피 등록", "💰 원가 관리", "📸 입고"])
 
 # =========================================================
-# [TAB 1] 오퍼레이션 (기존 유지)
+# [TAB 1] 오퍼레이션
 # =========================================================
 with menu_tabs[0]:
     st.subheader("📅 현장 오퍼레이션")
@@ -106,15 +106,14 @@ with menu_tabs[0]:
         menu_names = [r['name'] for r in st.session_state.recipe_db]
         selected = st.multiselect("메뉴 선택", menu_names)
         if st.button("🚀 공정 추가") and selected:
-            # (공정 추가 로직 간소화 - 실제론 이전 코드와 동일)
+            # (공정 추가 로직 간소화)
             st.success("공정 추가됨 (화면 갱신)")
     st.data_editor(st.session_state.schedule_df, num_rows="dynamic", use_container_width=True, hide_index=True)
 
 # =========================================================
-# [TAB 2] 메뉴 책장 (기존 유지)
+# [TAB 2] 메뉴 책장
 # =========================================================
 with menu_tabs[1]:
-    # (내비게이션 로직 기존과 동일하므로 UI만 표시)
     if st.session_state.nav_depth == 0:
         cols = st.columns(4)
         for idx, cat in enumerate(CATEGORY_TREE.keys()):
@@ -141,7 +140,7 @@ with menu_tabs[1]:
                 for t in r['tasks']: st.text(f"- {t['time']} {t['desc']}")
 
 # =========================================================
-# [TAB 3] R&D (재료 등록 기능 추가됨!)
+# [TAB 3] R&D (에러 수정됨: 초기값 빈칸 제거)
 # =========================================================
 with menu_tabs[2]:
     st.subheader("🧪 신규 레시피 및 재료 구성 등록")
@@ -154,19 +153,21 @@ with menu_tabs[2]:
             main_c = st.selectbox("대분류", list(CATEGORY_TREE.keys()))
         with col2:
             sub_c = st.selectbox("중분류", CATEGORY_TREE[main_c])
-            st.write("") # Spacer
+            st.write("") 
 
-        # 3-1. 재료 구성 입력 (원가 연동 핵심)
+        # 3-1. 재료 구성 입력 (수정된 부분: 빈 테이블로 시작)
         st.divider()
-        st.write("🥦 **재료 구성 (BOM)** - 원가 자동계산용")
-        # 입력 편의를 위해 미리 3줄 정도 생성
-        default_ing_rows = [{"재료명(검색)": "", "1인분 투입량": 0.0}] * 3
+        st.write("🥦 **재료 구성 (BOM)** - 표 아래 '+' 버튼을 눌러 추가하세요.")
+        
+        # [FIX] 초기값을 빈 리스트로 설정하여 ValueError 방지
+        empty_df = pd.DataFrame(columns=["재료명(검색)", "1인분 투입량"])
+        
         edited_ing_bom = st.data_editor(
-            pd.DataFrame(default_ing_rows),
+            empty_df, # 빈 데이터프레임 사용
             num_rows="dynamic",
             use_container_width=True,
             column_config={
-                "재료명(검색)": st.column_config.SelectboxColumn("재료명", options=st.session_state.ingredient_db["품목명"].unique(), required=True),
+                "재료명(검색)": st.column_config.SelectboxColumn("재료명", options=list(st.session_state.ingredient_db["품목명"].unique()), required=True),
                 "1인분 투입량": st.column_config.NumberColumn("1인분 투입량", min_value=0, format="%.1f")
             }
         )
@@ -199,32 +200,26 @@ with menu_tabs[2]:
                 st.success(f"✅ [{nm}] 등록 완료! (재료 {len(final_ings)}개 연동됨)")
 
 # =========================================================
-# [TAB 4] 원가 관리 (자동 로딩 & 세트 메뉴)
+# [TAB 4] 원가 관리 (기존 유지)
 # =========================================================
 with menu_tabs[3]:
     st.subheader("💰 원가 분석 및 마진율 계산기")
     
-    # 탭 분리: 단가관리 / 계산기
     cost_t1, cost_t2 = st.tabs(["📊 식자재 단가표", "🧮 자동 원가 계산기 (단품/세트)"])
     
     with cost_t1:
         st.data_editor(st.session_state.ingredient_db, num_rows="dynamic", use_container_width=True)
 
     with cost_t2:
-        # [모드 선택]
         calc_mode = st.radio("계산 모드 선택", ["단품 메뉴 분석", "세트/코스 메뉴 분석 (합산)"], horizontal=True)
         
-        target_menus = [] # 분석할 메뉴 리스트
-        
+        target_menus = []
         if calc_mode == "단품 메뉴 분석":
             sel = st.selectbox("분석할 메뉴 선택", [r['name'] for r in st.session_state.recipe_db])
             if sel: target_menus = [sel]
-            
-        else: # 세트 메뉴
-            sel = st.multiselect("세트/코스 구성 메뉴 선택", [r['name'] for r in st.session_state.recipe_db], placeholder="예: 갈비탕 + 공기밥 + 김치")
+        else: 
+            sel = st.multiselect("세트/코스 구성 메뉴 선택", [r['name'] for r in st.session_state.recipe_db])
             target_menus = sel
-            if target_menus:
-                st.info(f"선택된 코스: {' + '.join(target_menus)}")
 
         col_serv, col_price = st.columns(2)
         with col_serv:
@@ -234,61 +229,33 @@ with menu_tabs[3]:
 
         st.divider()
 
-        # [자동 계산 로직]
-        # 선택된 메뉴들의 모든 재료를 끌어와서 합산합니다.
         if target_menus:
-            # 계산용 임시 리스트
             calculated_rows = []
-            
             for m_name in target_menus:
-                # DB에서 메뉴 찾기
                 recipe_data = next((r for r in st.session_state.recipe_db if r['name'] == m_name), None)
                 if recipe_data and 'ingredients' in recipe_data:
                     for ing in recipe_data['ingredients']:
-                        # 단가 DB에서 정보 찾기
                         ing_info = st.session_state.ingredient_db[st.session_state.ingredient_db['품목명'] == ing['name']]
-                        
                         if not ing_info.empty:
                             row = ing_info.iloc[0]
                             unit = str(row['규격'])
                             price = row['단가']
                             yield_rate = row['수율']
-                            
-                            # 원가 계산
-                            cost = 0
-                            if unit.lower() in ['kg', 'l', '리터']:
-                                cost = (price / 1000) * ing['qty']
-                            else:
-                                cost = price * ing['qty']
-                            
-                            # 수율 적용
+                            cost = (price / 1000 * ing['qty']) if unit.lower() in ['kg', 'l', '리터'] else (price * ing['qty'])
                             if yield_rate > 0: cost = cost * (100/yield_rate)
-                            
                             calculated_rows.append({
-                                "구분(메뉴명)": m_name,
-                                "재료명": ing['name'],
-                                "1인분 투입량": ing['qty'],
-                                "단위": unit,
-                                "1인분 원가": int(cost)
+                                "구분": m_name, "재료명": ing['name'], "1인분 투입량": ing['qty'],
+                                "단위": unit, "1인분 원가": int(cost)
                             })
                         else:
-                            # 단가표에 없는 재료
-                            calculated_rows.append({
-                                "구분(메뉴명)": m_name,
-                                "재료명": f"{ing['name']} (단가정보 없음)",
-                                "1인분 투입량": ing['qty'],
-                                "단위": "-",
-                                "1인분 원가": 0
-                            })
+                            calculated_rows.append({"구분": m_name, "재료명": f"{ing['name']} (단가없음)", "1인분 투입량": ing['qty'], "단위": "-", "1인분 원가": 0})
             
             if calculated_rows:
                 res_df = pd.DataFrame(calculated_rows)
                 st.write("📝 **상세 원가 내역 (자동 산출)**")
                 st.dataframe(res_df, use_container_width=True)
                 
-                # 최종 집계
-                total_cost_unit = res_df["1인분 원가"].sum()
-                total_cost_final = total_cost_unit * servings
+                total_cost_final = res_df["1인분 원가"].sum() * servings
                 margin_final = sales_price - total_cost_final
                 rate_final = (total_cost_final / sales_price * 100) if sales_price > 0 else 0
                 
@@ -298,9 +265,7 @@ with menu_tabs[3]:
                 m2.metric("예상 마진", f"{int(margin_final):,}원")
                 m3.metric("원가율", f"{rate_final:.1f}%", delta_color="inverse")
             else:
-                st.warning("선택된 메뉴에 등록된 재료 정보가 없습니다. R&D 탭에서 재료를 등록해주세요.")
-        else:
-            st.info("분석할 메뉴를 선택해주세요.")
+                st.warning("선택된 메뉴에 등록된 재료 정보가 없습니다.")
 
 # [TAB 5] 입고 (준비 중)
 with menu_tabs[4]: st.write("입고 관리 준비 중")
