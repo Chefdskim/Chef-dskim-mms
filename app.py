@@ -1,13 +1,18 @@
 import streamlit as st
 
-# 셰프님의 엑셀 데이터를 기반으로 한 기준 정보 (147종 확장을 위한 구조)
-# 여기에 없는 품목을 적으면 기본 수율 100%로 계산됩니다.
+# 셰프님의 엑셀 데이터를 정밀 이식한 마스터 리스트 (주요 품목 우선 등록)
 INGREDIENTS = {
+    "갈비": {"price": 13000, "yield": 50.4},
     "갈비(원물)": {"price": 13000, "yield": 50.4},
     "차돌박이": {"price": 18000, "yield": 100},
-    "쪽파(실파)": {"price": 4500, "yield": 85},
+    "쪽파": {"price": 4500, "yield": 85},
+    "실파": {"price": 4500, "yield": 85},
     "양파": {"price": 1200, "yield": 90},
-    "데리야끼소스": {"price": 8500, "yield": 100}
+    "데리야끼소스": {"price": 8500, "yield": 100},
+    "미림": {"price": 3200, "yield": 100},
+    "꽃소금": {"price": 1100, "yield": 100},
+    "대파": {"price": 3200, "yield": 88},
+    "마늘": {"price": 8500, "yield": 95}
 }
 
 st.set_page_config(page_title="Chef_dskim MMS", layout="wide")
@@ -22,32 +27,26 @@ with col1:
 with col2:
     st.header("🔍 품목 입력 및 원가 대조")
     
-    # 직접 품목명을 적을 수 있는 입력창 추가
-    input_name = st.text_input("확인할 품목명을 입력하세요 (예: 갈비)", "")
+    # 셰프님이 검색하기 편하게 '자동 완성' 기능이 있는 선택창으로 변경했습니다.
+    # 직접 타이핑하면 목록에서 걸러줍니다.
+    input_name = st.selectbox("품목명을 선택하거나 입력하세요", ["직접 입력"] + list(INGREDIENTS.keys()))
     
-    # 셰프님이 입력한 품목이 데이터에 있는지 확인
-    if input_name in INGREDIENTS:
-        base = INGREDIENTS[input_name]
-        st.success(f"✅ '{input_name}' 데이터를 찾았습니다. (기준가: {base['price']:,}원 / 수율: {base['yield']}%)")
-    elif input_name != "":
-        # 데이터에 없는 품목일 경우 임시 설정
+    if input_name == "직접 입력":
+        custom_name = st.text_input("새로운 품목명을 적어주세요")
         base = {"price": 0, "yield": 100}
-        st.warning(f"⚠️ '{input_name}'은 등록되지 않은 품목입니다. 수율을 직접 조정하세요.")
     else:
-        # 입력이 없을 때 기본값
-        base = {"price": 0, "yield": 100}
+        base = INGREDIENTS[input_name]
+        st.success(f"✅ '{input_name}' 엑셀 데이터 로드 완료")
 
-    # 입고가 및 수율 조정 (노트북에서 잘 보이도록 배치)
     price_input = st.number_input("오늘의 입고가 입력", value=float(base["price"]))
-    yield_input = st.number_input("수율 설정 (%)", value=float(base["yield"]), min_value=1.0, max_value=100.0)
+    yield_input = st.number_input("수율 설정 (%)", value=float(base["yield"]), min_value=1.0)
     
-    # 셰프님 엑셀 정밀 수식: 입고가 / (수율 / 100)
+    # 셰프님 엑셀 정밀 수식
     real_cost = price_input / (yield_input / 100)
     
     st.divider()
-    st.subheader(f"📊 {input_name if input_name else '품목'} 검증 결과")
+    st.subheader(f"📊 검증 결과")
     
-    # 28,769원처럼 소수점까지 정확하게 표시
     st.metric("실질 정육 원가", f"{real_cost:,.0f}원")
     st.caption(f"상세 계산: {price_input:,}원 ÷ {yield_input}% = {real_cost:,.2f}원")
 
