@@ -41,7 +41,7 @@ if 'ingredient_db' not in st.session_state:
     ]
     st.session_state.ingredient_db = pd.DataFrame(data)
 
-# 3. 레시피 DB (재료 정보 포함)
+# 3. 레시피 DB (단위 개선 적용: kg -> g 입력)
 if 'recipe_db' not in st.session_state:
     st.session_state.recipe_db = [
         {
@@ -49,10 +49,10 @@ if 'recipe_db' not in st.session_state:
             "main_cat": "🇰🇷 한식", 
             "sub_cat": "국/찌개/전골/탕",
             "ingredients": [
-                {"name": "소갈비(Short Rib)", "qty": 250},
-                {"name": "무", "qty": 0.1},
+                {"name": "소갈비(Short Rib)", "qty": 250}, # 이제 250g으로 입력합니다 (기존 0.25kg 아님)
+                {"name": "무", "qty": 0.1}, # 개수는 그대로 소수점 가능
                 {"name": "대파", "qty": 0.1},
-                {"name": "깐마늘", "qty": 10}
+                {"name": "깐마늘", "qty": 10} # 10g
             ],
             "tasks": [
                 {"time": "08:00", "cat": "Prep", "desc": "핏물 빼기", "point": "찬물 유수"}
@@ -62,19 +62,19 @@ if 'recipe_db' not in st.session_state:
             "name": "공기밥", 
             "main_cat": "🇰🇷 한식", 
             "sub_cat": "밥/죽/면",
-            "ingredients": [{"name": "쌀", "qty": 150}],
+            "ingredients": [{"name": "쌀", "qty": 150}], # 150g
             "tasks": []
         },
         {
             "name": "배추김치(반찬)", 
             "main_cat": "🇰🇷 한식", 
             "sub_cat": "김치/장류",
-            "ingredients": [{"name": "김치", "qty": 80}],
+            "ingredients": [{"name": "김치", "qty": 80}], # 80g
             "tasks": []
         }
     ]
 
-# 4. 타임테이블 & 내비게이션 초기화
+# 4. 타임테이블 & 내비게이션
 if 'schedule_df' not in st.session_state:
     st.session_state.schedule_df = pd.DataFrame([{"시작 시간": time(9,0), "종료 시간": time(9,30), "구분": "Prep", "세부 작업 내용": "오픈 준비", "체크 포인트": "온도", "완료": False}])
 if 'nav_depth' not in st.session_state: st.session_state.nav_depth = 0
@@ -106,7 +106,6 @@ with menu_tabs[0]:
         menu_names = [r['name'] for r in st.session_state.recipe_db]
         selected = st.multiselect("메뉴 선택", menu_names)
         if st.button("🚀 공정 추가") and selected:
-            # (공정 추가 로직 간소화)
             st.success("공정 추가됨 (화면 갱신)")
     st.data_editor(st.session_state.schedule_df, num_rows="dynamic", use_container_width=True, hide_index=True)
 
@@ -129,22 +128,33 @@ with menu_tabs[1]:
                     st.session_state.selected_sub=sub; st.session_state.nav_depth=2; st.rerun()
     elif st.session_state.nav_depth == 2:
         st.button("⬅️", on_click=lambda: st.session_state.update(nav_depth=1))
-        # 레시피 상세에 재료 정보 추가 표시
         cur = [r for r in st.session_state.recipe_db if r['main_cat']==st.session_state.selected_main and r['sub_cat']==st.session_state.selected_sub]
         for r in cur:
             with st.expander(f"🍽️ {r['name']}"):
-                st.write("**[재료 구성]**")
-                ing_str = ", ".join([f"{i['name']} {i['qty']}" for i in r.get('ingredients', [])])
-                st.info(ing_str if ing_str else "등록된 재료 없음")
+                st.write("**[재료 구성 (1인분)]**")
+                # 단위 표시 개선
+                ing_display = []
+                for i in r.get('ingredients', []):
+                    # DB에서 규격 확인하여 표시 단위 결정
+                    db_item = st.session_state.ingredient_db[st.session_state.ingredient_db['품목명'] == i['name']]
+                    unit_disp = "g/ml"
+                    if not db_item.empty:
+                        orig_unit = str(db_item.iloc[0]['규격']).lower()
+                        if orig_unit not in ['kg', 'l', '리터', 'g', 'ml']:
+                            unit_disp = orig_unit # 개, can 등은 그대로
+                    
+                    ing_display.append(f"{i['name']} {i['qty']}{unit_disp}")
+                
+                st.info(", ".join(ing_display) if ing_display else "등록된 재료 없음")
                 st.write("**[공정]**")
                 for t in r['tasks']: st.text(f"- {t['time']} {t['desc']}")
 
 # =========================================================
-# [TAB 3] R&D (에러 수정됨: 초기값 빈칸 제거)
+# [TAB 3] R&D (단위 안내 강화)
 # =========================================================
 with menu_tabs[2]:
     st.subheader("🧪 신규 레시피 및 재료 구성 등록")
-    st.caption("레시피를 만들 때 '재료'를 미리 입력해두면, 원가 계산이 자동화됩니다.")
+    st.caption("※ 주의: 구매 단위가 'kg'이나 'L'인 식자재는 **g(그램)** 또는 **ml** 단위로 입력해주세요.")
     
     with st.form("new_recipe_full"):
         col1, col2 = st.columns(2)
@@ -155,24 +165,21 @@ with menu_tabs[2]:
             sub_c = st.selectbox("중분류", CATEGORY_TREE[main_c])
             st.write("") 
 
-        # 3-1. 재료 구성 입력 (수정된 부분: 빈 테이블로 시작)
         st.divider()
-        st.write("🥦 **재료 구성 (BOM)** - 표 아래 '+' 버튼을 눌러 추가하세요.")
+        st.write("🥦 **재료 구성 (BOM)**")
         
-        # [FIX] 초기값을 빈 리스트로 설정하여 ValueError 방지
         empty_df = pd.DataFrame(columns=["재료명(검색)", "1인분 투입량"])
         
         edited_ing_bom = st.data_editor(
-            empty_df, # 빈 데이터프레임 사용
+            empty_df,
             num_rows="dynamic",
             use_container_width=True,
             column_config={
                 "재료명(검색)": st.column_config.SelectboxColumn("재료명", options=list(st.session_state.ingredient_db["품목명"].unique()), required=True),
-                "1인분 투입량": st.column_config.NumberColumn("1인분 투입량", min_value=0, format="%.1f")
+                "1인분 투입량": st.column_config.NumberColumn("1인분 투입량 (g/ml/개)", min_value=0, format="%.1f", help="kg, L 재료는 g, ml로 환산하여 입력")
             }
         )
 
-        # 3-2. 공정 입력
         st.write("⏱️ **조리 공정 (SOP)**")
         edited_sop = st.data_editor(
             pd.DataFrame([{"time": "09:00", "cat": "Prep", "desc": "작업내용", "point": "체크"}]),
@@ -181,13 +188,11 @@ with menu_tabs[2]:
         
         if st.form_submit_button("💾 레시피 및 데이터 저장"):
             if nm:
-                # 재료 데이터 파싱
                 final_ings = []
                 for _, row in edited_ing_bom.iterrows():
                     if row["재료명(검색)"] and row["1인분 투입량"] > 0:
                         final_ings.append({"name": row["재료명(검색)"], "qty": row["1인분 투입량"]})
                 
-                # 공정 데이터 파싱
                 final_tasks = []
                 for _, row in edited_sop.iterrows():
                     if row['desc'] != "작업내용":
@@ -197,21 +202,21 @@ with menu_tabs[2]:
                     "name": nm, "main_cat": main_c, "sub_cat": sub_c, 
                     "ingredients": final_ings, "tasks": final_tasks
                 })
-                st.success(f"✅ [{nm}] 등록 완료! (재료 {len(final_ings)}개 연동됨)")
+                st.success(f"✅ [{nm}] 등록 완료!")
 
 # =========================================================
-# [TAB 4] 원가 관리 (기존 유지)
+# [TAB 4] 원가 관리 (단위 변환 로직 적용)
 # =========================================================
 with menu_tabs[3]:
     st.subheader("💰 원가 분석 및 마진율 계산기")
     
-    cost_t1, cost_t2 = st.tabs(["📊 식자재 단가표", "🧮 자동 원가 계산기 (단품/세트)"])
+    cost_t1, cost_t2 = st.tabs(["📊 식자재 단가표", "🧮 자동 원가 계산기"])
     
     with cost_t1:
         st.data_editor(st.session_state.ingredient_db, num_rows="dynamic", use_container_width=True)
 
     with cost_t2:
-        calc_mode = st.radio("계산 모드 선택", ["단품 메뉴 분석", "세트/코스 메뉴 분석 (합산)"], horizontal=True)
+        calc_mode = st.radio("계산 모드 선택", ["단품 메뉴 분석", "세트/코스 메뉴 분석"], horizontal=True)
         
         target_menus = []
         if calc_mode == "단품 메뉴 분석":
@@ -238,24 +243,40 @@ with menu_tabs[3]:
                         ing_info = st.session_state.ingredient_db[st.session_state.ingredient_db['품목명'] == ing['name']]
                         if not ing_info.empty:
                             row = ing_info.iloc[0]
-                            unit = str(row['규격'])
+                            unit = str(row['규격']).lower().strip()
                             price = row['단가']
                             yield_rate = row['수율']
-                            cost = (price / 1000 * ing['qty']) if unit.lower() in ['kg', 'l', '리터'] else (price * ing['qty'])
+                            
+                            # --- [핵심] 단위 변환 로직 ---
+                            cost = 0
+                            # 구매단위가 kg, L, 리터 이면 -> 1000으로 나누어 g, ml 단가로 변환
+                            if unit in ['kg', 'l', '리터']:
+                                unit_display = "g/ml"
+                                cost = (price / 1000) * ing['qty']
+                            else:
+                                # 개, can, ea 등은 그대로
+                                unit_display = unit
+                                cost = price * ing['qty']
+                            
+                            # 수율 적용
                             if yield_rate > 0: cost = cost * (100/yield_rate)
+                            
                             calculated_rows.append({
-                                "구분": m_name, "재료명": ing['name'], "1인분 투입량": ing['qty'],
-                                "단위": unit, "1인분 원가": int(cost)
+                                "구분": m_name, 
+                                "재료명": ing['name'], 
+                                "투입량": ing['qty'],
+                                "단위(레시피)": unit_display, 
+                                "원가": int(cost)
                             })
                         else:
-                            calculated_rows.append({"구분": m_name, "재료명": f"{ing['name']} (단가없음)", "1인분 투입량": ing['qty'], "단위": "-", "1인분 원가": 0})
+                            calculated_rows.append({"구분": m_name, "재료명": f"{ing['name']} (단가없음)", "투입량": ing['qty'], "단위(레시피)": "-", "원가": 0})
             
             if calculated_rows:
                 res_df = pd.DataFrame(calculated_rows)
-                st.write("📝 **상세 원가 내역 (자동 산출)**")
+                st.write("📝 **상세 원가 내역**")
                 st.dataframe(res_df, use_container_width=True)
                 
-                total_cost_final = res_df["1인분 원가"].sum() * servings
+                total_cost_final = res_df["원가"].sum() * servings
                 margin_final = sales_price - total_cost_final
                 rate_final = (total_cost_final / sales_price * 100) if sales_price > 0 else 0
                 
