@@ -4,240 +4,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chef Dskim System</title>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background: #f8fafc; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background: #f1f5f9; }
         #root { width: 100%; height: 100%; display: flex; flex-direction: column; }
-        
-        /* 자료실 카드 */
-        .file-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
-        .file-icon { font-size: 24px; margin-right: 12px; }
-        .btn-down { background: #eff6ff; color: #2563eb; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 900; text-decoration: none; border: 1px solid #dbeafe; }
-
-        /* 하단 네비게이션 */
-        .btm-nav { height: 60px; background: white; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); z-index: 50; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #cbd5e1; font-size: 10px; font-weight: 700; cursor: pointer; }
-        .nav-item.active { color: #2563eb; }
-
-        /* 달력 스타일 */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); background: #cbd5e1; gap: 1px; flex: 1; overflow-y: auto; grid-auto-rows: minmax(60px, 1fr); border-radius: 12px; overflow: hidden; border: 1px solid #cbd5e1; }
-        .calendar-header { background: #f8fafc; text-align: center; font-size: 9px; font-weight: 900; color: #94a3b8; padding: 4px 0; }
-        .calendar-day { background: white; padding: 2px; display: flex; flex-direction: column; min-height: 0; cursor: pointer; }
-        .calendar-day.selected { background: #eff6ff !important; box-shadow: inset 0 0 0 2px #3b82f6; z-index: 10; }
-        
-        /* 로그인 */
-        .login-box { background: white; padding: 40px; border-radius: 24px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .login-input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 10px; text-align: center; font-weight: 700; outline: none; }
-        .login-btn { width: 100%; background: #2563eb; color: white; padding: 12px; border-radius: 12px; font-weight: 900; }
-        
-        .spin-anim { animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .nav-active { color: #2563eb !important; border-top: 2px solid #2563eb; }
+        .spin { animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div id="root"></div>
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useEffect } = React;
 
-        // 셰프님이 보내주신 주소 적용
-        const DRIVE_APP_URL = "https://script.google.com/macros/s/AKfycbzv9AeNIaJ4RFX_r7ek0NPOreudELL7UJBKuNpNXx1TC8vBk1eQ5lXw8TjnFROwWSfa9w/exec"; 
-        const MENU_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSnsej-xGogyedNPYTs2iqEMFKAwIL3tipLoSiDDKxKHot-PITnmxYETDseGckqpb6EMiQm39Sfol0-/pub?gid=0&single=true&output=csv";
+        // 셰프님이 생성한 웹 앱 주소
+        const DRIVE_API = "https://script.google.com/macros/s/AKfycbzv9AeNIaJ4RFX_r7ek0NPOreudELL7UJBKuNpNXx1TC8vBk1eQ5lXw8TjnFROwWSfa9w/exec";
 
         const App = () => {
-            const [page, setPage] = useState('home'); 
-            const [isAuth, setIsAuth] = useState(false);
-            const [user, setUser] = useState('');
-            const [name, setName] = useState('');
-            const [code, setCode] = useState('');
-            
+            const [view, setView] = useState('home'); // home, drive, inventory
             const [files, setFiles] = useState([]);
             const [loading, setLoading] = useState(false);
-            const [menus, setMenus] = useState([]);
-            const [selDate, setSelDate] = useState(null);
-            const [currMonth, setCurrMonth] = useState(new Date());
 
-            useEffect(() => {
-                const u = localStorage.getItem('chef_user');
-                if(u) { setIsAuth(true); setUser(u); loadMenu(); }
-            }, []);
-
-            const login = () => {
-                if(!name || !code) return alert('정보를 입력하세요');
-                setIsAuth(true); setUser(name); localStorage.setItem('chef_user', name);
-                loadMenu();
-            };
-
-            const loadMenu = () => {
-                Papa.parse(MENU_CSV, {
-                    download: true,
-                    header: false,
-                    complete: (res) => {
-                        let parsed = [];
-                        const raw = res.data;
-                        let dateIdx = -1;
-                        let headers = [];
-                        raw.forEach((r, i) => { if(r[0] && r[0].includes('날짜')) { dateIdx = i; headers = r; } });
-
-                        if(dateIdx > -1) {
-                            for(let c=1; c<headers.length; c++) {
-                                const dStr = headers[c];
-                                if(!dStr) continue;
-                                const m = dStr.match(/(\d{4}).*(\d{1,2}).*(\d{1,2})/);
-                                if(m) {
-                                    const y=m[1], mo=m[2].padStart(2,'0'), d=m[3].padStart(2,'0');
-                                    const std = `${y}-${mo}-${d}`;
-                                    let mo_m='', lu_m='', di_m='';
-                                    for(let r=dateIdx+1; r<raw.length; r++) {
-                                        const lbl = (raw[r][0]||'').trim();
-                                        const val = (raw[r][c]||'').trim();
-                                        if(!val) continue;
-                                        if(lbl.includes('아침')) mo_m = val;
-                                        if(lbl.includes('점심')) lu_m = val;
-                                        if(lbl.includes('저녁')) di_m = val;
-                                    }
-                                    parsed.push({ date: std, morning: mo_m, lunch: lu_m, dinner: di_m });
-                                }
-                            }
-                        }
-                        setMenus(parsed);
-                        const today = new Date().toISOString().split('T')[0];
-                        const tData = parsed.find(m => m.date === today);
-                        setSelDate(tData || { date: today, morning:'', lunch:'', dinner:'' });
-                    }
-                });
-            };
-
-            const loadFiles = () => {
+            // 자료 로딩 함수
+            const fetchDrive = async () => {
                 setLoading(true);
-                fetch(DRIVE_APP_URL).then(r=>r.json()).then(d=>{ setFiles(d); setLoading(false); })
-                .catch(()=>{ setLoading(false); alert('자료를 불러오는데 실패했습니다.'); });
+                try {
+                    const res = await fetch(DRIVE_API);
+                    const data = await res.json();
+                    setFiles(data);
+                } catch (err) {
+                    console.error("연결 오류:", err);
+                }
+                setLoading(false);
             };
 
-            useEffect(() => { if(page === 'drive' && files.length === 0) loadFiles(); }, [page]);
-
-            const calDays = useMemo(() => {
-                const y = currMonth.getFullYear();
-                const m = currMonth.getMonth();
-                const first = new Date(y, m, 1).getDay();
-                const last = new Date(y, m+1, 0).getDate();
-                const days = [];
-                for(let i=0; i<first; i++) days.push(null);
-                for(let i=1; i<=last; i++) {
-                    const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                    days.push({ day: i, dateStr: ds, data: menus.find(x => x.date === ds) });
-                }
-                return days;
-            }, [currMonth, menus]);
-
-            if(!isAuth) return (
-                <div className="fixed inset-0 flex items-center justify-center bg-slate-50">
-                    <div className="login-box">
-                        <h1 className="text-2xl font-black italic mb-2">CHEF DSKIM</h1>
-                        <p className="text-xs text-blue-500 font-bold mb-6 tracking-widest">SYSTEM ACCESS</p>
-                        <input className="login-input" placeholder="이름" value={name} onChange={e=>setName(e.target.value)} />
-                        <input className="login-input" type="password" placeholder="코드" value={code} onChange={e=>setCode(e.target.value)} />
-                        <button className="login-btn mt-2" onClick={login}>접속</button>
-                    </div>
-                </div>
-            );
+            useEffect(() => { if(view === 'drive') fetchDrive(); }, [view]);
 
             return (
-                <div className="flex flex-col h-full w-full bg-slate-50">
-                    <header className="bg-white px-5 py-4 border-b flex justify-between items-center shadow-sm z-10">
-                        <div>
-                            <div className="font-black italic text-xl tracking-tighter">CHEF DSKIM</div>
-                            <div className="text-[10px] text-slate-400 font-bold tracking-widest">SYSTEM v2.0</div>
-                        </div>
-                        <div className="text-xs font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded">👨‍🍳 {user}</div>
+                <div className="flex flex-col h-full">
+                    {/* 상단 헤더 */}
+                    <header className="bg-white p-4 shadow-sm border-b flex justify-between items-center">
+                        <h1 className="font-black italic text-xl tracking-tighter text-slate-800">CHEF DSKIM <span className="text-blue-600">SYSTEM</span></h1>
+                        <div className="text-[10px] font-bold bg-slate-100 px-2 py-1 rounded text-slate-500 uppercase">Authenticated</div>
                     </header>
 
-                    <div className="flex-1 overflow-hidden relative">
-                        {page === 'home' && (
-                            <div className="h-full flex flex-col p-4">
-                                <div className="flex justify-between items-center mb-3">
-                                    <h2 className="font-black text-lg italic text-slate-700">SCHEDULE</h2>
-                                    <div className="flex gap-2 text-sm font-bold bg-white px-2 py-1 rounded-lg border">
-                                        <button onClick={()=>setCurrMonth(new Date(currMonth.setMonth(currMonth.getMonth()-1)))}>◀</button>
-                                        <span>{currMonth.getMonth()+1}월</span>
-                                        <button onClick={()=>setCurrMonth(new Date(currMonth.setMonth(currMonth.getMonth()+1)))}>▶</button>
+                    {/* 메인 화면 */}
+                    <main className="flex-1 overflow-y-auto p-4 pb-20">
+                        {view === 'home' && (
+                            <div className="space-y-4">
+                                <div className="bg-blue-600 p-6 rounded-3xl text-white shadow-lg">
+                                    <p className="text-xs font-bold opacity-80 mb-1 uppercase tracking-widest">Dashboard</p>
+                                    <h2 className="text-2xl font-black italic">WELCOME, CHEF</h2>
+                                    <div className="mt-4 text-sm font-medium bg-blue-500/30 p-3 rounded-xl border border-blue-400/30">
+                                        새로운 시스템의 기본 틀이 준비되었습니다.
                                     </div>
                                 </div>
-                                <div className="calendar-grid mb-4 bg-white shadow-sm">
-                                    {['일','월','화','수','목','금','토'].map(d=><div key={d} className="calendar-header">{d}</div>)}
-                                    {calDays.map((d,i) => (
-                                        <div key={i} className={`calendar-day ${d?.dateStr === selDate?.date ? 'selected' : ''}`}
-                                             onClick={()=> d && (d.data ? setSelDate(d.data) : setSelDate({date:d.dateStr}))}>
-                                            {d && <span className={`text-[10px] font-bold text-center ${d.data?'text-slate-800':'text-slate-300'}`}>{d.day}</span>}
-                                            {d?.data && (d.data.morning || d.data.lunch) && <div className="w-1 h-1 rounded-full bg-blue-500 mx-auto mt-1"></div>}
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="bg-white p-4 rounded-xl border flex-1 shadow-sm overflow-y-auto">
-                                    {selDate ? (
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between border-b pb-2 mb-2">
-                                                <span className="font-black text-slate-700">MENU</span>
-                                                <span className="font-bold text-blue-600">{selDate.date}</span>
-                                            </div>
-                                            <div className="bg-slate-50 p-3 rounded border">
-                                                <div className="text-[10px] font-black text-orange-500 mb-1">MORNING</div>
-                                                <div className="text-sm font-bold">{selDate.morning || '-'}</div>
-                                            </div>
-                                            <div className="bg-slate-50 p-3 rounded border">
-                                                <div className="text-[10px] font-black text-blue-500 mb-1">LUNCH</div>
-                                                <div className="text-sm font-bold">{selDate.lunch || '-'}</div>
-                                            </div>
-                                            <div className="bg-slate-50 p-3 rounded border">
-                                                <div className="text-[10px] font-black text-purple-500 mb-1">DINNER</div>
-                                                <div className="text-sm font-bold">{selDate.dinner || '-'}</div>
-                                            </div>
-                                        </div>
-                                    ) : <div className="text-center text-slate-300 font-bold mt-10">날짜 선택</div>}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="bg-white p-4 rounded-2xl border shadow-sm" onClick={() => setView('drive')}>
+                                        <div className="text-2xl mb-2">📂</div>
+                                        <div className="font-black text-slate-700">자료실</div>
+                                        <div className="text-[10px] text-slate-400 font-bold">DRIVE CONNECTED</div>
+                                    </div>
+                                    <div className="bg-white p-4 rounded-2xl border shadow-sm">
+                                        <div className="text-2xl mb-2">📊</div>
+                                        <div className="font-black text-slate-700">원가/메뉴</div>
+                                        <div className="text-[10px] text-slate-400 font-bold">READY TO BUILD</div>
+                                    </div>
                                 </div>
                             </div>
                         )}
 
-                        {page === 'drive' && (
-                            <div className="h-full flex flex-col bg-white">
-                                <div className="p-4 border-b bg-slate-50">
-                                    <h2 className="font-black text-xl italic">DATA ROOM</h2>
-                                    <div className="text-xs text-slate-500 font-bold">Google Drive Connection</div>
+                        {view === 'drive' && (
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center px-1">
+                                    <h2 className="font-black italic text-lg uppercase text-slate-600">Data Room</h2>
+                                    <button onClick={fetchDrive} className="text-xs font-bold text-blue-600">🔄 갱신</button>
                                 </div>
-                                <div className="flex-1 overflow-y-auto p-4">
-                                    {loading ? <div className="text-center py-20 text-blue-500 font-bold spin-anim">스캔 중...</div> :
-                                     files.length === 0 ? <div className="text-center py-20 text-slate-300 font-bold">자료가 없습니다.</div> :
-                                     files.map((f, i) => (
-                                        <div key={i} className="file-card">
-                                            <div className="flex items-center overflow-hidden flex-1">
-                                                <div className="file-icon">{f.type.includes('image')?'🖼️':f.type.includes('pdf')?'📄':'📁'}</div>
-                                                <div className="truncate font-bold text-slate-700 text-sm flex-1">{f.name}</div>
+                                {loading ? (
+                                    <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+                                        <div className="text-3xl mb-3 spin">⏳</div>
+                                        <p className="font-bold text-sm">자료 스캔 중...</p>
+                                    </div>
+                                ) : files.length === 0 ? (
+                                    <div className="bg-white p-10 rounded-3xl border border-dashed text-center text-slate-300 font-bold">자료가 없거나 주소를 확인하세요.</div>
+                                ) : (
+                                    files.map((f, i) => (
+                                        <div key={i} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-center mb-2">
+                                            <div className="flex items-center gap-3 overflow-hidden">
+                                                <div className="text-2xl">📄</div>
+                                                <div className="overflow-hidden">
+                                                    <div className="font-bold text-sm text-slate-800 truncate">{f.name}</div>
+                                                    <div className="text-[10px] font-bold text-slate-400 uppercase">{f.size}</div>
+                                                </div>
                                             </div>
-                                            <a href={f.url} target="_blank" className="btn-down ml-3 shrink-0">열기</a>
+                                            <a href={f.url} target="_blank" className="bg-blue-50 text-blue-600 px-3 py-2 rounded-xl text-[10px] font-black uppercase">열기</a>
                                         </div>
-                                    ))}
-                                </div>
+                                    ))
+                                )}
                             </div>
                         )}
-                    </div>
+                    </main>
 
-                    <div className="btm-nav">
-                        <div className={`nav-item ${page==='home'?'active':''}`} onClick={()=>setPage('home')}>
-                            <div className="nav-icon">🏠</div><span>홈</span>
+                    {/* 하단 탭 네비게이션 */}
+                    <nav className="fixed bottom-0 w-full h-16 bg-white border-t flex items-center justify-around shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+                        <div className={`flex flex-col items-center justify-center w-full h-full ${view==='home'?'nav-active':'text-slate-300'}`} onClick={() => setView('home')}>
+                            <span className="text-xl">🏠</span><span className="text-[9px] font-black mt-1 uppercase">Home</span>
                         </div>
-                        <div className={`nav-item ${page==='drive'?'active':''}`} onClick={()=>setPage('drive')}>
-                            <div className="nav-icon">📂</div><span>자료실</span>
+                        <div className={`flex flex-col items-center justify-center w-full h-full ${view==='drive'?'nav-active':'text-slate-300'}`} onClick={() => setView('drive')}>
+                            <span className="text-xl">📂</span><span className="text-[9px] font-black mt-1 uppercase">Drive</span>
                         </div>
-                        <div className="nav-item" onClick={()=>alert('설정 준비중')}>
-                            <div className="nav-icon">⚙️</div><span>설정</span>
+                        <div className="flex flex-col items-center justify-center w-full h-full text-slate-300">
+                            <span className="text-xl">⚙️</span><span className="text-[9px] font-black mt-1 uppercase">Setting</span>
                         </div>
-                    </div>
+                    </nav>
                 </div>
             );
         };
