@@ -1,131 +1,49 @@
-function doGet() {
-  return HtmlService.createTemplateFromFile('index').evaluate()
-      .setTitle('Chef_dskim 시스템')
-      .addMetaTag('viewport', 'width=device-width, initial-scale=1');
-}
-
-// 품목 검색 함수
-function searchItem(itemName) {
-  try {
-    const ssId = "1hJ_72IAyBJr06p3jGgEB5AlQT23OSDB7xKVEVt0H_o0";
-    const ss = SpreadsheetApp.openById(ssId);
-    const sheet = ss.getSheets()[0]; // 첫 번째 시트
-    const data = sheet.getDataRange().getValues();
-    
-    let results = [];
-    
-    // B열(품목명)을 기준으로 검색
-    for (let i = 1; i < data.length; i++) {
-      let nameInSheet = data[i][1] ? data[i][1].toString() : "";
-      if (nameInSheet.includes(itemName)) {
-        results.push({
-          code: data[i][0],    // A열: 코드
-          name: data[i][1],    // B열: 품목
-          spec: data[i][2],    // C열: 규격
-          unit: data[i][3],    // D열: 단위
-          remark: data[i][11]  // L열: 비고
-        });
-      }
-    }
-    return results;
-  } catch (e) {
-    return "Error: " + e.message;
-  }
-}
-      <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <base target="_top">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chef_dskim System</title>
     <style>
-      body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f4f4f4; color: #333; }
-      .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-      h2 { text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-      
-      /* 버튼 스타일 */
-      .menu-btn { width: 100%; padding: 18px; margin-top: 10px; font-size: 16px; font-weight: bold; border: 1px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; text-align: left; }
-      .menu-btn:hover { background: #f9f9f9; }
-      .btn-code { color: #888; font-size: 12px; display: block; }
-
-      /* 서브메뉴 */
-      .submenu { display: none; background: #fdfdfd; border: 1px solid #eee; border-radius: 0 0 8px 8px; padding: 5px; }
-      .sub-btn { width: 100%; padding: 12px; border: none; background: none; text-align: left; border-bottom: 1px solid #f1f1f1; cursor: pointer; }
-      .sub-btn:hover { background: #f1f1f1; }
-      .sub-desc { font-size: 11px; color: #999; display: block; }
-
-      /* 검색 영역 */
-      #search-section { display: none; margin-top: 20px; padding: 15px; border: 1px solid #333; border-radius: 8px; }
-      input { width: 70%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-      .action-btn { padding: 10px; background: #333; color: white; border: none; border-radius: 4px; cursor: pointer; }
-      
-      /* 결과 테이블 */
-      table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
-      th, td { border: 1px solid #eee; padding: 10px; text-align: left; }
-      th { background: #f8f9fa; }
+        /* (위에서 드린 스타일과 동일하므로 핵심 로직만 수정합니다) */
+        body { font-family: sans-serif; padding: 20px; text-align: center; background: #f4f4f4; }
+        .container { max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        input { width: 70%; padding: 10px; margin: 10px 0; }
+        button { padding: 10px 20px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; font-size: 13px; }
     </style>
-  </head>
-  <body>
-
+</head>
+<body>
     <div class="container">
-      <h2>Chef_dskim SYSTEM</h2>
-
-      <button class="menu-btn" onclick="toggleMenu('menu-000')">
-        <span class="btn-code">000</span> 기준정보 (ADMIN) ▼
-      </button>
-      <div id="menu-000" class="submenu">
-        <button class="sub-btn" onclick="openSearch()">
-          010 원가_매입관리
-          <span class="sub-desc">원가 계산표, 거래처 리스트, 발주서 양식</span>
-        </button>
-        <button class="sub-btn" onclick="alert('준비 중')">020 사업기획_운영</button>
-        <button class="sub-btn" onclick="alert('준비 중')">030 직원교육</button>
-      </div>
-
-      <button class="menu-btn" onclick="alert('준비 중')"><span class="btn-code">100~300</span> 국가별 요리</button>
-      <button class="menu-btn" onclick="alert('준비 중')"><span class="btn-code">400</span> 심화 연구 (R&D)</button>
-      <button class="menu-btn" onclick="alert('준비 중')"><span class="btn-code">900</span> 자료실 (ARCHIVE)</button>
-
-      <div id="search-section">
-        <h3>품목 실시간 검색</h3>
-        <input type="text" id="itemName" placeholder="예: 대게, 모렐">
-        <button class="action-btn" onclick="runSearch()">검색</button>
-        <div id="result-list"></div>
-        <button onclick="closeSearch()" style="margin-top:15px; background:none; border:none; color:red; cursor:pointer;">◀ 뒤로가기</button>
-      </div>
+        <h2>010 원가_매입관리</h2>
+        <input type="text" id="itemName" placeholder="품목 입력 (예: 대게)">
+        <button onclick="runSearch()">검색</button>
+        <div id="result"></div>
     </div>
 
     <script>
-      function toggleMenu(id) {
-        var x = document.getElementById(id);
-        x.style.display = (x.style.display === "block") ? "none" : "block";
-      }
+        function runSearch() {
+            const name = document.getElementById('itemName').value;
+            const resultDiv = document.getElementById('result');
+            // ⚠️ 아래 URL에 1번에서 만든 GAS 배포 URL을 넣으세요.
+            const gasUrl = "여기에_GAS_배포_URL_입력"; 
 
-      function openSearch() {
-        document.getElementById('search-section').style.display = 'block';
-        document.getElementById('menu-000').parentElement.querySelectorAll('.menu-btn, .submenu').forEach(el => el.style.display = 'none');
-        document.querySelector('h2').innerText = "010 원가_매입관리";
-      }
+            resultDiv.innerHTML = "검색 중...";
 
-      function closeSearch() {
-        location.reload(); // 가장 단순하게 초기 상태로 복구
-      }
-
-      function runSearch() {
-        var val = document.getElementById('itemName').value;
-        if(!val) return alert('품목을 입력하세요.');
-        
-        var resDiv = document.getElementById('result-list');
-        resDiv.innerHTML = "검색 중...";
-
-        google.script.run.withSuccessHandler(function(results) {
-          if (results.length === 0) { resDiv.innerHTML = "결과가 없습니다."; return; }
-          var html = '<table><tr><th>품목</th><th>규격</th><th>단위</th></tr>';
-          results.forEach(function(item) {
-            html += '<tr><td>'+item.name+'</td><td>'+item.spec+'</td><td>'+item.unit+'</td></tr>';
-          });
-          html += '</table>';
-          resDiv.innerHTML = html;
-        }).searchItem(val);
-      }
+            fetch(`${gasUrl}?item=${encodeURIComponent(name)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length === 0) { resultDiv.innerHTML = "결과 없음"; return; }
+                    let html = '<table><tr><th>품목</th><th>규격</th></tr>';
+                    data.forEach(item => {
+                        html += `<tr><td>${item.name}</td><td>${item.spec}</td></tr>`;
+                    });
+                    html += '</table>';
+                    resultDiv.innerHTML = html;
+                })
+                .catch(err => { resultDiv.innerHTML = "오류 발생"; });
+        }
     </script>
-  </body>
+</body>
 </html>
