@@ -451,4 +451,170 @@
                             </div>
                         </div>
 
-                        <aside className="flex-1 bg
+                        <aside className="flex-1 bg-white p-4 overflow-y-auto min-h-[45%]">
+                            {selectedDate ? (
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center border-b-2 border-blue-600 pb-1">
+                                        <h2 className="text-xl font-black italic">DAILY MENU</h2>
+                                        <button onClick={()=>setWeeklyModal(true)} className="bg-slate-800 text-white px-3 py-1 rounded-lg text-xs font-bold shadow-lg hover:bg-slate-700 transition-all">📅 주간표 보기</button>
+                                    </div>
+                                    <div className="font-bold text-slate-500 text-sm mb-2">{selectedDate.date}</div>
+                                    {selectedDate.duty && <div className="p-4 rounded-xl border mb-3 bg-slate-50 border-slate-200"><div className="text-[10px] font-black text-slate-400 uppercase mb-1">Schedule</div><div className="text-sm font-black text-slate-800">👨‍🍳 {selectedDate.duty}</div></div>}
+                                    <MenuCard text={selectedDate.morning} type="Morning" recipeMap={recipeMap} setPopupRecipes={setPopupRecipes} setActiveRecipeIndex={setActiveRecipeIndex} onExpand={handleExpandMenu} />
+                                    <MenuCard text={selectedDate.lunch} type="Lunch" recipeMap={recipeMap} setPopupRecipes={setPopupRecipes} setActiveRecipeIndex={setActiveRecipeIndex} onExpand={handleExpandMenu} />
+                                    <MenuCard text={selectedDate.dinner} type="Dinner" recipeMap={recipeMap} setPopupRecipes={setPopupRecipes} setActiveRecipeIndex={setActiveRecipeIndex} onExpand={handleExpandMenu} />
+                                    {selectedDate.packing && <div className="p-4 rounded-xl border mb-3 bg-green-50 border-green-200"><div className="text-[10px] font-black text-green-700 uppercase mb-1">Takeout</div><div className="text-sm font-black text-green-900">🎁 {selectedDate.packing}</div></div>}
+                                    
+                                    <div className="mt-8 pt-4 border-t-2 border-slate-100">
+                                        <h3 className="text-sm font-black text-slate-400 uppercase mb-3">🖊️ 포인트 필기</h3>
+                                        <div className="space-y-3 mb-4">
+                                            {todayComments.length > 0 ? todayComments.map((c, i) => (
+                                                <div key={i} className={`p-3 rounded-xl border transition-all ${c.important ? 'bg-yellow-50 border-yellow-200 ring-2 ring-yellow-100' : 'bg-slate-50'}`}>
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <div className="flex items-center gap-1">
+                                                            {currentUser === ADMIN_NAME && <input type="checkbox" className="imp-check mr-1" checked={c.important} onChange={()=>handleToggleImportant(c)} />}
+                                                            {c.important && <span className="text-xs">⭐</span>}
+                                                            <span className={`text-xs font-black ${c.important ? 'text-yellow-700' : 'text-blue-600'}`}>{c.name}</span>
+                                                        </div>
+                                                        <span className="text-[10px] text-slate-400">{c.time}</span>
+                                                    </div>
+                                                    <div className={`text-xs font-bold whitespace-pre-wrap ${c.important ? 'text-slate-800' : 'text-slate-700'}`}>{c.content}</div>
+                                                </div>
+                                            )) : <div className="text-center text-xs text-slate-300 py-2">기록된 포인트가 없습니다.</div>}
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <input className="flex-1 bg-slate-100 px-3 py-2 rounded-xl text-xs font-bold outline-none border focus:border-blue-500" placeholder="중요 포인트 메모..." value={newComment} onChange={e=>setNewComment(e.target.value)} onKeyDown={e=>e.key==='Enter' && handleCommentSubmit()} disabled={isSubmitting}/>
+                                            <button onClick={handleCommentSubmit} disabled={isSubmitting} className="bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-black hover:bg-slate-700 disabled:opacity-50">{isSubmitting ? "..." : "저장"}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : <div className="h-full flex items-center justify-center text-slate-300 font-black">SELECT DATE</div>}
+                        </aside>
+                    </main>
+
+                    {/* ★ 확대 보기 팝업 (새로 추가됨) */}
+                    {expandedMenu && (
+                        <div className="zoom-popup" onClick={() => setExpandedMenu(null)}>
+                            <div className="flex justify-between items-center mb-6 border-b pb-4">
+                                <div>
+                                    <div className="text-sm font-black text-slate-400 uppercase mb-1">{selectedDate.date}</div>
+                                    <div className="text-3xl font-black italic text-blue-600">{expandedMenu.type}</div>
+                                </div>
+                                <button onClick={() => setExpandedMenu(null)} className="text-4xl text-slate-300">&times;</button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto flex items-center justify-center">
+                                <div className="text-2xl md:text-4xl font-black text-slate-800 leading-relaxed text-center whitespace-pre-wrap">
+                                    {expandedMenu.text}
+                                </div>
+                            </div>
+                            <div className="text-center text-xs text-slate-400 mt-6 font-bold">화면을 터치하면 닫힙니다</div>
+                        </div>
+                    )}
+
+                    {importantModal && (
+                        <div className="modal-view">
+                            <div className="flex justify-between items-center mb-4 border-b pb-2">
+                                <h2 className="text-xl font-black italic text-yellow-600">⭐ IMPORTANT NOTES</h2>
+                                <button onClick={()=>setImportantModal(false)} className="text-3xl">&times;</button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto pb-10 space-y-6">
+                                {importantComments.length > 0 ? importantComments.map((c, i) => {
+                                    const menu = menus.find(m => m.date === c.date);
+                                    return (
+                                        <div key={i} className="bg-white p-4 rounded-xl border-2 border-yellow-200 shadow-md">
+                                            <div className="bg-slate-50 p-3 rounded-lg border mb-3">
+                                                <div className="font-black text-blue-600 mb-2 border-b pb-1">{c.date}</div>
+                                                {menu ? (<div className="text-xs font-bold space-y-1">
+                                                    <div className="flex gap-2"><span className="text-orange-500 w-6">아침</span> <span className="text-slate-600">{menu.morning}</span></div>
+                                                    <div className="flex gap-2"><span className="text-blue-500 w-6">점심</span> <span className="text-slate-600">{menu.lunch}</span></div>
+                                                    <div className="flex gap-2"><span className="text-purple-500 w-6">저녁</span> <span className="text-slate-600">{menu.dinner}</span></div>
+                                                </div>) : <div className="text-xs text-slate-300">메뉴 정보 없음</div>}
+                                            </div>
+                                            <div className="flex justify-between items-center mb-1 px-1">
+                                                <div className="flex items-center gap-1"><span className="text-xs">⭐</span><span className="text-xs font-black text-yellow-800">{c.name}</span></div><span className="text-[10px] text-slate-400">{c.time}</span>
+                                            </div>
+                                            <div className="text-sm font-bold text-slate-800 bg-yellow-50 p-3 rounded-lg">{c.content}</div>
+                                        </div>
+                                    );
+                                }) : <div className="text-center py-10 text-slate-400 font-bold">중요한 포인트가 없습니다.</div>}
+                            </div>
+                        </div>
+                    )}
+
+                    {weeklyModal && selectedDate && (
+                        <div className="modal-view">
+                            <div className="flex justify-between items-center mb-4 border-b pb-2">
+                                <h2 className="text-xl font-black italic">WEEKLY MENU PLAN</h2>
+                                <button onClick={()=>setWeeklyModal(false)} className="text-3xl">&times;</button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto pb-10">
+                                {weeklyData.map((d, i) => (
+                                    <div key={i} className={`mb-4 p-3 border rounded-xl ${d.date === selectedDate.date ? 'border-blue-50 bg-blue-50 ring-2 ring-blue-100' : 'bg-slate-50'}`}>
+                                        <div className={`font-black mb-2 flex justify-between ${d.date === selectedDate.date ? 'text-blue-600' : 'text-slate-600'}`}>
+                                            <span>{d.date} ({weekDays[d.dayIdx]})</span>
+                                            {d.date === selectedDate.date && <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded">선택됨</span>}
+                                        </div>
+                                        {d.menu ? (
+                                            <div className="grid grid-cols-1 gap-3">
+                                                <WeeklyMenuRow label="아침" colorClass="text-orange-500" text={d.menu.morning} recipeMap={recipeMap} setPopupRecipes={setPopupRecipes} setActiveRecipeIndex={setActiveRecipeIndex} />
+                                                <WeeklyMenuRow label="점심" colorClass="text-blue-500" text={d.menu.lunch} recipeMap={recipeMap} setPopupRecipes={setPopupRecipes} setActiveRecipeIndex={setActiveRecipeIndex} />
+                                                <WeeklyMenuRow label="저녁" colorClass="text-purple-500" text={d.menu.dinner} recipeMap={recipeMap} setPopupRecipes={setPopupRecipes} setActiveRecipeIndex={setActiveRecipeIndex} />
+                                            </div>
+                                        ) : <div className="text-slate-400 text-xs font-bold">등록된 메뉴 없음</div>}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {activeModal && (
+                        <div className="modal-view">
+                            <div className="flex justify-between items-center mb-4 border-b pb-2">
+                                <h2 className="text-xl font-black italic">SEARCH RESULT</h2>
+                                <button onClick={()=>setActiveModal(false)} className="text-3xl">&times;</button>
+                            </div>
+                            <input className="bg-slate-100 px-4 py-3 rounded-xl w-full font-bold mb-4 border-2 border-blue-500 outline-none" placeholder="검색어..." autoFocus value={modalSearch} onChange={e=>setModalSearch(e.target.value)}/>
+                            <div className="flex-1 overflow-y-auto space-y-4 pb-10">
+                                {currentSearchResults.length > 0 ? currentSearchResults.map((m, i) => (
+                                    <div key={i} className="bg-slate-50 p-4 rounded-xl border">
+                                        <div className="font-black text-blue-600 mb-2">{m.date}</div>
+                                        <MenuCard text={m.morning} type="Morning" query={modalSearch} recipeMap={recipeMap} setPopupRecipes={setPopupRecipes} setActiveRecipeIndex={setActiveRecipeIndex} onExpand={handleExpandMenu} />
+                                        <MenuCard text={m.lunch} type="Lunch" query={modalSearch} recipeMap={recipeMap} setPopupRecipes={setPopupRecipes} setActiveRecipeIndex={setActiveRecipeIndex} onExpand={handleExpandMenu} />
+                                        <MenuCard text={m.dinner} type="Dinner" query={modalSearch} recipeMap={recipeMap} setPopupRecipes={setPopupRecipes} setActiveRecipeIndex={setActiveRecipeIndex} onExpand={handleExpandMenu} />
+                                    </div>
+                                )) : <div className="text-center py-10 text-slate-400 font-bold">결과 없음</div>}
+                            </div>
+                        </div>
+                    )}
+
+                    {popupRecipes.length > 0 && currentRecipe && (
+                        <div className="recipe-popup" onClick={() => setPopupRecipes([])}>
+                            <div className="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl overflow-y-auto max-h-[85vh]" onClick={e => e.stopPropagation()}>
+                                <div className="flex justify-between items-center mb-4 border-b pb-2">
+                                    <h3 className="text-xl font-black uppercase italic text-blue-600">Recipe Master</h3>
+                                    <button onClick={() => setPopupRecipes([])} className="text-4xl font-thin">&times;</button>
+                                </div>
+                                {popupRecipes.length > 1 && (
+                                    <div className="flex overflow-x-auto border-b mb-4 no-scrollbar">
+                                        {popupRecipes.map((r, i) => <div key={i} onClick={() => setActiveRecipeIndex(i)} className={`tab-btn whitespace-nowrap ${i === activeRecipeIndex ? 'active' : ''}`}>{r.name}</div>)}
+                                    </div>
+                                )}
+                                <div className="animate-in fade-in zoom-in-95 duration-200">
+                                    <div className="bg-blue-600 text-white px-3 py-1 rounded-full inline-block text-xs font-black mb-3 uppercase">{currentRecipe.name}</div>
+                                    <div className="space-y-4">
+                                        <div><div className="text-[10px] font-black text-slate-400 uppercase mb-1">Ingredients</div><div className="recipe-content bg-slate-50 p-3 rounded-xl border">{currentRecipe.ingredients}</div></div>
+                                        <div><div className="text-[10px] font-black text-slate-400 uppercase mb-1">Instructions</div><div className="recipe-content bg-slate-50 p-3 rounded-xl border">{currentRecipe.process}</div></div>
+                                        {currentRecipe.tip && <div className="bg-orange-50 p-3 rounded-xl border border-orange-100 font-bold text-orange-950 text-xs">💡 {currentRecipe.tip}</div>}
+                                        {currentRecipe.nutrition && <div className="bg-teal-50 p-3 rounded-xl border border-teal-100 font-bold text-teal-900 text-xs">📊 {currentRecipe.nutrition}</div>}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+        ReactDOM.createRoot(document.getElementById('root')).render(<MisoYonApp />);
+    </script>
+</body>
+</html>
