@@ -9,10 +9,19 @@
         .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
         
-        /* 자산 표시 박스 (NEW) */
-        .asset-box { background: #eaf2f8; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #d6eaf8; }
+        /* [NEW] 클릭 가능한 자산 박스 */
+        .asset-box { background: #eaf2f8; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #d6eaf8; cursor: pointer; transition: 0.2s; }
+        .asset-box:hover { background: #d4e6f1; }
         .asset-title { font-size: 13px; color: #3498db; font-weight: bold; }
         .asset-value { font-size: 24px; color: #2c3e50; font-weight: bold; margin-top: 5px; }
+        .toggle-icon { font-size: 12px; color: #7f8c8d; margin-top: 5px; }
+
+        /* [NEW] 상세 내역 리스트 (숨김 상태) */
+        #asset-detail { display: none; margin-bottom: 20px; background: #fafafa; border: 1px solid #eee; border-radius: 8px; padding: 10px; max-height: 200px; overflow-y: auto; }
+        .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-name { font-weight: bold; color: #555; }
+        .detail-val { color: #2c3e50; }
 
         /* 메인 네비 */
         .main-btn { width: 100%; padding: 20px; margin-bottom: 10px; font-size: 16px; font-weight: bold; border: 1px solid #ccc; border-radius: 8px; background: #fff; cursor: pointer; text-align: left; }
@@ -61,9 +70,14 @@
         <div id="workspace-010">
             <button onclick="goBackMain()" style="background:none; border:none; color:#555; margin-bottom:15px; cursor:pointer;">◀ 메인으로</button>
             
-            <div class="asset-box">
+            <div class="asset-box" onclick="toggleAssetDetail()">
                 <div class="asset-title">💰 현재 총 재고 자산</div>
                 <div id="asset-value" class="asset-value">계산 중...</div>
+                <div class="toggle-icon">▼ 상세 내역 보기 (클릭)</div>
+            </div>
+            
+            <div id="asset-detail">
+                <p style="text-align:center; color:#999;">내역을 불러오는 중...</p>
             </div>
 
             <div class="mode-switch">
@@ -88,11 +102,12 @@
     </div>
 
     <script>
-        // 셰프님의 GAS URL (새 배포 후 URL이 바뀌면 꼭 수정!)
+        // 셰프님의 GAS URL (배포 후 바뀐 주소 확인 필수!)
         const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
         
         let currentMode = 'in'; 
         let workList = []; 
+        let assetData = null; // 자산 데이터 임시 저장
 
         document.addEventListener("DOMContentLoaded", function() {
             const input = document.getElementById("searchInput");
@@ -108,7 +123,7 @@
             document.getElementById('workspace-010').style.display = 'block';
             document.getElementById('page-title').innerText = "입출고/원가 관리";
             setMode('in');
-            loadAsset(); // [NEW] 자산 불러오기 실행
+            loadAsset(); 
         }
 
         function goBackMain() {
@@ -118,18 +133,49 @@
             workList = []; renderList();
         }
 
-        // [NEW] 자산 데이터 불러오기
+        // [NEW] 자산 데이터 불러오기 (JSON 처리)
         function loadAsset() {
             fetch(`${gasUrl}?action=asset`)
-                .then(res => res.text())
-                .then(text => {
-                    // 숫자 3자리마다 콤마 찍기
-                    const formatted = Number(text).toLocaleString(); 
+                .then(res => res.json())
+                .then(data => {
+                    assetData = data; // 데이터 저장
+                    // 총합 표시
+                    const formatted = Number(data.total).toLocaleString(); 
                     document.getElementById('asset-value').innerText = formatted + " 원";
+                    
+                    // 상세 리스트 미리 렌더링
+                    renderAssetDetail(data.list);
                 })
                 .catch(() => {
                     document.getElementById('asset-value').innerText = "조회 실패";
                 });
+        }
+
+        // [NEW] 상세 내역 토글
+        function toggleAssetDetail() {
+            const detailBox = document.getElementById('asset-detail');
+            if (detailBox.style.display === 'block') {
+                detailBox.style.display = 'none';
+            } else {
+                detailBox.style.display = 'block';
+            }
+        }
+
+        // [NEW] 상세 내역 HTML 생성
+        function renderAssetDetail(list) {
+            const box = document.getElementById('asset-detail');
+            if (!list || list.length === 0) {
+                box.innerHTML = "<p style='text-align:center; color:#999;'>상세 내역이 없습니다.</p>";
+                return;
+            }
+            let html = "";
+            list.forEach(item => {
+                html += `<div class="detail-row">
+                    <span class="detail-name">${item.name}</span>
+                    <span class="detail-val">${Number(item.value).toLocaleString()} 원</span>
+                </div>`;
+            });
+            box.innerHTML = html;
         }
 
         function setMode(mode) {
@@ -141,6 +187,7 @@
             document.getElementById('search-area').style.display = 'flex';
             document.getElementById('work-area').style.display = 'block';
             document.getElementById('result-list').innerHTML = "";
+            document.getElementById('asset-detail').style.display = 'none'; // 모드 변경시 상세내역 닫기
 
             if (mode === 'in') {
                 document.getElementById('btn-in').className = "mode-btn active-in";
@@ -165,6 +212,7 @@
             document.getElementById('btn-stock').className = "mode-btn active-stock";
             document.getElementById('search-area').style.display = 'none';
             document.getElementById('work-area').style.display = 'none';
+            document.getElementById('asset-detail').style.display = 'none'; // 재고모드 시 상세내역 닫기
             
             const resDiv = document.getElementById('result-list');
             resDiv.innerHTML = "<p style='text-align:center;'>📦 전체 재고를 계산 중입니다...</p>";
