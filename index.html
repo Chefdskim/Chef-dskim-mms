@@ -1,50 +1,454 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>셰프님 레시피</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chef_dskim 통합관리시스템</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .recipe { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
-        .recipe h2 { margin-top: 0; }
-        .photo-box { width: 100%; height: 200px; background: #eee; margin-top: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        img { width: 100%; height: auto; }
-        .btn-photo { background: #007bff; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background: #f8fafc; }
+        #root { width: 100%; height: 100%; display: flex; flex-direction: column; }
+        
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); background: #cbd5e1; gap: 1px; border: 1px solid #cbd5e1; flex: 1; overflow-y: auto; }
+        .calendar-grid { grid-auto-rows: minmax(60px, 1fr); } 
+        @media (min-width: 1024px) { .calendar-grid { grid-template-rows: 25px repeat(6, 1fr); grid-auto-rows: auto; } }
+        .calendar-header { background: #f8fafc; text-align: center; font-size: 9px; font-weight: 900; color: #94a3b8; padding: 4px 0; }
+        .calendar-day { background: white; padding: 2px 4px; cursor: pointer; display: flex; flex-direction: column; overflow: hidden; min-height: 0; position: relative; }
+        .calendar-day.selected { background: #eff6ff !important; box-shadow: inset 0 0 0 2px #3b82f6; z-index: 10; }
+        .menu-text { font-size: 9px; font-weight: 800; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; padding: 1px 2px; border-radius: 2px; }
+        
+        .modal-view { position: fixed; inset: 0; background: white; z-index: 1000; display: flex; flex-direction: column; padding: 15px; animation: slideUp 0.3s ease-out; }
+        .recipe-popup { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1100; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+        .notice-popup { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1200; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(2px); }
+        /* ★ 확대 보기 팝업 스타일 (Z-Index 최상위) */
+        .zoom-popup { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 1500; display: flex; flex-direction: column; padding: 20px; animation: zoomIn 0.2s ease-out; }
+        
+        .recipe-tag { display: inline-block; background: #eff6ff; color: #2563eb; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 900; margin-right: 4px; margin-top: 4px; border: 1px solid #bfdbfe; cursor: pointer; transition: all 0.2s; }
+        .recipe-content { font-size: 13px; font-weight: 600; color: #1e293b; line-height: 1.7; white-space: pre-wrap; }
+        .hl-red { color: #ef4444; text-decoration: underline; font-weight: 900; }
+        
+        .top-banner { background: #4f46e5; color: white; padding: 8px 16px; font-size: 12px; font-weight: 700; text-align: center; animation: slideDown 0.5s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 10px rgba(79, 70, 229, 0.2); }
+        .banner-icon { background: white; color: #4f46e5; border-radius: 4px; padding: 0 4px; font-size: 10px; font-weight: 900; flex-shrink: 0; }
+
+        .login-screen { position: fixed; inset: 0; background: #f8fafc; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .login-box { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); width: 100%; max-width: 320px; text-align: center; }
+        .login-input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; text-align: center; margin-bottom: 12px; outline: none; transition: all 0.2s; font-weight: 700; }
+        .login-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .login-btn { width: 100%; background: #3b82f6; color: white; padding: 12px; border-radius: 12px; font-weight: 900; font-size: 14px; transition: all 0.2s; margin-top: 4px; }
+        
+        .imp-check { width: 18px; height: 18px; accent-color: #f59e0b; cursor: pointer; }
+        
+        .spin-anim { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
-    <h1>👨‍🍳 마스터 레시피 리스트</h1>
-    <div id="list"></div>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef } = React;
 
-    <script>
-        // 셰프님의 데이터를 이곳에 배열 형태로 넣습니다.
-        const data = [
-            { id: 1, menu: "크램차우더", howto: "1. 조개 손질\n2. 야채 볶기..." },
-            { id: 2, menu: "도미솥밥", howto: "1. 쌀 불리기\n2. 도미 굽기..." }
-        ];
+        const findMatchedRecipes = (menuName, recipeMap) => {
+            if (!menuName || menuName === "일정없음" || !recipeMap) return [];
+            const cleanMenu = menuName.toLowerCase().replace(/[^가-힣a-zA-Z0-9]/g, "");
+            return Object.values(recipeMap).filter(recipe => {
+                if (!recipe.key) return false;
+                const fullKey = recipe.key.toLowerCase().replace(/[^가-힣a-zA-Z0-9]/g, "");
+                const coreKey = recipe.key.toLowerCase().replace(/\(.*\)/g, "").replace(/[^가-힣a-zA-Z0-9]/g, "");
+                return cleanMenu.includes(fullKey) || (coreKey.length > 1 && cleanMenu.includes(coreKey));
+            });
+        };
 
-        const list = document.getElementById('list');
-        data.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'recipe';
-            div.innerHTML = `
-                <h2>${item.menu}</h2>
-                <pre>${item.howto}</pre>
-                <input type="file" accept="image/*" capture="environment" id="input-${item.id}" style="display:none" onchange="showImg(this, ${item.id})">
-                <button class="btn-photo" onclick="document.getElementById('input-${item.id}').click()">📸 사진 촬영/업로드</button>
-                <div class="photo-box" id="box-${item.id}">사진 없음</div>
-            `;
-            list.appendChild(div);
-        });
+        const highlightText = (text, query) => {
+            if (!query || !text || !isNaN(query)) return text;
+            const parts = text.split(new RegExp(`(${query})`, 'gi'));
+            return parts.map((p, i) => p.toLowerCase() === query.toLowerCase() ? <span key={i} className="hl-red">{p}</span> : p);
+        };
 
-        function showImg(input, id) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const box = document.getElementById('box-' + id);
-                box.innerHTML = `<img src="${e.target.result}">`;
+        // ★ MenuCard 수정: 클릭 시 onExpand 호출
+        const MenuCard = ({text, type, query, recipeMap, setPopupRecipes, setActiveRecipeIndex, onExpand}) => {
+            const matched = findMatchedRecipes(text, recipeMap);
+            return (
+                <div onClick={() => onExpand && onExpand(type, text)} className={`p-4 rounded-xl border mb-3 transition-all cursor-pointer ${matched.length > 0 ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' : 'bg-slate-50 border-slate-100 hover:bg-slate-100'}`}>
+                    <div className="text-[10px] font-black text-slate-400 uppercase mb-1 flex justify-between">
+                        <span>{type}</span>
+                        <span className="text-xs text-slate-300">🔍 확대</span>
+                        {matched.length > 0 && <span className="text-blue-500">Found: {matched.length}</span>}
+                    </div>
+                    <div className="text-sm font-black text-slate-700 mb-2 leading-relaxed whitespace-pre-wrap">
+                        {highlightText(text, query)}
+                    </div>
+                    {matched.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-blue-100">
+                            {matched.map((r, idx) => (
+                                <span key={idx} className="recipe-tag" onClick={(e) => { e.stopPropagation(); setPopupRecipes(matched); setActiveRecipeIndex(idx); }}>📖 {r.name}</span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const WeeklyMenuRow = ({ label, colorClass, text, recipeMap, setPopupRecipes, setActiveRecipeIndex }) => {
+            if(!text) return <div className="flex gap-2 text-sm"><span className={`w-8 font-bold ${colorClass}`}>{label}</span><span className="text-slate-300">-</span></div>;
+            const matched = findMatchedRecipes(text, recipeMap);
+            return (
+                <div className="flex gap-2 text-sm items-start">
+                    <span className={`w-8 font-bold ${colorClass} shrink-0`}>{label}</span>
+                    <div className="flex-1">
+                        <span className="font-bold text-slate-700">{text}</span>
+                        {matched.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                                {matched.map((r, idx) => (
+                                    <span key={idx} className="recipe-tag" onClick={(e) => { e.stopPropagation(); setPopupRecipes(matched); setActiveRecipeIndex(idx); }}>📖 {r.name}</span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const MisoYonApp = () => {
+            const getFreshUrl = (url) => `${url}&t=${new Date().getTime()}`;
+            const USER_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSnsej-xGogyedNPYTs2iqEMFKAwIL3tipLoSiDDKxKHot-PITnmxYETDseGckqpb6EMiQm39Sfol0-/pub?gid=1190342038&single=true&output=csv";
+            const MENU_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSnsej-xGogyedNPYTs2iqEMFKAwIL3tipLoSiDDKxKHot-PITnmxYETDseGckqpb6EMiQm39Sfol0-/pub?gid=0&single=true&output=csv";
+            const RECIPE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoOE5m6eIgIRn6Pt09QvLjBFIokFX-hk04n1XOTX89eRg-3-eQSgv4QlJjdUyrpsYNtc9Y-q5uqv9n/pub?gid=949808515&single=true&output=csv";
+            const NOTICE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSnsej-xGogyedNPYTs2iqEMFKAwIL3tipLoSiDDKxKHot-PITnmxYETDseGckqpb6EMiQm39Sfol0-/pub?gid=489171005&single=true&output=csv";
+            const COMMENT_READ_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSnsej-xGogyedNPYTs2iqEMFKAwIL3tipLoSiDDKxKHot-PITnmxYETDseGckqpb6EMiQm39Sfol0-/pub?gid=918283439&single=true&output=csv";
+            const COMMENT_WRITE_URL = "https://script.google.com/macros/s/AKfycbxQt7hG7JaH3HBD0ygYNezSlNFEuqLZJAv-22gDCTMET7z2nZs_MarT47Rxq7GlxBxC-Q/exec";
+
+            const ADMIN_NAME = "관리자";
+            const ADMIN_CODE = "2026";
+            const INACTIVITY_LIMIT = 3 * 60 * 60 * 1000; 
+
+            const [isAuthenticated, setIsAuthenticated] = useState(false);
+            const [currentUser, setCurrentUser] = useState("");
+            const [inputName, setInputName] = useState("");
+            const [inputCode, setInputCode] = useState("");
+            const [loginError, setLoginError] = useState("");
+            const [userList, setUserList] = useState([]);
+            
+            const [menus, setMenus] = useState([]);
+            const [recipeMap, setRecipeMap] = useState({});
+            
+            const [activeBanner, setActiveBanner] = useState(null);
+            const [activePopup, setActivePopup] = useState(null);
+            
+            const [comments, setComments] = useState([]);
+            const [newComment, setNewComment] = useState("");
+            const [isSubmitting, setIsSubmitting] = useState(false);
+            const [isRefreshing, setIsRefreshing] = useState(false);
+
+            const [currentMonth, setCurrentMonth] = useState(new Date()); 
+            const [selectedDate, setSelectedDate] = useState(null);
+            const [searchTerm, setSearchTerm] = useState("");
+            const [modalSearch, setModalSearch] = useState("");
+            const [activeModal, setActiveModal] = useState(false);
+            const [weeklyModal, setWeeklyModal] = useState(false);
+            const [importantModal, setImportantModal] = useState(false);
+            const [popupRecipes, setPopupRecipes] = useState([]);
+            const [activeRecipeIndex, setActiveRecipeIndex] = useState(0);
+
+            // ★ 확대 보기용 상태 추가
+            const [expandedMenu, setExpandedMenu] = useState(null); // { type: 'Morning', text: '...' }
+
+            const timerRef = useRef(null);
+
+            const resetTimer = () => {
+                if (timerRef.current) clearTimeout(timerRef.current);
+                timerRef.current = setTimeout(() => {
+                    if (isAuthenticated) {
+                        alert("3시간 동안 활동이 없어 자동 로그아웃됩니다.");
+                        handleLogout();
+                    }
+                }, INACTIVITY_LIMIT);
             };
-            reader.readAsDataURL(input.files[0]);
-        }
-    </script>
-</body>
-</html>
+
+            useEffect(() => {
+                if (!isAuthenticated) return;
+                const events = ['mousemove', 'keydown', 'click', 'touchstart'];
+                events.forEach(ev => window.addEventListener(ev, resetTimer));
+                resetTimer();
+                return () => {
+                    if (timerRef.current) clearTimeout(timerRef.current);
+                    events.forEach(ev => window.removeEventListener(ev, resetTimer));
+                };
+            }, [isAuthenticated]);
+
+            const fetchData = (forceFresh = false) => {
+                if(forceFresh) setIsRefreshing(true);
+                const getUrl = (url) => forceFresh ? `${url}&t=${new Date().getTime()}` : url;
+
+                Papa.parse(getUrl(USER_URL), { 
+                    download: true, header: false,
+                    complete: (res) => {
+                        const users = [];
+                        res.data.forEach(row => { if (row.length >= 2 && row[1]) users.push({ name: (row[0]||"").trim(), code: (row[1]||"").trim() }); });
+                        setUserList(users);
+                    }
+                });
+
+                Papa.parse(getUrl(MENU_URL), { 
+                    download: true, 
+                    complete: (res) => {
+                        let temp = []; let headers = [];
+                        res.data.forEach(row => {
+                            const label = (row[0] || "").replace(/\s/g, "");
+                            const vals = row.slice(1);
+                            if (label === "날짜") {
+                                headers = vals.map(v => {
+                                    const m = (v || "").match(/(\d{4})[^\d]*(\d{1,2})[^\d]*(\d{1,2})/);
+                                    return m ? `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}` : null;
+                                });
+                                headers.forEach(d => { if(d) temp.push({ date: d, morning: "", lunch: "", dinner: "", duty: "", packing: "" }); });
+                            } 
+                            else if (headers.length > 0) {
+                                vals.forEach((v, i) => {
+                                    if (!headers[i]) return;
+                                    const t = temp.find(m => m.date === headers[i]);
+                                    if (t && v && v.trim() !== "") {
+                                        if (label.includes("아침")) t.morning = v;
+                                        else if (label.includes("점심")) t.lunch = v;
+                                        else if (label.includes("저녁")) t.dinner = v;
+                                        else if (label.includes("근무") || label.includes("당직") || label.match(/\d/)) t.duty = t.duty ? t.duty + " / " + v : v;
+                                        else if (label.includes("포장") || label.includes("Takeout")) t.packing = v;
+                                    }
+                                });
+                            }
+                        });
+                        setMenus(temp);
+
+                        const now = new Date();
+                        const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+                        const todayMenu = temp.find(m => m.date === todayStr);
+                        if(todayMenu) {
+                            setSelectedDate(todayMenu);
+                        } else {
+                            setSelectedDate({ date: todayStr, morning: "", lunch: "", dinner: "", duty: "", packing: "" });
+                        }
+                    }
+                });
+
+                Papa.parse(getUrl(RECIPE_URL), { 
+                    download: true, 
+                    complete: (res) => {
+                        const newRecipes = {};
+                        res.data.forEach(row => {
+                            if (row.length < 2 || !row[0] || row[0].includes("메뉴명") || row[0].includes("Key")) return;
+                            const key = row[0].trim();
+                            newRecipes[key] = { key: key, name: row[1] || key, ingredients: row[2] || "", process: row[3] || "", tip: row[4] || "", nutrition: row[5] || "" };
+                        });
+                        setRecipeMap(newRecipes);
+                    }
+                });
+
+                Papa.parse(getUrl(NOTICE_URL), {
+                    download: true,
+                    complete: (res) => {
+                        const now = new Date();
+                        const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+                        const hiddenDate = localStorage.getItem("misoyon_notice_hidden");
+                        
+                        let banners = [];
+                        let popup = null;
+                        
+                        res.data.forEach(row => {
+                            if(row.length < 4 || row[0] === "구분") return;
+                            const sDateStr = row[1].trim();
+                            const eDateStr = row[2].trim();
+                            if(!sDateStr || !eDateStr) return;
+                            
+                            const start = new Date(sDateStr + "T05:00:00");
+                            const end = new Date(eDateStr + "T19:00:00");
+                            
+                            if (now >= start && now <= end) {
+                                const type = row[0].trim();
+                                const content = row[3].trim();
+                                if (type === "배너") banners.push(content);
+                                else if (type === "팝업" && hiddenDate !== todayStr) popup = content;
+                            }
+                        });
+                        setActiveBanner(banners.length > 0 ? banners.join("   /   ") : null);
+                        setActivePopup(popup);
+                    }
+                });
+                
+                Papa.parse(getUrl(COMMENT_READ_URL), {
+                    download: true,
+                    complete: (res) => {
+                        const loadedComments = [];
+                        res.data.forEach(row => {
+                            if(row.length >= 4 && row[0] !== "날짜") {
+                                const isImportant = row[4] && row[4].trim() !== ""; 
+                                loadedComments.push({ date: row[0], name: row[1], content: row[2], time: row[3], important: isImportant });
+                            }
+                        });
+                        loadedComments.sort((a,b) => new Date(b.date) - new Date(a.date));
+                        setComments(loadedComments);
+                        if(forceFresh) setTimeout(() => setIsRefreshing(false), 500);
+                    }
+                });
+            };
+
+            useEffect(() => { if (isAuthenticated) fetchData(false); }, [isAuthenticated]);
+            useEffect(() => { const savedUser = localStorage.getItem("misoyon_user"); if (savedUser) { setIsAuthenticated(true); setCurrentUser(savedUser); } }, []);
+
+            const handleLogin = () => {
+                const foundUser = userList.find(u => u.name === inputName.trim() && u.code === inputCode.trim());
+                if (foundUser) { setIsAuthenticated(true); setCurrentUser(foundUser.name); localStorage.setItem("misoyon_user", foundUser.name); }
+                else if (inputName.trim() === ADMIN_NAME && inputCode.trim() === ADMIN_CODE) { setIsAuthenticated(true); setCurrentUser("관리자"); localStorage.setItem("misoyon_user", "관리자"); }
+                else { setLoginError("이름 또는 코드를 확인하세요."); }
+            };
+
+            const handleLogout = () => { setIsAuthenticated(false); setCurrentUser(""); localStorage.removeItem("misoyon_user"); window.location.reload(); };
+            const handleClosePopup = (hideToday) => { if (hideToday) localStorage.setItem("misoyon_notice_hidden", `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}-${String(new Date().getDate()).padStart(2,'0')}`); setActivePopup(null); };
+
+            const handleCommentSubmit = () => {
+                if (!newComment.trim() || !selectedDate) return;
+                setIsSubmitting(true);
+                const commentData = { date: selectedDate.date, name: currentUser, content: newComment.trim(), action: 'write' };
+                fetch(COMMENT_WRITE_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(commentData) })
+                .then(() => { setComments([{ ...commentData, time: new Date().toLocaleString("ko-KR"), important: false }, ...comments]); setNewComment(""); setIsSubmitting(false); })
+                .catch(err => { alert("전송 실패."); setIsSubmitting(false); });
+            };
+
+            const handleToggleImportant = (targetComment) => {
+                if (currentUser !== ADMIN_NAME) return;
+                const updatedComments = comments.map(c => c === targetComment ? { ...c, important: !c.important } : c);
+                setComments(updatedComments);
+                fetch(COMMENT_WRITE_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'toggle', date: targetComment.date, name: targetComment.name, content: targetComment.content }) }).catch(err => console.error("체크 실패"));
+            };
+
+            const getWeeklyData = () => {
+                if (!selectedDate || !selectedDate.date) return [];
+                try {
+                    const [y, m, d] = selectedDate.date.split('-').map(Number);
+                    const target = new Date(y, m - 1, d);
+                    const day = target.getDay(); 
+                    const weekData = [];
+                    for(let i=0; i<7; i++) {
+                        const tempDate = new Date(y, m - 1, d - day + i);
+                        const dateStr = `${tempDate.getFullYear()}-${String(tempDate.getMonth() + 1).padStart(2, '0')}-${String(tempDate.getDate()).padStart(2, '0')}`;
+                        const menu = menus.find(m => m.date === dateStr);
+                        weekData.push({ date: dateStr, dayIdx: i, menu: menu });
+                    }
+                    return weekData;
+                } catch (e) { return []; }
+            };
+
+            const calDays = useMemo(() => {
+                const year = currentMonth.getFullYear(), month = currentMonth.getMonth();
+                const firstDay = new Date(year, month, 1).getDay();
+                const lastDate = new Date(year, month + 1, 0).getDate();
+                const days = [];
+                for (let i = 0; i < firstDay; i++) days.push(null);
+                for (let i = 1; i <= lastDate; i++) {
+                    const ds = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                    days.push({ day: i, dateStr: ds, data: menus.find(m => m.date === ds) });
+                }
+                while (days.length < 42) days.push(null);
+                return days;
+            }, [currentMonth, menus]);
+
+            const currentSearchResults = useMemo(() => {
+                const q = (activeModal ? modalSearch : searchTerm).trim();
+                if (!q) return [];
+                const query = q.toLowerCase().replace(/\s+/g, "");
+                const isMonthSearch = q.endsWith("월") || (!isNaN(q) && parseInt(q) <= 12);
+                return menus.filter(m => {
+                    if (isMonthSearch) return String(new Date(m.date).getMonth() + 1).padStart(2, '0') === q.replace("월","").padStart(2,'0');
+                    return (m.morning + m.lunch + m.dinner + (m.duty||"") + (m.packing||"")).toLowerCase().replace(/\s+/g, "").includes(query);
+                }).sort((a,b) => new Date(b.date) - new Date(a.date));
+            }, [modalSearch, searchTerm, activeModal, menus]);
+
+            const importantComments = comments.filter(c => c.important);
+            const weekDays = ['일','월','화','수','목','금','토'];
+            const yearOptions = Array.from({length: 16}, (_, i) => 2020 + i);
+            const currentRecipe = popupRecipes[activeRecipeIndex];
+            const weeklyData = getWeeklyData();
+            const todayComments = selectedDate ? comments.filter(c => c.date === selectedDate.date) : [];
+
+            // ★ 확대 보기 핸들러
+            const handleExpandMenu = (type, text) => {
+                if(!text) return;
+                setExpandedMenu({ type, text });
+            };
+
+            if (!isAuthenticated) {
+                return (
+                    <div className="login-screen">
+                        <div className="login-box">
+                            <h1 className="text-2xl font-black italic tracking-tighter mb-2">CHEF_DSKIM <span className="text-blue-600">SYSTEM</span></h1>
+                            <p className="text-xs text-slate-400 font-bold mb-6">AUTHORIZED ACCESS ONLY</p>
+                            <input type="text" className="login-input" placeholder="이름 (Name)" value={inputName} onChange={e => setInputName(e.target.value)} />
+                            <input type="password" inputMode="numeric" className="login-input" placeholder="비밀번호 (Code)" value={inputCode} onChange={e => setInputCode(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleLogin()} />
+                            <button onClick={handleLogin} className="login-btn">LOGIN</button>
+                            <div className="mt-4 pt-4 border-t border-slate-100">
+                                <button onClick={() => fetchData(true)} className="text-xs text-slate-400 font-bold flex items-center justify-center gap-1 w-full hover:text-blue-500">
+                                    <span className={isRefreshing ? "spin-anim" : ""}>🔄</span> 
+                                    {isRefreshing ? "명단 업데이트 중..." : "로그인이 안 되나요? (최신 명단 가져오기)"}
+                                </button>
+                            </div>
+                            {loginError && <p className="text-red-500 text-xs font-bold mt-3">{loginError}</p>}
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="flex flex-col h-full w-full">
+                    {activeBanner && <div className="top-banner"><span className="banner-icon">NOTICE</span><span>{activeBanner}</span></div>}
+
+                    <header className="flex flex-col px-4 py-3 bg-white border-b gap-3 shrink-0">
+                        <div className="flex justify-between items-center">
+                            <h1 className="text-xl font-black italic tracking-tighter">CHEF_DSKIM <span className="text-blue-600">SYSTEM</span></h1>
+                            <div className="hidden md:flex items-center bg-blue-50 text-blue-600 px-3 py-1 rounded-xl border border-blue-100 font-bold text-xs">👨‍🍳 {currentUser}</div>
+                        </div>
+                        <div className="flex gap-2">
+                            <div className="flex-1 flex items-center justify-center bg-slate-100 px-3 py-2 rounded-xl border font-bold text-sm">
+                                <select className="bg-transparent" value={currentMonth.getFullYear()} onChange={(e)=>setCurrentMonth(new Date(e.target.value, currentMonth.getMonth()))}>{yearOptions.map(y => <option key={y} value={y}>{y}년</option>)}</select>
+                                <span className="mx-1">/</span>
+                                <select className="bg-transparent" value={currentMonth.getMonth() + 1} onChange={(e)=>setCurrentMonth(new Date(currentMonth.getFullYear(), e.target.value - 1))}>{Array.from({length:12},(_,i)=>i+1).map(m => <option key={m} value={m}>{m}월</option>)}</select>
+                            </div>
+                            <button onClick={() => fetchData(true)} className="bg-slate-800 text-white px-3 py-2 rounded-xl font-black text-xs flex items-center gap-1">
+                                <span className={isRefreshing ? "spin-anim" : ""}>🔄</span> <span>{isRefreshing ? "갱신" : "갱신"}</span>
+                            </button>
+                            <button onClick={handleLogout} className="bg-red-500 text-white px-3 py-2 rounded-xl font-black text-xs">OUT</button>
+                        </div>
+                        <div className="flex gap-2">
+                            <input className="flex-1 bg-slate-100 px-3 py-2 rounded-xl text-xs font-bold border outline-none" placeholder="메뉴 검색 (예: 제육, 1월)" value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} onKeyDown={e=>e.key==='Enter' && (setModalSearch(searchTerm), setActiveModal(true))}/>
+                            <button onClick={()=>{setModalSearch(searchTerm); setActiveModal(true);}} className="bg-blue-600 text-white px-4 py-2 rounded-xl font-black text-xs">GO</button>
+                        </div>
+                    </header>
+
+                    <main className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+                        <div className="flex-[2] flex flex-col min-h-[55%] lg:min-h-full border-b lg:border-b-0 lg:border-r overflow-hidden">
+                            <div className="calendar-grid">
+                                {weekDays.map(d=><div key={d} className="calendar-header">{d}</div>)}
+                                {calDays.map((d,i)=>(
+                                    <div key={i} className={`calendar-day ${d?.dateStr === selectedDate?.date ? 'selected' : ''}`} onClick={()=>d?.data && setSelectedDate(d.data)}>
+                                        {d && (<><span className={`text-[10px] font-black ${d.data ? 'text-slate-800' : 'text-slate-300'}`}>{d.day}</span>
+                                        {d.data && (<div className="flex flex-col gap-[1px] mt-[1px]">
+                                            {d.data.morning && <div className="menu-text bg-orange-50 text-orange-600">조:{d.data.morning}</div>}
+                                            {d.data.lunch && <div className="menu-text bg-blue-50 text-blue-600">중:{d.data.lunch}</div>}
+                                            {d.data.dinner && <div className="menu-text bg-purple-50 text-purple-600">석:{d.data.dinner}</div>}
+                                        </div>)}</>)}
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="p-2 bg-white border-t">
+                                <button onClick={()=>setImportantModal(true)} className="w-full bg-yellow-400 text-yellow-900 py-3 rounded-xl font-black text-sm shadow-sm hover:bg-yellow-500 transition-colors flex items-center justify-center gap-2">
+                                    <span>⭐ 중요 포인트 모아보기</span><span className="bg-white text-yellow-800 text-xs px-2 py-0.5 rounded-full">{importantComments.length}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <aside className="flex-1 bg
