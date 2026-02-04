@@ -71,7 +71,8 @@
     </div>
 
     <script>
-        const gasUrl = "https://script.google.com/macros/s/AKfycby-QwJPnia73zOYnqF7GE-4nwLiZHtaThFi1W_wPXZghhgT8ZicneDUIuL_zRACE0zB/exec";
+        // 셰프님이 주신 최신 API 주소 적용
+        const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
 
         function toggleMenu(id) {
             const x = document.getElementById(id);
@@ -97,24 +98,26 @@
             if(!val) { alert('품목을 입력하세요.'); return; }
             
             const resDiv = document.getElementById('result-list');
-            resDiv.innerHTML = "<p style='text-align:center;'>셰프님, 시트에서 데이터를 찾는 중입니다...</p>";
+            resDiv.innerHTML = "<p style='text-align:center;'>셰프님, 데이터를 불러오고 있습니다...</p>";
 
+            // API 호출
             fetch(`${gasUrl}?item=${encodeURIComponent(val)}`)
                 .then(res => res.json())
                 .then(data => {
-                    if (data.length === 0) { 
+                    if (!data || data.length === 0) { 
                         resDiv.innerHTML = "<p style='color:red; text-align:center;'>검색 결과가 없습니다.</p>"; 
                         return; 
                     }
                     let html = '<table><thead><tr><th>품목</th><th>규격</th><th>단위</th></tr></thead><tbody>';
                     data.forEach(item => {
-                        html += `<tr><td>${item.name}</td><td>${item.spec}</td><td>${item.unit}</td></tr>`;
+                        html += `<tr><td>${item.name || '-'}</td><td>${item.spec || '-'}</td><td>${item.unit || '-'}</td></tr>`;
                     });
                     html += '</tbody></table>';
                     resDiv.innerHTML = html;
                 })
                 .catch(err => {
-                    resDiv.innerHTML = "<p style='color:red; text-align:center;'>연결 오류가 발생했습니다.</p>";
+                    console.error(err);
+                    resDiv.innerHTML = "<p style='color:red; text-align:center;'>연결 오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>";
                 });
         }
     </script>
