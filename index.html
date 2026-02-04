@@ -5,120 +5,108 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chef_dskim SYSTEM</title>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f4f4f4; color: #333; line-height: 1.6; }
+        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f4f4f4; color: #333; }
         .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        
-        /* 메인 버튼 */
-        .menu-btn { width: 100%; padding: 18px; margin-top: 10px; font-size: 16px; font-weight: bold; border: 1px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; text-align: left; }
-        .menu-btn:hover { background: #f9f9f9; }
-        .btn-code { color: #888; font-size: 12px; display: block; }
-
-        /* 서브메뉴 */
-        .submenu { display: none; background: #fdfdfd; border: 1px solid #eee; border-top: none; border-radius: 0 0 8px 8px; padding: 5px; }
-        .sub-btn { width: 100%; padding: 12px; border: none; background: none; text-align: left; border-bottom: 1px solid #f1f1f1; cursor: pointer; }
-        .sub-btn:hover { background: #f1f1f1; }
-        .sub-desc { font-size: 11px; color: #999; display: block; }
-
-        /* 검색 영역 */
-        #search-section { display: none; margin-top: 20px; padding: 15px; border: 2px solid #2c3e50; border-radius: 8px; background: #fff; }
+        #search-section { margin-top: 20px; padding: 15px; border: 2px solid #2c3e50; border-radius: 8px; }
         .search-box { display: flex; gap: 5px; margin-top: 10px; }
         input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
-        .action-btn { padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .action-btn { padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; }
         
-        /* 결과 테이블 */
-        .result-container { margin-top: 20px; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th, td { border: 1px solid #eee; padding: 12px; text-align: left; }
-        th { background: #2c3e50; color: white; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-
-        .back-btn { margin-top: 20px; background: none; border: none; color: #e74c3c; cursor: pointer; font-weight: bold; text-decoration: underline; }
+        /* 결과 및 저장 리스트 테이블 */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+        th, td { border: 1px solid #eee; padding: 10px; text-align: left; }
+        th { background: #f8f9fa; }
+        
+        .save-section { margin-top: 30px; padding-top: 20px; border-top: 2px dashed #ccc; }
+        .add-btn { background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .date-tag { font-size: 11px; color: #7f8c8d; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2 id="main-title">Chef_dskim SYSTEM</h2>
-
-        <div id="main-menu">
-            <button class="menu-btn" onclick="toggleMenu('menu-000')">
-                <span class="btn-code">000</span> 기준정보 (ADMIN) ▼
-            </button>
-            <div id="menu-000" class="submenu">
-                <button class="sub-btn" onclick="openSearch()">
-                    010 원가_매입관리
-                    <span class="sub-desc">원가 계산표, 거래처 리스트, 발주서 양식</span>
-                </button>
-                <button class="sub-btn" onclick="alert('준비 중입니다.')">020 사업기획_운영</button>
-                <button class="sub-btn" onclick="alert('준비 중입니다.')">030 직원교육</button>
-            </div>
-
-            <button class="menu-btn" onclick="alert('준비 중입니다.')"><span class="btn-code">100~300</span> 국가별 요리</button>
-            <button class="menu-btn" onclick="alert('준비 중입니다.')"><span class="btn-code">400</span> 심화 연구 (R&D)</button>
-            <button class="menu-btn" onclick="alert('준비 중입니다.')"><span class="btn-code">900</span> 자료실 (ARCHIVE)</button>
-        </div>
+        <h2>010 원가_매입관리</h2>
 
         <div id="search-section">
-            <strong>010 원가_매입관리</strong>
+            <strong>품목 검색 (Enter 지원)</strong>
             <div class="search-box">
-                <input type="text" id="itemName" placeholder="품목명을 입력하세요 (예: 대게)">
+                <input type="text" id="itemName" placeholder="품목명 입력 후 엔터" onkeypress="if(event.keyCode==13) runSearch()">
                 <button class="action-btn" onclick="runSearch()">검색</button>
             </div>
-            <div id="result-list" class="result-container"></div>
-            <button class="back-btn" onclick="closeSearch()">◀ 메인으로 돌아가기</button>
+            <div id="result-list"></div>
+        </div>
+
+        <div class="save-section">
+            <strong>📋 오늘의 매입 관리 리스트</strong>
+            <div id="saved-list">
+                <p style="color: #999; font-size: 12px; margin-top: 10px;">추가된 품목이 없습니다.</p>
+            </div>
+            <button onclick="clearSaved()" style="margin-top:10px; font-size:11px; color:red; background:none; border:none; cursor:pointer;">전체 삭제</button>
         </div>
     </div>
 
     <script>
-        // 셰프님이 주신 최신 API 주소 적용
         const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
+        let savedItems = JSON.parse(localStorage.getItem('myPurchaseList')) || [];
 
-        function toggleMenu(id) {
-            const x = document.getElementById(id);
-            x.style.display = (x.style.display === "block") ? "none" : "block";
-        }
-
-        function openSearch() {
-            document.getElementById('main-menu').style.display = 'none';
-            document.getElementById('search-section').style.display = 'block';
-            document.getElementById('main-title').innerText = "DATA SEARCH";
-        }
-
-        function closeSearch() {
-            document.getElementById('main-menu').style.display = 'block';
-            document.getElementById('search-section').style.display = 'none';
-            document.getElementById('main-title').innerText = "Chef_dskim SYSTEM";
-            document.getElementById('result-list').innerHTML = "";
-            document.getElementById('itemName').value = "";
-        }
+        window.onload = displaySaved;
 
         function runSearch() {
             const val = document.getElementById('itemName').value;
-            if(!val) { alert('품목을 입력하세요.'); return; }
-            
+            if(!val) return;
             const resDiv = document.getElementById('result-list');
-            resDiv.innerHTML = "<p style='text-align:center;'>셰프님, 데이터를 불러오고 있습니다...</p>";
+            resDiv.innerHTML = "찾는 중...";
 
-            // API 호출
             fetch(`${gasUrl}?item=${encodeURIComponent(val)}`)
                 .then(res => res.json())
                 .then(data => {
-                    if (!data || data.length === 0) { 
-                        resDiv.innerHTML = "<p style='color:red; text-align:center;'>검색 결과가 없습니다.</p>"; 
-                        return; 
-                    }
-                    let html = '<table><thead><tr><th>품목</th><th>규격</th><th>단위</th></tr></thead><tbody>';
+                    if (data.length === 0) { resDiv.innerHTML = "<p>결과 없음</p>"; return; }
+                    let html = '<table>';
                     data.forEach(item => {
-                        html += `<tr><td>${item.name || '-'}</td><td>${item.spec || '-'}</td><td>${item.unit || '-'}</td></tr>`;
+                        html += `<tr>
+                            <td>${item.name}<br><small>${item.spec}</small></td>
+                            <td><button class="add-btn" onclick="addItem('${item.name}', '${item.spec}', '${item.unit}')">추가</button></td>
+                        </tr>`;
                     });
-                    html += '</tbody></table>';
+                    html += '</table>';
                     resDiv.innerHTML = html;
-                })
-                .catch(err => {
-                    console.error(err);
-                    resDiv.innerHTML = "<p style='color:red; text-align:center;'>연결 오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>";
                 });
+        }
+
+        // 리스트에 추가 (날짜 포함)
+        function addItem(name, spec, unit) {
+            const date = new Date().toLocaleDateString();
+            savedItems.push({ date, name, spec, unit });
+            localStorage.setItem('myPurchaseList', JSON.stringify(savedItems));
+            displaySaved();
+        }
+
+        // 저장된 리스트 표시
+        function displaySaved() {
+            const listDiv = document.getElementById('saved-list');
+            if (savedItems.length === 0) {
+                listDiv.innerHTML = '<p style="color:#999; font-size:12px; margin-top:10px;">추가된 품목이 없습니다.</p>';
+                return;
+            }
+            let html = '<table><tr><th>날짜</th><th>품목</th><th>단위</th></tr>';
+            savedItems.forEach(item => {
+                html += `<tr>
+                    <td class="date-tag">${item.date}</td>
+                    <td>${item.name}<br><small>${item.spec}</small></td>
+                    <td>${item.unit}</td>
+                </tr>`;
+            });
+            html += '</table>';
+            listDiv.innerHTML = html;
+        }
+
+        function clearSaved() {
+            if(confirm("리스트를 모두 비울까요?")) {
+                savedItems = [];
+                localStorage.removeItem('myPurchaseList');
+                displaySaved();
+            }
         }
     </script>
 </body>
