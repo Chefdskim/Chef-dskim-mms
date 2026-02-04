@@ -1,229 +1,80 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chef_dskim SYSTEM</title>
-    <style>
-        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f4f4f4; color: #333; }
-        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
-        
-        /* 메인 네비 */
-        .main-btn { width: 100%; padding: 20px; margin-bottom: 10px; font-size: 16px; font-weight: bold; border: 1px solid #ccc; border-radius: 8px; background: #fff; cursor: pointer; text-align: left; }
-        .code-tag { color: #888; font-size: 12px; display: block; margin-bottom: 5px; }
-        #submenu-000 { display: none; background: #f8f9fa; margin-top: -5px; margin-bottom: 15px; padding: 5px; border: 1px solid #ddd; border-top: none; }
-        .sub-btn { width: 100%; padding: 15px; border: none; border-bottom: 1px solid #eee; background: none; text-align: left; cursor: pointer; font-size: 15px; }
-        .sub-btn:hover { background: #e9ecef; font-weight: bold; }
+function doGet(e) {
+  const action = e.parameter.action;
+  const ssId = "1hJ_72IAyBJr06p3jGgEB5AlQT23OSDB7xKVEVt0H_o0";
+  const ss = SpreadsheetApp.openById(ssId);
 
-        /* 010 작업창 */
-        #workspace-010 { display: none; } 
-        
-        /* 모드 스위치 (3개) */
-        .mode-switch { display: flex; gap: 5px; margin-bottom: 20px; }
-        .mode-btn { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-weight: bold; cursor: pointer; background: #fff; color: #777; font-size: 13px; }
-        
-        .mode-btn.active-in { background: #e8f8f5; border-color: #27ae60; color: #27ae60; }
-        .mode-btn.active-out { background: #fdedec; border-color: #e74c3c; color: #e74c3c; }
-        .mode-btn.active-stock { background: #eaf2f8; border-color: #3498db; color: #3498db; }
+  // 1. 검색 (기존 유지)
+  if (action === "search") {
+    const itemName = e.parameter.item;
+    const sheet = ss.getSheets()[0]; 
+    const data = sheet.getDataRange().getValues();
+    let results = [];
+    for (let i = 1; i < data.length; i++) {
+       let nameInSheet = data[i][2] ? data[i][2].toString() : ""; 
+       if (nameInSheet.replace(/\s/g, "").includes(itemName.replace(/\s/g, ""))) {
+         results.push({ name: data[i][2], spec: data[i][3], unit: data[i][4] });
+       }
+    }
+    return ContentService.createTextOutput(JSON.stringify(results)).setMimeType(ContentService.MimeType.JSON);
+  }
 
-        /* 공통 UI */
-        .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
-        input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
-        input[type="number"] { width: 60px; padding: 5px; border: 1px solid #ddd; text-align: center; }
-        .action-btn { padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        
-        table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
-        th, td { border: 1px solid #eee; padding: 10px; text-align: left; vertical-align: middle; }
-        th { background: #f1f1f1; }
-        
-        .save-btn { width: 100%; padding: 15px; color: white; border: none; border-radius: 8px; margin-top: 20px; font-weight: bold; cursor: pointer; }
-        .bg-in { background: #27ae60; } .bg-out { background: #c0392b; }
-    </style>
-</head>
-<body>
+  // 2. 저장 (기존 유지)
+  if (action === "save") {
+    const type = e.parameter.type;
+    const items = JSON.parse(e.parameter.data);
+    let sheetName = (type === "in") ? "매입장" : "출고장";
+    const sheet = ss.getSheetByName(sheetName) || ss.insertSheet(sheetName);
+    items.forEach(item => {
+      sheet.appendRow([item.date, item.name, item.spec, item.unit, item.qty]);
+    });
+    return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
+  }
 
-    <div class="container">
-        <h2 id="page-title">MAIN MENU</h2>
+  // 3. 재고 조회 (기존 유지)
+  if (action === "inventory") {
+    const inSheet = ss.getSheetByName("매입장");
+    const outSheet = ss.getSheetByName("출고장");
+    let stockMap = {};
 
-        <div id="main-nav">
-            <button class="main-btn" onclick="toggleSubMenu()"><span class="code-tag">000</span> 기준정보 (ADMIN) ▼</button>
-            <div id="submenu-000">
-                <button class="sub-btn" onclick="openWorkspace()">010 입출고/원가 관리</button>
-                <button class="sub-btn" onclick="alert('준비 중')">020 사업기획_운영</button>
-                <button class="sub-btn" onclick="alert('준비 중')">030 직원교육</button>
-            </div>
-            <button class="main-btn" onclick="alert('준비 중')"><span class="code-tag">100~300</span> 국가별 요리</button>
-            <button class="main-btn" onclick="alert('준비 중')"><span class="code-tag">400</span> 심화 연구 (R&D)</button>
-            <button class="main-btn" onclick="alert('준비 중')"><span class="code-tag">900</span> 자료실 (ARCHIVE)</button>
-        </div>
+    if (inSheet) {
+      const inData = inSheet.getDataRange().getValues();
+      for (let i = 0; i < inData.length; i++) {
+        let key = inData[i][1] + " (" + inData[i][2] + ")";
+        let qty = Number(inData[i][4]) || 0;
+        if (!stockMap[key]) stockMap[key] = { name: inData[i][1], spec: inData[i][2], unit: inData[i][3], qty: 0 };
+        stockMap[key].qty += qty;
+      }
+    }
+    if (outSheet) {
+      const outData = outSheet.getDataRange().getValues();
+      for (let i = 0; i < outData.length; i++) {
+        let key = outData[i][1] + " (" + outData[i][2] + ")";
+        let qty = Number(outData[i][4]) || 0;
+        if (stockMap[key]) stockMap[key].qty -= qty;
+      }
+    }
+    let results = [];
+    for (let key in stockMap) {
+      if (stockMap[key].qty !== 0) results.push(stockMap[key]);
+    }
+    return ContentService.createTextOutput(JSON.stringify(results)).setMimeType(ContentService.MimeType.JSON);
+  }
 
-        <div id="workspace-010">
-            <button onclick="goBackMain()" style="background:none; border:none; color:#555; margin-bottom:15px; cursor:pointer;">◀ 메인으로</button>
+  // 4. [NEW] 총 자산 조회 (기초재고 탭 활용)
+  if (action === "asset") {
+    const sheet = ss.getSheetByName("기초재고");
+    if (!sheet) return ContentService.createTextOutput("0").setMimeType(ContentService.MimeType.TEXT);
+    
+    const data = sheet.getDataRange().getValues();
+    let totalAsset = 0;
 
-            <div class="mode-switch">
-                <button id="btn-in" class="mode-btn active-in" onclick="setMode('in')">📥 매입(입고)</button>
-                <button id="btn-out" class="mode-btn" onclick="setMode('out')">📤 출고(사용)</button>
-                <button id="btn-stock" class="mode-btn" onclick="loadStock()">📦 재고 확인</button>
-            </div>
-
-            <div id="search-area" class="search-box">
-                <input type="text" id="searchInput" placeholder="품목명 입력">
-                <button class="action-btn" id="searchBtn">검색</button>
-            </div>
-
-            <div id="result-list"></div>
-
-            <div id="work-area" style="margin-top:30px; border-top:2px solid #eee; padding-top:15px;">
-                <strong id="list-title">📋 매입 리스트</strong>
-                <div id="saved-list"></div>
-                <button id="send-btn" class="save-btn bg-in" onclick="saveToSheet()" style="display:none;">매입장 저장하기</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // 셰프님의 최신 GAS URL (새 배포 후 URL 바뀌면 수정 필요)
-        const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
-        
-        let currentMode = 'in'; 
-        let workList = []; 
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const input = document.getElementById("searchInput");
-            const btn = document.getElementById("searchBtn");
-            input.addEventListener("keypress", function(e) { if(e.key==="Enter") { e.preventDefault(); btn.click(); } });
-            btn.addEventListener("click", runSearch);
-        });
-
-        function toggleSubMenu() { const el = document.getElementById('submenu-000'); el.style.display = (el.style.display==='block')?'none':'block'; }
-        
-        function openWorkspace() {
-            document.getElementById('main-nav').style.display = 'none';
-            document.getElementById('workspace-010').style.display = 'block';
-            document.getElementById('page-title').innerText = "입출고/원가 관리";
-            setMode('in');
-        }
-
-        function goBackMain() {
-            document.getElementById('workspace-010').style.display = 'none';
-            document.getElementById('main-nav').style.display = 'block';
-            document.getElementById('page-title').innerText = "MAIN MENU";
-            workList = []; renderList();
-        }
-
-        // [모드 전환]
-        function setMode(mode) {
-            currentMode = mode;
-            // 스타일 초기화
-            document.getElementById('btn-in').className = "mode-btn";
-            document.getElementById('btn-out').className = "mode-btn";
-            document.getElementById('btn-stock').className = "mode-btn";
-            
-            // 화면 표시 제어
-            document.getElementById('search-area').style.display = 'flex';
-            document.getElementById('work-area').style.display = 'block';
-            document.getElementById('result-list').innerHTML = "";
-
-            if (mode === 'in') {
-                document.getElementById('btn-in').className = "mode-btn active-in";
-                setupWorkArea("매입장 저장하기", "bg-in", "📥 매입 리스트");
-            } else {
-                document.getElementById('btn-out').className = "mode-btn active-out";
-                setupWorkArea("출고장 저장하기", "bg-out", "📤 출고 리스트");
-            }
-        }
-
-        function setupWorkArea(btnText, btnClass, titleText) {
-            const sendBtn = document.getElementById('send-btn');
-            sendBtn.innerText = btnText;
-            sendBtn.className = "save-btn " + btnClass;
-            document.getElementById('list-title').innerText = titleText;
-            renderList(); // 기존 작업 리스트 표시
-        }
-
-        // [재고 불러오기]
-        function loadStock() {
-            // 버튼 스타일
-            document.getElementById('btn-in').className = "mode-btn";
-            document.getElementById('btn-out').className = "mode-btn";
-            document.getElementById('btn-stock').className = "mode-btn active-stock";
-            
-            // 화면 정리
-            document.getElementById('search-area').style.display = 'none';
-            document.getElementById('work-area').style.display = 'none';
-            const resDiv = document.getElementById('result-list');
-            resDiv.innerHTML = "<p style='text-align:center;'>📦 전체 재고를 계산 중입니다...</p>";
-
-            fetch(`${gasUrl}?action=inventory`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.length === 0) { resDiv.innerHTML = "<p>재고 데이터가 없습니다.</p>"; return; }
-                    let html = '<table style="margin-top:0"><tr><th>품목(규격)</th><th>현재고</th></tr>';
-                    data.forEach(item => {
-                        let color = item.qty < 0 ? 'red' : 'blue'; // 마이너스면 빨간색
-                        html += `<tr>
-                            <td>${item.name}<br><small style='color:#888'>${item.spec}</small></td>
-                            <td style='font-weight:bold; color:${color}'>${item.qty} ${item.unit}</td>
-                        </tr>`;
-                    });
-                    resDiv.innerHTML = html + '</table>';
-                });
-        }
-
-        // [검색 및 리스트]
-        function runSearch() {
-            const val = document.getElementById('searchInput').value;
-            if(!val) return;
-            const resDiv = document.getElementById('result-list');
-            resDiv.innerHTML = "검색 중...";
-            fetch(`${gasUrl}?action=search&item=${encodeURIComponent(val)}`)
-                .then(res => res.json())
-                .then(data => {
-                    let html = '<table>';
-                    data.forEach(item => {
-                        html += `<tr><td>${item.name}<br><small>${item.spec}</small></td><td style='text-align:right'><button class="action-btn" style="padding:5px;" onclick="addToList('${item.name}','${item.spec}','${item.unit}')">추가</button></td></tr>`;
-                    });
-                    resDiv.innerHTML = html + '</table>';
-                });
-        }
-
-        function addToList(name, spec, unit) {
-            const date = new Date().toISOString().split('T')[0];
-            workList.push({ date, name, spec, unit, qty: 1 });
-            renderList();
-        }
-
-        function updateQty(index, val) { workList[index].qty = val; }
-
-        function renderList() {
-            const listDiv = document.getElementById('saved-list');
-            const btn = document.getElementById('send-btn');
-            if (workList.length === 0) { listDiv.innerHTML = ""; btn.style.display = 'none'; return; }
-            
-            let html = '<table><tr><th>품목</th><th>수량</th></tr>';
-            workList.forEach((item, index) => {
-                html += `<tr><td>${item.name}<br><small>${item.spec}</small></td><td><input type="number" value="${item.qty}" onchange="updateQty(${index}, this.value)"> ${item.unit}</td></tr>`;
-            });
-            listDiv.innerHTML = html + '</table>';
-            btn.style.display = 'block';
-        }
-
-        function saveToSheet() {
-            const typeName = (currentMode === 'in') ? "매입장" : "출고장";
-            if(!confirm(`${typeName}에 저장할까요?`)) return;
-            
-            const btn = document.getElementById('send-btn');
-            btn.disabled = true; btn.innerText = "저장 중...";
-
-            fetch(`${gasUrl}?action=save&type=${currentMode}&data=${encodeURIComponent(JSON.stringify(workList))}`)
-                .then(res => res.text())
-                .then(() => {
-                    alert("저장 완료!");
-                    workList = []; renderList();
-                    btn.disabled = false; btn.innerText = typeName + " 저장하기";
-                });
-        }
-    </script>
-</body>
-</html>
+    // I열(인덱스 8)이 '총 재고 자산'입니다.
+    // 2행부터 끝까지 더합니다.
+    for (let i = 1; i < data.length; i++) {
+      let val = Number(data[i][8]); // I열 값
+      if (!isNaN(val)) totalAsset += val;
+    }
+    
+    return ContentService.createTextOutput(totalAsset.toString()).setMimeType(ContentService.MimeType.TEXT);
+  }
+}
