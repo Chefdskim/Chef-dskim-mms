@@ -8,28 +8,51 @@
         body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f4f4f4; color: #333; }
         .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .search-box { display: flex; gap: 5px; margin-bottom: 20px; }
-        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; }
+        
+        /* 메인 메뉴 스타일 */
+        .menu-btn { width: 100%; padding: 18px; margin-top: 10px; font-size: 16px; font-weight: bold; border: 1px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; text-align: left; }
+        .btn-code { color: #888; font-size: 12px; display: block; }
+        
+        /* 섹션 제어 */
+        #main-menu, #module-010 { display: block; }
+        #module-010 { display: none; }
+
+        /* 검색 및 테이블 스타일 */
+        .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
+        input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; }
+        input[type="number"] { width: 50px; padding: 5px; border: 1px solid #ddd; }
         .action-btn { padding: 10px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
-        th, td { border: 1px solid #eee; padding: 10px; text-align: left; }
-        .date-col { color: #e67e22; font-weight: bold; width: 90px; }
+        th, td { border: 1px solid #eee; padding: 8px; text-align: left; }
         .save-btn { width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 8px; margin-top: 20px; font-weight: bold; cursor: pointer; }
+        .back-btn { background: none; border: none; color: #e74c3c; cursor: pointer; text-decoration: underline; margin-bottom: 15px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>010 원가_매입관리</h2>
-        <div class="search-box">
-            <input type="text" id="itemName" placeholder="품목 검색 후 엔터" onkeypress="if(event.keyCode==13) runSearch()">
-            <button class="action-btn" onclick="runSearch()">검색</button>
-        </div>
-        <div id="result-list"></div>
+        <h2 id="title">Chef_dskim SYSTEM</h2>
 
-        <div style="margin-top:30px; border-top:2px solid #eee; pt:20px;">
-            <h3>📋 매입 리스트 (기록용)</h3>
-            <div id="saved-list"></div>
-            <button id="send-btn" class="save-btn" onclick="saveToSheet()" style="display:none;">구글 시트 '매입장'으로 전송</button>
+        <div id="main-menu">
+            <button class="menu-btn" onclick="showModule('010')">
+                <span class="btn-code">010</span> 원가_매입관리 ▼
+            </button>
+            <button class="menu-btn" onclick="alert('준비 중입니다.')"><span class="btn-code">020</span> 사업기획_운영</button>
+            <button class="menu-btn" onclick="alert('준비 중입니다.')"><span class="btn-code">030</span> 직원교육</button>
+        </div>
+
+        <div id="module-010">
+            <button class="back-btn" onclick="showMain()">◀ 메인으로</button>
+            <div class="search-box">
+                <input type="text" id="itemName" placeholder="품목 검색 후 엔터" onkeypress="if(event.keyCode==13) runSearch()">
+                <button class="action-btn" onclick="runSearch()">검색</button>
+            </div>
+            <div id="result-list"></div>
+
+            <div style="margin-top:30px; border-top:2px solid #eee; padding-top:15px;">
+                <strong>📋 매입 리스트 (수량 입력 가능)</strong>
+                <div id="saved-list"></div>
+                <button id="send-btn" class="save-btn" onclick="saveToSheet()" style="display:none;">매입장 시트로 전송</button>
+            </div>
         </div>
     </div>
 
@@ -37,39 +60,59 @@
         const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
         let purchaseList = [];
 
+        function showModule(code) {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('module-010').style.display = 'block';
+            document.getElementById('title').innerText = "010 원가_매입관리";
+        }
+
+        function showMain() {
+            document.getElementById('main-menu').style.display = 'block';
+            document.getElementById('module-010').style.display = 'none';
+            document.getElementById('title').innerText = "Chef_dskim SYSTEM";
+        }
+
         function runSearch() {
             const val = document.getElementById('itemName').value;
+            if(!val) return;
             fetch(`${gasUrl}?action=search&item=${encodeURIComponent(val)}`)
                 .then(res => res.json())
                 .then(data => {
                     let html = '<table>';
                     data.forEach(item => {
-                        html += `<tr><td>${item.name} (${item.spec})</td><td><button onclick="addToList('${item.name}','${item.spec}','${item.unit}')">추가</button></td></tr>`;
+                        html += `<tr><td>${item.name}<br><small>${item.spec}</small></td><td><button onclick="addToList('${item.name}','${item.spec}','${item.unit}')">추가</button></td></tr>`;
                     });
                     document.getElementById('result-list').innerHTML = html + '</table>';
                 });
         }
 
         function addToList(name, spec, unit) {
-            const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-            purchaseList.push({ date, name, spec, unit });
+            const date = new Date().toISOString().split('T')[0];
+            purchaseList.push({ date, name, spec, unit, qty: 1 }); // 기본수량 1
             renderList();
         }
 
+        function updateQty(index, val) {
+            purchaseList[index].qty = val;
+        }
+
         function renderList() {
-            let html = '<table><tr><th>날짜</th><th>품목</th></tr>';
-            purchaseList.forEach(item => {
-                html += `<tr><td class="date-col">${item.date}</td><td>${item.name}</td></tr>`;
+            let html = '<table><tr><th>품목</th><th>수량</th></tr>';
+            purchaseList.forEach((item, index) => {
+                html += `<tr>
+                    <td>${item.name}<br><small>${item.date}</small></td>
+                    <td><input type="number" value="${item.qty}" onchange="updateQty(${index}, this.value)"> ${item.unit}</td>
+                </tr>`;
             });
             document.getElementById('saved-list').innerHTML = html + '</table>';
             document.getElementById('send-btn').style.display = purchaseList.length > 0 ? 'block' : 'none';
         }
 
         function saveToSheet() {
-            if(!confirm("시트에 저장할까요?")) return;
+            if(!confirm("매입장에 기록할까요?")) return;
             fetch(`${gasUrl}?action=save&data=${encodeURIComponent(JSON.stringify(purchaseList))}`)
                 .then(() => {
-                    alert("매입장에 저장되었습니다!");
+                    alert("성공적으로 저장되었습니다!");
                     purchaseList = [];
                     renderList();
                 });
