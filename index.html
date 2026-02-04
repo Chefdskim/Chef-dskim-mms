@@ -9,50 +9,39 @@
         .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
         
-        /* [메인 메뉴 버튼 스타일] */
-        .main-btn { 
-            width: 100%; padding: 20px; margin-bottom: 15px; 
-            font-size: 16px; font-weight: bold; 
-            border: 1px solid #ccc; border-radius: 8px; 
-            background: #fff; cursor: pointer; text-align: left; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .main-btn:hover { background-color: #f9f9f9; border-color: #bbb; }
+        /* 메인 메뉴 버튼 */
+        .main-btn { width: 100%; padding: 20px; margin-bottom: 10px; font-size: 16px; font-weight: bold; border: 1px solid #ccc; border-radius: 8px; background: #fff; cursor: pointer; text-align: left; }
         .code-tag { color: #888; font-size: 12px; display: block; margin-bottom: 5px; }
-
-        /* [서브 메뉴 스타일 (000 하위)] */
-        #submenu-000 { 
-            display: none; 
-            background-color: #f8f9fa; 
-            margin-top: -10px; margin-bottom: 15px; 
-            border: 1px solid #ddd; border-top: none; 
-            border-radius: 0 0 8px 8px; 
-            padding: 5px;
-        }
-        .sub-btn { 
-            width: 100%; padding: 15px; 
-            border: none; border-bottom: 1px solid #eee; 
-            background: none; text-align: left; cursor: pointer; 
-            font-size: 15px; color: #555;
-        }
-        .sub-btn:last-child { border-bottom: none; }
-        .sub-btn:hover { background-color: #e9ecef; color: #333; font-weight: bold; }
-
-        /* [010 작업 화면 스타일] */
-        #workspace-010 { display: none; } /* 초기엔 숨김 */
         
+        /* 서브 메뉴 */
+        #submenu-000 { display: none; background: #f8f9fa; margin-top: -5px; margin-bottom: 15px; border: 1px solid #ddd; border-top: none; padding: 5px; }
+        .sub-btn { width: 100%; padding: 15px; border: none; border-bottom: 1px solid #eee; background: none; text-align: left; cursor: pointer; font-size: 15px; }
+        .sub-btn:hover { background: #e9ecef; font-weight: bold; }
+
+        /* 작업 공간 제어 */
+        #workspace-010 { display: none; } 
+        
+        /* 입출고 모드 스위치 */
+        .mode-switch { display: flex; gap: 10px; margin-bottom: 20px; }
+        .mode-btn { flex: 1; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-weight: bold; cursor: pointer; background: #fff; color: #aaa; }
+        
+        /* 활성화된 버튼 스타일 */
+        .mode-btn.active-in { background: #e8f8f5; border-color: #27ae60; color: #27ae60; }
+        .mode-btn.active-out { background: #fdedec; border-color: #e74c3c; color: #e74c3c; }
+
+        /* 검색 및 리스트 */
         .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
         input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
-        input[type="number"] { width: 50px; padding: 5px; border: 1px solid #ddd; text-align: center; }
-        
+        input[type="number"] { width: 60px; padding: 5px; border: 1px solid #ddd; text-align: center; font-weight: bold; }
         .action-btn { padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        
+
         table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
         th, td { border: 1px solid #eee; padding: 10px; text-align: left; vertical-align: middle; }
         th { background: #f1f1f1; }
         
-        .save-btn { width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 8px; margin-top: 20px; font-weight: bold; cursor: pointer; }
-        .back-btn { background: none; border: none; color: #e74c3c; cursor: pointer; text-decoration: underline; margin-bottom: 15px; font-size: 14px; }
+        .save-btn { width: 100%; padding: 15px; color: white; border: none; border-radius: 8px; margin-top: 20px; font-weight: bold; cursor: pointer; }
+        .bg-in { background: #27ae60; } /* 매입 버튼색 */
+        .bg-out { background: #c0392b; } /* 출고 버튼색 */
     </style>
 </head>
 <body>
@@ -61,43 +50,25 @@
         <h2 id="page-title">MAIN MENU</h2>
 
         <div id="main-nav">
-            
-            <button class="main-btn" onclick="toggleSubMenu()">
-                <span class="code-tag">000</span>
-                기준정보 (ADMIN) ▼
-            </button>
-            
+            <button class="main-btn" onclick="toggleSubMenu()"><span class="code-tag">000</span> 기준정보 (ADMIN) ▼</button>
             <div id="submenu-000">
-                <button class="sub-btn" onclick="openWorkspace()">
-                    010 원가_매입관리
-                </button>
-                <button class="sub-btn" onclick="alert('020 준비 중')">
-                    020 사업기획_운영
-                </button>
-                <button class="sub-btn" onclick="alert('030 준비 중')">
-                    030 직원교육
-                </button>
+                <button class="sub-btn" onclick="openWorkspace()">010 입출고/원가 관리</button>
+                <button class="sub-btn" onclick="alert('준비 중')">020 사업기획_운영</button>
+                <button class="sub-btn" onclick="alert('준비 중')">030 직원교육</button>
             </div>
-
-            <button class="main-btn" onclick="alert('준비 중')">
-                <span class="code-tag">100~300</span>
-                국가별 요리 (CUISINE)
-            </button>
-
-            <button class="main-btn" onclick="alert('준비 중')">
-                <span class="code-tag">400</span>
-                심화 연구 (R&D / DEEP DIVE)
-            </button>
-
-            <button class="main-btn" onclick="alert('준비 중')">
-                <span class="code-tag">900</span>
-                자료실 (ARCHIVE)
-            </button>
+            <button class="main-btn" onclick="alert('준비 중')"><span class="code-tag">100~300</span> 국가별 요리 (CUISINE)</button>
+            <button class="main-btn" onclick="alert('준비 중')"><span class="code-tag">400</span> 심화 연구 (R&D)</button>
+            <button class="main-btn" onclick="alert('준비 중')"><span class="code-tag">900</span> 자료실 (ARCHIVE)</button>
         </div>
 
         <div id="workspace-010">
-            <button class="back-btn" onclick="goBackMain()">◀ 메인으로 돌아가기</button>
-            
+            <button onclick="goBackMain()" style="background:none; border:none; color:#555; margin-bottom:15px; cursor:pointer;">◀ 메인으로</button>
+
+            <div class="mode-switch">
+                <button id="btn-in" class="mode-btn active-in" onclick="setMode('in')">📥 매입(입고)</button>
+                <button id="btn-out" class="mode-btn" onclick="setMode('out')">📤 출고(사용)</button>
+            </div>
+
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="품목명 입력 (예: 대게)">
                 <button class="action-btn" id="searchBtn">검색</button>
@@ -106,143 +77,135 @@
             <div id="result-list"></div>
 
             <div style="margin-top:30px; border-top:2px solid #eee; padding-top:15px;">
-                <strong>📋 매입 리스트 (수량 입력)</strong>
+                <strong id="list-title">📋 매입 리스트</strong>
                 <div id="saved-list"></div>
-                <button id="send-btn" class="save-btn" onclick="saveToSheet()" style="display:none;">매입장 시트로 전송</button>
+                <button id="send-btn" class="save-btn bg-in" onclick="saveToSheet()" style="display:none;">매입장 저장하기</button>
             </div>
         </div>
-
     </div>
 
     <script>
-        // 셰프님의 최신 GAS URL
         const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
         
-        let purchaseList = [];
+        let currentMode = 'in'; // 기본값: 매입
+        let workList = []; // 작업 중인 리스트
 
-        // 화면 로드 후 엔터키 이벤트 강제 바인딩 (확실한 방법)
         document.addEventListener("DOMContentLoaded", function() {
             const input = document.getElementById("searchInput");
             const btn = document.getElementById("searchBtn");
-
-            // 엔터키 누르면 버튼 클릭 효과
-            input.addEventListener("keypress", function(event) {
-                if (event.key === "Enter") {
-                    event.preventDefault();
-                    btn.click();
-                }
-            });
-
-            // 검색 버튼 클릭 시 실행
+            input.addEventListener("keypress", function(e) { if(e.key==="Enter") { e.preventDefault(); btn.click(); } });
             btn.addEventListener("click", runSearch);
         });
 
-        // [화면 전환 로직]
+        // [화면 전환]
         function toggleSubMenu() {
-            const sub = document.getElementById('submenu-000');
-            sub.style.display = (sub.style.display === 'block') ? 'none' : 'block';
+            const el = document.getElementById('submenu-000');
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
         }
-
         function openWorkspace() {
             document.getElementById('main-nav').style.display = 'none';
             document.getElementById('workspace-010').style.display = 'block';
-            document.getElementById('page-title').innerText = "010 원가_매입관리";
-            // 화면 열리면 입력창에 바로 포커스
+            document.getElementById('page-title').innerText = "입출고/원가 관리";
             document.getElementById('searchInput').focus();
+            setMode('in'); // 열릴 때 매입 모드로 초기화
         }
-
         function goBackMain() {
             document.getElementById('workspace-010').style.display = 'none';
             document.getElementById('main-nav').style.display = 'block';
             document.getElementById('page-title').innerText = "MAIN MENU";
-            // 초기화
-            document.getElementById('result-list').innerHTML = "";
-            document.getElementById('searchInput').value = "";
+            workList = []; renderList(); // 초기화
         }
 
-        // [기능 로직]
+        // [모드 변경]
+        function setMode(mode) {
+            currentMode = mode;
+            const btnIn = document.getElementById('btn-in');
+            const btnOut = document.getElementById('btn-out');
+            const sendBtn = document.getElementById('send-btn');
+            const listTitle = document.getElementById('list-title');
+
+            if (mode === 'in') {
+                btnIn.className = "mode-btn active-in";
+                btnOut.className = "mode-btn";
+                sendBtn.className = "save-btn bg-in";
+                sendBtn.innerText = "매입장 저장하기";
+                listTitle.innerText = "📥 매입 리스트 (입고)";
+            } else {
+                btnIn.className = "mode-btn";
+                btnOut.className = "mode-btn active-out";
+                sendBtn.className = "save-btn bg-out";
+                sendBtn.innerText = "출고장 저장하기";
+                listTitle.innerText = "📤 출고 리스트 (사용/폐기)";
+            }
+        }
+
+        // [검색 및 리스트 관리]
         function runSearch() {
             const val = document.getElementById('searchInput').value;
             if(!val) return;
-            
             const resDiv = document.getElementById('result-list');
             resDiv.innerHTML = "검색 중...";
 
             fetch(`${gasUrl}?action=search&item=${encodeURIComponent(val)}`)
                 .then(res => res.json())
                 .then(data => {
-                    if (data.length === 0) {
-                        resDiv.innerHTML = "<p style='color:red'>검색 결과가 없습니다.</p>";
-                        return;
-                    }
+                    if (data.length === 0) { resDiv.innerHTML = "<p style='color:red'>결과 없음</p>"; return; }
                     let html = '<table>';
                     data.forEach(item => {
                         html += `<tr>
                             <td>${item.name}<br><small style='color:#888'>${item.spec}</small></td>
-                            <td style='text-align:right'>
-                                <button class="action-btn" style="padding:5px 10px; font-size:12px;" 
-                                onclick="addToList('${item.name}','${item.spec}','${item.unit}')">추가</button>
-                            </td>
+                            <td style='text-align:right'><button class="action-btn" style="padding:5px 10px; font-size:12px;" onclick="addToList('${item.name}','${item.spec}','${item.unit}')">추가</button></td>
                         </tr>`;
                     });
                     resDiv.innerHTML = html + '</table>';
-                })
-                .catch(err => {
-                    resDiv.innerHTML = "오류 발생: " + err;
                 });
         }
 
         function addToList(name, spec, unit) {
             const date = new Date().toISOString().split('T')[0];
-            purchaseList.push({ date, name, spec, unit, qty: 1 });
+            workList.push({ date, name, spec, unit, qty: 1 });
             renderList();
         }
 
         function updateQty(index, val) {
-            purchaseList[index].qty = val;
+            workList[index].qty = val;
         }
 
         function renderList() {
             const listDiv = document.getElementById('saved-list');
-            if (purchaseList.length === 0) {
+            const btn = document.getElementById('send-btn');
+            
+            if (workList.length === 0) {
                 listDiv.innerHTML = "";
-                document.getElementById('send-btn').style.display = 'none';
+                btn.style.display = 'none';
                 return;
             }
-
             let html = '<table><tr><th>품목</th><th>수량</th></tr>';
-            purchaseList.forEach((item, index) => {
+            workList.forEach((item, index) => {
                 html += `<tr>
-                    <td>${item.name}<br><small>${item.date}</small></td>
-                    <td>
-                        <input type="number" value="${item.qty}" min="0" 
-                        onchange="updateQty(${index}, this.value)"> ${item.unit}
-                    </td>
+                    <td>${item.name}<br><small>${item.spec}</small></td>
+                    <td><input type="number" value="${item.qty}" onchange="updateQty(${index}, this.value)"> ${item.unit}</td>
                 </tr>`;
             });
             listDiv.innerHTML = html + '</table>';
-            document.getElementById('send-btn').style.display = 'block';
+            btn.style.display = 'block';
         }
 
         function saveToSheet() {
-            if(!confirm("매입장에 저장하시겠습니까?")) return;
+            const typeName = (currentMode === 'in') ? "매입장" : "출고장";
+            if(!confirm(`${typeName}에 저장하시겠습니까?`)) return;
             
             const btn = document.getElementById('send-btn');
             btn.innerText = "저장 중...";
             btn.disabled = true;
 
-            fetch(`${gasUrl}?action=save&data=${encodeURIComponent(JSON.stringify(purchaseList))}`)
+            // action=save 뒤에 &type=in 또는 &type=out 파라미터 추가
+            fetch(`${gasUrl}?action=save&type=${currentMode}&data=${encodeURIComponent(JSON.stringify(workList))}`)
                 .then(res => res.text())
                 .then(text => {
-                    alert("매입장에 성공적으로 기록되었습니다.");
-                    purchaseList = []; // 리스트 초기화
-                    renderList();
-                    btn.innerText = "매입장 시트로 전송";
-                    btn.disabled = false;
-                })
-                .catch(err => {
-                    alert("저장 실패: " + err);
-                    btn.innerText = "매입장 시트로 전송";
+                    alert("저장 완료!");
+                    workList = []; renderList();
+                    btn.innerText = (currentMode === 'in') ? "매입장 저장하기" : "출고장 저장하기";
                     btn.disabled = false;
                 });
         }
