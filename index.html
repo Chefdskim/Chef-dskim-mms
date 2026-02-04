@@ -7,53 +7,64 @@
         font-family: sans-serif; 
         padding: 20px; 
         text-align: center; 
+        background-color: #fafafa;
+      }
+      .menu-container {
+        max-width: 400px;
+        margin: 0 auto;
       }
       .menu-btn {
         display: block;
         width: 100%;
-        max-width: 400px;
-        margin: 10px auto;
-        padding: 20px;
+        padding: 25px;
+        margin-bottom: 15px;
         font-size: 18px;
         font-weight: bold;
-        background-color: #f1f1f1;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        cursor: pointer;
-        text-decoration: none;
         color: #333;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        text-align: left; /* 글자 왼쪽 정렬 */
       }
       .menu-btn:hover {
-        background-color: #e0e0e0;
+        background-color: #f8f9fa;
+        border-color: #ccc;
+      }
+      .btn-code {
+        color: #888;
+        font-size: 14px;
+        margin-bottom: 5px;
+        display: block;
       }
     </style>
   </head>
   <body>
 
-    <h2>메인 메뉴</h2>
+    <h2>MENU</h2>
+    
+    <div class="menu-container">
+      <button class="menu-btn" onclick="alert('ADMIN 페이지 준비 중')">
+        <span class="btn-code">000</span>
+        기준정보 (ADMIN)
+      </button>
 
-    <div class="menu-btn" onclick="google.script.run.loadPage('ADMIN')">
-      000 기준정보 (ADMIN)
+      <button class="menu-btn" onclick="alert('CUISINE 페이지 준비 중')">
+        <span class="btn-code">100~300</span>
+        국가별 요리 (CUISINE)
+      </button>
+
+      <button class="menu-btn" onclick="alert('R&D 페이지 준비 중')">
+        <span class="btn-code">400</span>
+        심화 연구 (R&D)
+      </button>
+
+      <button class="menu-btn" onclick="alert('ARCHIVE 페이지 준비 중')">
+        <span class="btn-code">900</span>
+        자료실 (ARCHIVE)
+      </button>
     </div>
-
-    <div class="menu-btn" onclick="google.script.run.loadPage('CUISINE')">
-      100~300 국가별 요리 (CUISINE)
-    </div>
-
-    <div class="menu-btn" onclick="google.script.run.loadPage('R&D')">
-      400 심화 연구 (R&D / DEEP DIVE)
-    </div>
-
-    <div class="menu-btn" onclick="google.script.run.loadPage('ARCHIVE')">
-      900 자료실 (ARCHIVE)
-    </div>
-
-    <script>
-      // 페이지 이동 로직 (추후 구현)
-      function loadPage(pageName) {
-        alert(pageName + " 페이지로 이동합니다."); 
-      }
-    </script>
 
   </body>
 </html>
