@@ -13,30 +13,57 @@
         max-width: 400px;
         margin: 0 auto;
       }
+      /* 메인 버튼 스타일 */
       .menu-btn {
         display: block;
         width: 100%;
-        padding: 25px;
-        margin-bottom: 15px;
+        padding: 20px;
+        margin-top: 15px;
         font-size: 18px;
         font-weight: bold;
         color: #333;
         background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
         cursor: pointer;
+        text-align: left;
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        text-align: left; /* 글자 왼쪽 정렬 */
       }
-      .menu-btn:hover {
-        background-color: #f8f9fa;
-        border-color: #ccc;
+      .menu-btn:hover { background-color: #f1f1f1; }
+      
+      .btn-code { color: #888; font-size: 14px; display: block; margin-bottom: 5px; }
+
+      /* 하위 메뉴 영역 (숨김 처리) */
+      .submenu {
+        display: none; /* 기본적으로 숨김 */
+        background-color: #f9f9f9;
+        margin-bottom: 15px;
+        border: 1px solid #eee;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
       }
-      .btn-code {
-        color: #888;
-        font-size: 14px;
-        margin-bottom: 5px;
+
+      /* 하위 버튼 스타일 */
+      .sub-btn {
         display: block;
+        width: 100%;
+        padding: 15px 20px;
+        text-align: left;
+        border: none;
+        border-bottom: 1px solid #eee;
+        background: none;
+        cursor: pointer;
+        font-size: 16px;
+        color: #555;
+      }
+      .sub-btn:last-child { border-bottom: none; }
+      .sub-btn:hover { background-color: #e9ecef; color: #000; }
+      
+      .sub-desc {
+        display: block;
+        font-size: 12px;
+        color: #999;
+        margin-top: 3px;
       }
     </style>
   </head>
@@ -45,10 +72,26 @@
     <h2>MENU</h2>
     
     <div class="menu-container">
-      <button class="menu-btn" onclick="alert('ADMIN 페이지 준비 중')">
+      
+      <button class="menu-btn" onclick="toggleMenu('menu-000')">
         <span class="btn-code">000</span>
-        기준정보 (ADMIN)
+        기준정보 (ADMIN) ▼
       </button>
+      
+      <div id="menu-000" class="submenu">
+        <button class="sub-btn" onclick="alert('010 페이지 이동 예정')">
+          010 원가_매입관리
+          <span class="sub-desc">원가 계산표, 거래처 리스트, 발주서 양식</span>
+        </button>
+        <button class="sub-btn" onclick="alert('020 페이지 이동 예정')">
+          020 사업기획_운영
+          <span class="sub-desc">메뉴 개발 계획서, 운영 매뉴얼, 주방 배치도</span>
+        </button>
+        <button class="sub-btn" onclick="alert('030 페이지 이동 예정')">
+          030 직원교육
+          <span class="sub-desc">직원 교육 자료, 레시피 표준 양식</span>
+        </button>
+      </div>
 
       <button class="menu-btn" onclick="alert('CUISINE 페이지 준비 중')">
         <span class="btn-code">100~300</span>
@@ -64,7 +107,20 @@
         <span class="btn-code">900</span>
         자료실 (ARCHIVE)
       </button>
+
     </div>
+
+    <script>
+      // 메뉴 펼치기/접기 기능
+      function toggleMenu(id) {
+        var x = document.getElementById(id);
+        if (x.style.display === "block") {
+          x.style.display = "none";
+        } else {
+          x.style.display = "block";
+        }
+      }
+    </script>
 
   </body>
 </html>
