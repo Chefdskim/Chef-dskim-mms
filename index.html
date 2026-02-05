@@ -8,29 +8,24 @@
         body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f4f4f4; color: #333; }
         .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
-        
-        /* 자산 박스 */
-        .asset-box { background: #eaf2f8; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #d6eaf8; cursor: pointer; transition: 0.2s; }
-        .asset-box:hover { background: #d4e6f1; }
-        .asset-title { font-size: 13px; color: #3498db; font-weight: bold; }
-        .asset-value { font-size: 24px; color: #2c3e50; font-weight: bold; margin-top: 5px; }
-        .toggle-icon { font-size: 12px; color: #7f8c8d; margin-top: 5px; }
 
-        /* 상세 내역 */
-        #asset-detail { display: none; margin-bottom: 20px; background: #fafafa; border: 1px solid #eee; border-radius: 8px; padding: 10px; max-height: 200px; overflow-y: auto; }
-        .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
-        .detail-name { font-weight: bold; color: #555; }
-        .detail-val { color: #2c3e50; }
-
-        /* 메인 메뉴 버튼 */
+        /* [메인 메뉴] */
         .main-btn { width: 100%; padding: 20px; margin-bottom: 10px; font-size: 16px; font-weight: bold; border: 1px solid #ccc; border-radius: 8px; background: #fff; cursor: pointer; text-align: left; }
         .code-tag { color: #888; font-size: 12px; display: block; margin-bottom: 5px; }
         #submenu-000 { display: none; background: #f8f9fa; margin-top: -5px; margin-bottom: 15px; padding: 5px; border: 1px solid #ddd; border-top: none; }
         .sub-btn { width: 100%; padding: 15px; border: none; border-bottom: 1px solid #eee; background: none; text-align: left; cursor: pointer; font-size: 15px; }
         .sub-btn:hover { background: #e9ecef; font-weight: bold; }
 
-        /* 작업창 */
-        #workspace-010 { display: none; } 
+        /* 작업 공간 공통 */
+        .workspace { display: none; }
+        .back-btn { background: none; border: none; color: #555; margin-bottom:15px; cursor:pointer; }
+        
+        /* [010] 스타일 */
+        .asset-box { background: #eaf2f8; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #d6eaf8; cursor: pointer; }
+        .asset-value { font-size: 24px; color: #2c3e50; font-weight: bold; margin-top: 5px; }
+        #asset-detail { display: none; margin-bottom: 20px; background: #fafafa; border: 1px solid #eee; border-radius: 8px; padding: 10px; max-height: 200px; overflow-y: auto; }
+        .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+        
         .mode-switch { display: flex; gap: 5px; margin-bottom: 20px; }
         .mode-btn { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-weight: bold; cursor: pointer; background: #fff; color: #777; font-size: 13px; }
         .mode-btn.active-in { background: #e8f8f5; border-color: #27ae60; color: #27ae60; }
@@ -39,16 +34,28 @@
 
         .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
         input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
+        .camera-btn { padding: 10px 15px; background: #ccc; color: white; border: none; border-radius: 4px; cursor: not-allowed; font-size: 18px; }
         .action-btn { padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         
-        /* 카메라 버튼 (기능은 임시 중지) */
-        .camera-btn { padding: 10px 15px; background: #ccc; color: white; border: none; border-radius: 4px; cursor: not-allowed; font-size: 18px; }
-
         table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
         th, td { border: 1px solid #eee; padding: 10px; text-align: left; vertical-align: middle; }
         th { background: #f1f1f1; }
         .save-btn { width: 100%; padding: 15px; color: white; border: none; border-radius: 8px; margin-top: 20px; font-weight: bold; cursor: pointer; }
         .bg-in { background: #27ae60; } .bg-out { background: #c0392b; }
+
+        /* [020] 손익분기점 대시보드 스타일 (NEW!) */
+        .bep-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .bep-title { font-size: 14px; color: #888; font-weight: bold; }
+        .bep-amount { font-size: 24px; color: #2c3e50; font-weight: bold; margin: 5px 0 15px 0; }
+        .progress-container { background: #f1f1f1; border-radius: 10px; height: 15px; width: 100%; margin-bottom: 5px; overflow: hidden; }
+        .progress-bar { height: 100%; border-radius: 10px; transition: width 0.5s; }
+        .bar-green { background: #27ae60; }
+        .bar-red { background: #e74c3c; }
+        .bep-info { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-top: 5px; }
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; }
+        .status-profit { background: #e8f8f5; color: #27ae60; border: 1px solid #27ae60; }
+        .status-loss { background: #fdedec; color: #e74c3c; border: 1px solid #e74c3c; }
+
     </style>
 </head>
 <body>
@@ -59,8 +66,8 @@
         <div id="main-nav">
             <button class="main-btn" onclick="toggleSubMenu()"><span class="code-tag">000</span> 기준정보 (ADMIN) ▼</button>
             <div id="submenu-000">
-                <button class="sub-btn" onclick="openWorkspace()">010 입출고/원가 관리</button>
-                <button class="sub-btn" onclick="alert('준비 중')">020 사업기획_운영</button>
+                <button class="sub-btn" onclick="openModule('010')">010 입출고/원가 관리</button>
+                <button class="sub-btn" onclick="openModule('020')">020 사업기획_운영</button>
                 <button class="sub-btn" onclick="alert('준비 중')">030 직원교육</button>
             </div>
             <button class="main-btn" onclick="alert('준비 중')"><span class="code-tag">100~300</span> 국가별 요리</button>
@@ -68,13 +75,13 @@
             <button class="main-btn" onclick="alert('준비 중')"><span class="code-tag">900</span> 자료실 (ARCHIVE)</button>
         </div>
 
-        <div id="workspace-010">
-            <button onclick="goBackMain()" style="background:none; border:none; color:#555; margin-bottom:15px; cursor:pointer;">◀ 메인으로</button>
+        <div id="workspace-010" class="workspace">
+            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
             
             <div class="asset-box" onclick="toggleAssetDetail()">
-                <div class="asset-title">💰 현재 총 재고 자산</div>
+                <div style="font-size:13px; color:#3498db; font-weight:bold;">💰 현재 총 재고 자산</div>
                 <div id="asset-value" class="asset-value">계산 중...</div>
-                <div class="toggle-icon">▼ 상세 내역 보기</div>
+                <div style="font-size:12px; color:#aaa; margin-top:5px;">▼ 클릭하여 상세 보기</div>
             </div>
             <div id="asset-detail"><p style="text-align:center; color:#999;">로딩 중...</p></div>
 
@@ -85,11 +92,10 @@
             </div>
 
             <div id="search-area" class="search-box">
-                <button class="camera-btn" onclick="alert('카메라 기능은 현재 점검 중입니다.')">📷</button>
+                <button class="camera-btn" onclick="alert('카메라 점검 중')">📷</button>
                 <input type="text" id="searchInput" placeholder="품목명 입력">
                 <button class="action-btn" id="searchBtn">검색</button>
             </div>
-
             <div id="result-list"></div>
 
             <div id="work-area" style="margin-top:30px; border-top:2px solid #eee; padding-top:15px;">
@@ -98,165 +104,219 @@
                 <button id="send-btn" class="save-btn bg-in" onclick="saveToSheet()" style="display:none;">매입장 저장하기</button>
             </div>
         </div>
+
+        <div id="workspace-020" class="workspace">
+            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
+            
+            <h3 style="margin-bottom:20px;">📊 이번 달 손익 현황</h3>
+
+            <div class="bep-card">
+                <div class="bep-title">이번 달 목표 매출</div>
+                <div class="bep-amount" id="target-sales">0 원</div>
+                
+                <div class="progress-container">
+                    <div id="sales-bar" class="progress-bar bar-green" style="width: 0%;"></div>
+                </div>
+                <div class="bep-info">
+                    <span>현재: <span id="current-sales" style="color:#27ae60; font-weight:bold;">0 원</span></span>
+                    <span id="sales-percent">0% 달성</span>
+                </div>
+            </div>
+
+            <div class="bep-card">
+                <div class="bep-title">손익분기점 (BEP)</div>
+                <div class="bep-amount" id="bep-amount" style="color:#e67e22;">0 원</div>
+                <p style="font-size:13px; color:#777; margin-bottom:10px;">
+                    이 금액을 넘겨야 흑자입니다.
+                </p>
+                <div class="progress-container">
+                    <div id="bep-bar" class="progress-bar bar-red" style="width: 0%;"></div>
+                </div>
+                <div class="bep-info">
+                    <span>BEP 달성률</span>
+                    <span id="bep-percent">0%</span>
+                </div>
+            </div>
+
+            <div style="text-align:center; padding:20px;">
+                <span id="status-badge" class="status-badge status-loss">데이터 불러오는 중...</span>
+                <p id="profit-msg" style="margin-top:10px; font-weight:bold;">잠시만 기다려주세요.</p>
+            </div>
+
+        </div>
+
     </div>
 
     <script>
         const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
         
+        // --- 공통 기능 ---
+        function toggleSubMenu() { const el = document.getElementById('submenu-000'); el.style.display = (el.style.display==='block')?'none':'block'; }
+        
+        function openModule(code) {
+            document.getElementById('main-nav').style.display = 'none';
+            document.querySelectorAll('.workspace').forEach(el => el.style.display = 'none'); // 모두 숨김
+            
+            if (code === '010') {
+                document.getElementById('workspace-010').style.display = 'block';
+                document.getElementById('page-title').innerText = "010 입출고/원가 관리";
+                setMode('in'); loadAsset();
+            } else if (code === '020') {
+                document.getElementById('workspace-020').style.display = 'block';
+                document.getElementById('page-title').innerText = "020 사업기획_운영";
+                loadBEP(); // [NEW] 손익 데이터 로드
+            }
+        }
+
+        function goBackMain() {
+            document.querySelectorAll('.workspace').forEach(el => el.style.display = 'none');
+            document.getElementById('main-nav').style.display = 'block';
+            document.getElementById('page-title').innerText = "MAIN MENU";
+        }
+
+        // --- 020 손익분기점 기능 (NEW!) ---
+        function loadBEP() {
+            fetch(`${gasUrl}?action=bep`)
+                .then(res => res.json())
+                .then(data => {
+                    // 데이터 바인딩
+                    const target = data.target;
+                    const current = data.current;
+                    const bep = data.bep;
+
+                    // 1. 목표 매출 카드
+                    document.getElementById('target-sales').innerText = target.toLocaleString() + " 원";
+                    document.getElementById('current-sales').innerText = current.toLocaleString() + " 원";
+                    
+                    let salesPct = Math.min((current / target) * 100, 100);
+                    document.getElementById('sales-bar').style.width = salesPct + "%";
+                    document.getElementById('sales-percent').innerText = Math.round((current / target) * 100) + "% 달성";
+
+                    // 2. BEP 카드
+                    document.getElementById('bep-amount').innerText = bep.toLocaleString() + " 원";
+                    
+                    let bepPct = Math.min((current / bep) * 100, 100);
+                    document.getElementById('bep-bar').style.width = bepPct + "%";
+                    document.getElementById('bep-percent').innerText = Math.round((current / bep) * 100) + "%";
+
+                    // 3. 상태 메시지
+                    const badge = document.getElementById('status-badge');
+                    const msg = document.getElementById('profit-msg');
+                    const diff = current - bep;
+
+                    if (diff >= 0) {
+                        badge.className = "status-badge status-profit";
+                        badge.innerText = "흑자 전환 성공! 🎉";
+                        msg.innerText = `현재 ${diff.toLocaleString()}원 이익 중입니다.`;
+                        msg.style.color = "#27ae60";
+                    } else {
+                        badge.className = "status-badge status-loss";
+                        badge.innerText = "아직 적자 구간입니다 📉";
+                        msg.innerText = `BEP까지 ${Math.abs(diff).toLocaleString()}원 남았습니다.`;
+                        msg.style.color = "#e74c3c";
+                    }
+                })
+                .catch(err => {
+                    alert("데이터 로드 실패: " + err);
+                });
+        }
+
+
+        // --- 010 입출고 기능 (기존 유지) ---
         let currentMode = 'in'; 
         let workList = []; 
-        let assetData = null;
 
         document.addEventListener("DOMContentLoaded", function() {
             const input = document.getElementById("searchInput");
             const btn = document.getElementById("searchBtn");
-            input.addEventListener("keypress", function(e) { if(e.key==="Enter") { e.preventDefault(); btn.click(); } });
-            btn.addEventListener("click", runSearch);
+            if(input) input.addEventListener("keypress", function(e) { if(e.key==="Enter") { e.preventDefault(); btn.click(); } });
+            if(btn) btn.addEventListener("click", runSearch);
         });
-
-        function toggleSubMenu() { const el = document.getElementById('submenu-000'); el.style.display = (el.style.display==='block')?'none':'block'; }
-        
-        function openWorkspace() {
-            document.getElementById('main-nav').style.display = 'none';
-            document.getElementById('workspace-010').style.display = 'block';
-            document.getElementById('page-title').innerText = "입출고/원가 관리";
-            setMode('in');
-            loadAsset(); 
-        }
-
-        function goBackMain() {
-            document.getElementById('workspace-010').style.display = 'none';
-            document.getElementById('main-nav').style.display = 'block';
-            document.getElementById('page-title').innerText = "MAIN MENU";
-            workList = []; renderList();
-        }
 
         function loadAsset() {
             fetch(`${gasUrl}?action=asset`)
                 .then(res => res.json())
                 .then(data => {
-                    assetData = data;
                     document.getElementById('asset-value').innerText = Number(data.total).toLocaleString() + " 원";
                     renderAssetDetail(data.list);
-                })
-                .catch(() => { document.getElementById('asset-value').innerText = "조회 실패"; });
+                });
         }
-
         function toggleAssetDetail() {
-            const detailBox = document.getElementById('asset-detail');
-            detailBox.style.display = (detailBox.style.display === 'block') ? 'none' : 'block';
+            const d = document.getElementById('asset-detail');
+            d.style.display = (d.style.display==='block')?'none':'block';
         }
-
         function renderAssetDetail(list) {
             const box = document.getElementById('asset-detail');
-            if (!list || list.length === 0) { box.innerHTML = "<p style='text-align:center; color:#999;'>상세 내역 없음</p>"; return; }
-            let html = "";
-            list.forEach(item => {
-                html += `<div class="detail-row"><span class="detail-name">${item.name}</span><span class="detail-val">${Number(item.value).toLocaleString()} 원</span></div>`;
-            });
-            box.innerHTML = html;
+            if(!list || list.length===0){ box.innerHTML="<p style='text-align:center;color:#999'>내역 없음</p>"; return;}
+            let h=""; list.forEach(i=>{ h+=`<div class="detail-row"><span>${i.name}</span><span>${i.value.toLocaleString()}원</span></div>`; });
+            box.innerHTML=h;
         }
 
         function setMode(mode) {
             currentMode = mode;
-            document.getElementById('btn-in').className = "mode-btn";
-            document.getElementById('btn-out').className = "mode-btn";
-            document.getElementById('btn-stock').className = "mode-btn";
-            document.getElementById('search-area').style.display = 'flex';
-            document.getElementById('work-area').style.display = 'block';
-            document.getElementById('result-list').innerHTML = "";
-            document.getElementById('asset-detail').style.display = 'none';
+            document.getElementById('btn-in').className="mode-btn";
+            document.getElementById('btn-out').className="mode-btn";
+            document.getElementById('btn-stock').className="mode-btn";
+            document.getElementById('search-area').style.display='flex';
+            document.getElementById('work-area').style.display='block';
+            document.getElementById('result-list').innerHTML="";
+            document.getElementById('asset-detail').style.display='none';
 
-            if (mode === 'in') {
-                document.getElementById('btn-in').className = "mode-btn active-in";
-                setupWorkArea("매입장 저장하기", "bg-in", "📥 매입 리스트");
+            if(mode==='in') {
+                document.getElementById('btn-in').className="mode-btn active-in";
+                setupWorkArea("매입장 저장하기","bg-in","📥 매입 리스트");
             } else {
-                document.getElementById('btn-out').className = "mode-btn active-out";
-                setupWorkArea("출고장 저장하기", "bg-out", "📤 출고 리스트");
+                document.getElementById('btn-out').className="mode-btn active-out";
+                setupWorkArea("출고장 저장하기","bg-out","📤 출고 리스트");
             }
         }
-
-        function setupWorkArea(btnText, btnClass, titleText) {
-            const sendBtn = document.getElementById('send-btn');
-            sendBtn.innerText = btnText;
-            sendBtn.className = "save-btn " + btnClass;
-            document.getElementById('list-title').innerText = titleText;
-            renderList(); 
-        }
-
-        function loadStock() {
-            document.getElementById('btn-in').className = "mode-btn";
-            document.getElementById('btn-out').className = "mode-btn";
-            document.getElementById('btn-stock').className = "mode-btn active-stock";
-            document.getElementById('search-area').style.display = 'none';
-            document.getElementById('work-area').style.display = 'none';
-            document.getElementById('asset-detail').style.display = 'none';
-            
-            const resDiv = document.getElementById('result-list');
-            resDiv.innerHTML = "<p style='text-align:center;'>📦 전체 재고를 계산 중입니다...</p>";
-
-            fetch(`${gasUrl}?action=inventory`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.length === 0) { resDiv.innerHTML = "<p>재고 데이터가 없습니다.</p>"; return; }
-                    let html = '<table style="margin-top:0"><tr><th>품목(규격)</th><th>현재고</th></tr>';
-                    data.forEach(item => {
-                        let color = item.qty < 0 ? 'red' : 'blue'; 
-                        html += `<tr><td>${item.name}<br><small style='color:#888'>${item.spec}</small></td><td style='font-weight:bold; color:${color}'>${item.qty} ${item.unit}</td></tr>`;
-                    });
-                    resDiv.innerHTML = html + '</table>';
-                });
-        }
-
-        function runSearch() {
-            const val = document.getElementById('searchInput').value;
-            if(!val) return;
-            const resDiv = document.getElementById('result-list');
-            resDiv.innerHTML = "검색 중...";
-            fetch(`${gasUrl}?action=search&item=${encodeURIComponent(val)}`)
-                .then(res => res.json())
-                .then(data => {
-                    let html = '<table>';
-                    data.forEach(item => {
-                        html += `<tr><td>${item.name}<br><small>${item.spec}</small></td><td style='text-align:right'><button class="action-btn" style="padding:5px;" onclick="addToList('${item.name}','${item.spec}','${item.unit}')">추가</button></td></tr>`;
-                    });
-                    resDiv.innerHTML = html + '</table>';
-                });
-        }
-
-        function addToList(name, spec, unit) {
-            const date = new Date().toISOString().split('T')[0];
-            workList.push({ date, name, spec, unit, qty: 1 });
+        function setupWorkArea(txt,cls,tit) {
+            const btn=document.getElementById('send-btn');
+            btn.innerText=txt; btn.className="save-btn "+cls;
+            document.getElementById('list-title').innerText=tit;
             renderList();
         }
-
-        function updateQty(index, val) { workList[index].qty = val; }
-
-        function renderList() {
-            const listDiv = document.getElementById('saved-list');
-            const btn = document.getElementById('send-btn');
-            if (workList.length === 0) { listDiv.innerHTML = ""; btn.style.display = 'none'; return; }
-            let html = '<table><tr><th>품목</th><th>수량</th></tr>';
-            workList.forEach((item, index) => {
-                html += `<tr><td>${item.name}<br><small>${item.spec}</small></td><td><input type="number" value="${item.qty}" onchange="updateQty(${index}, this.value)"> ${item.unit}</td></tr>`;
-            });
-            listDiv.innerHTML = html + '</table>';
-            btn.style.display = 'block';
-        }
-
-        function saveToSheet() {
-            const typeName = (currentMode === 'in') ? "매입장" : "출고장";
-            if(!confirm(`${typeName}에 저장할까요?`)) return;
-            const btn = document.getElementById('send-btn');
-            btn.disabled = true; btn.innerText = "저장 중...";
-
-            fetch(`${gasUrl}?action=save&type=${currentMode}&data=${encodeURIComponent(JSON.stringify(workList))}`)
-                .then(res => res.text())
-                .then(() => {
-                    alert("저장 완료!");
-                    workList = []; renderList();
-                    btn.disabled = false; btn.innerText = typeName + " 저장하기";
+        function loadStock() {
+            document.getElementById('btn-in').className="mode-btn";
+            document.getElementById('btn-out').className="mode-btn";
+            document.getElementById('btn-stock').className="mode-btn active-stock";
+            document.getElementById('search-area').style.display='none';
+            document.getElementById('work-area').style.display='none';
+            document.getElementById('asset-detail').style.display='none';
+            const res=document.getElementById('result-list');
+            res.innerHTML="<p style='text-align:center'>재고 확인 중...</p>";
+            fetch(`${gasUrl}?action=inventory`).then(r=>r.json()).then(d=>{
+                if(d.length===0){res.innerHTML="<p>데이터 없음</p>";return;}
+                let h='<table><tr><th>품목</th><th>재고</th></tr>';
+                d.forEach(i=>{ 
+                    let c=i.qty<0?'red':'blue';
+                    h+=`<tr><td>${i.name}<br><small>${i.spec}</small></td><td style='color:${c};font-weight:bold'>${i.qty} ${i.unit}</td></tr>`;
                 });
+                res.innerHTML=h+'</table>';
+            });
+        }
+        function runSearch() {
+            const v=document.getElementById('searchInput').value; if(!v)return;
+            const r=document.getElementById('result-list'); r.innerHTML="검색 중...";
+            fetch(`${gasUrl}?action=search&item=${encodeURIComponent(v)}`).then(x=>x.json()).then(d=>{
+                let h='<table>'; d.forEach(i=>{ h+=`<tr><td>${i.name}<br><small>${i.spec}</small></td><td style='text-align:right'><button class='action-btn' style='padding:5px' onclick="addToList('${i.name}','${i.spec}','${i.unit}')">추가</button></td></tr>`;});
+                r.innerHTML=h+'</table>';
+            });
+        }
+        function addToList(n,s,u){ workList.push({date:new Date().toISOString().split('T')[0], name:n, spec:s, unit:u, qty:1}); renderList(); }
+        function updateQty(i,v){ workList[i].qty=v; }
+        function renderList(){
+            const l=document.getElementById('saved-list'); const b=document.getElementById('send-btn');
+            if(workList.length===0){l.innerHTML="";b.style.display='none';return;}
+            let h='<table><tr><th>품목</th><th>수량</th></tr>';
+            workList.forEach((item,idx)=>{ h+=`<tr><td>${item.name}</td><td><input type='number' value='${item.qty}' onchange='updateQty(${idx},this.value)'> ${item.unit}</td></tr>`; });
+            l.innerHTML=h+'</table>'; b.style.display='block';
+        }
+        function saveToSheet(){
+            if(!confirm("저장할까요?"))return;
+            const b=document.getElementById('send-btn'); b.disabled=true; b.innerText="저장 중...";
+            fetch(`${gasUrl}?action=save&type=${currentMode}&data=${encodeURIComponent(JSON.stringify(workList))}`)
+            .then(()=>{ alert("완료!"); workList=[]; renderList(); b.disabled=false; setMode(currentMode); });
         }
     </script>
 </body>
