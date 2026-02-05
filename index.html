@@ -95,7 +95,7 @@
                     <span id="file-name" style="font-size:12px; color:#777; margin-left:10px;"></span>
                 </div>
                 <img id="img-preview" style="width:100%; max-height:200px; object-fit:contain; display:none; margin-bottom:10px;">
-                <button class="action-btn" onclick="saveRnD()" style="width:100%; background:#3498db;">저장하기</button>
+                <button class="action-btn" onclick="saveRnD()" style="width:100%; background:#3498db;">저장하기 (즉시 전송)</button>
             </div>
             <div id="rnd-list-area"></div>
         </div>
@@ -117,7 +117,7 @@
             else if(code==='400'){document.getElementById('workspace-400').style.display='block'; loadRnD();}
         }
 
-        // [400] R&D (사진 첨부 + 다이어트 압축)
+        // [400] R&D (300px 초경량 압축)
         let currentImageBase64 = null;
         function previewImage() {
             const file = document.getElementById('rnd-photo').files[0];
@@ -130,15 +130,15 @@
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
-                        // [핵심] 500px로 줄여서 전송 속도 확보
-                        const MAX_WIDTH = 500; 
+                        // [핵심] 300px : 거의 썸네일 수준으로 줄여서 속도 확보
+                        const MAX_WIDTH = 300; 
                         let width = img.width;
                         let height = img.height;
                         if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
                         canvas.width = width; canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
-                        // 품질 0.4 (40%)로 압축
-                        const compressedData = canvas.toDataURL('image/jpeg', 0.4);
+                        // 품질 0.3 (30%) : 용량 극소화
+                        const compressedData = canvas.toDataURL('image/jpeg', 0.3);
                         
                         document.getElementById('img-preview').src = compressedData;
                         document.getElementById('img-preview').style.display = 'block';
@@ -159,8 +159,8 @@
                 image: currentImageBase64
             };
             if(!item.menu) return alert("메뉴명 입력 필수");
-            const btn = document.querySelector('#workspace-400 .action-btn'); btn.innerText="업로드 중...🚀"; btn.disabled=true;
-            google.script.run.withSuccessHandler(()=>{ alert("저장 완료!"); btn.innerText="저장하기"; btn.disabled=false; loadRnD(); }).saveRnDItem(item);
+            const btn = document.querySelector('#workspace-400 .action-btn'); btn.innerText="즉시 전송 중...🚀"; btn.disabled=true;
+            google.script.run.withSuccessHandler(()=>{ alert("저장 완료!"); btn.innerText="저장하기 (즉시 전송)"; btn.disabled=false; loadRnD(); }).saveRnDItem(item);
         }
         function loadRnD() {
             fetch(`${gasUrl}?action=rnd`).then(r=>r.json()).then(l=>{
