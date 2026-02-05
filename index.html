@@ -56,13 +56,19 @@
         .status-profit { background: #e8f8f5; color: #27ae60; border: 1px solid #27ae60; }
         .status-loss { background: #fdedec; color: #e74c3c; border: 1px solid #e74c3c; }
 
+        /* [NEW] 재무 지표 요약 그리드 */
+        .finance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .finance-item { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee; text-align: center; }
+        .finance-label { font-size: 12px; color: #7f8c8d; margin-bottom: 5px; }
+        .finance-val { font-size: 16px; font-weight: bold; color: #2c3e50; }
+
         /* 메뉴 원가 리스트 */
         .menu-card { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 15px 0; }
         .menu-name { font-weight: bold; font-size: 15px; color: #333; }
         .menu-cost-info { font-size: 12px; color: #777; margin-top: 4px; }
         .cost-badge { padding: 5px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .cost-good { background: #e8f8f5; color: #27ae60; } /* 원가율 좋음 (낮음) */
-        .cost-bad { background: #fdedec; color: #e74c3c; } /* 원가율 나쁨 (높음) */
+        .cost-good { background: #e8f8f5; color: #27ae60; } 
+        .cost-bad { background: #fdedec; color: #e74c3c; } 
 
     </style>
 </head>
@@ -118,19 +124,39 @@
             
             <h3 style="margin-bottom:20px;">📊 사업 기획 & 운영</h3>
 
+            <div class="finance-grid">
+                <div class="finance-item">
+                    <div class="finance-label">이번 달 목표 매출</div>
+                    <div class="finance-val" id="fin-target" style="color:#3498db;">0 원</div>
+                </div>
+                <div class="finance-item">
+                    <div class="finance-label">현재 총 매출액</div>
+                    <div class="finance-val" id="fin-current" style="color:#2c3e50;">0 원</div>
+                </div>
+                <div class="finance-item">
+                    <div class="finance-label">월 고정비</div>
+                    <div class="finance-val" id="fin-fixed">0 원</div>
+                </div>
+                <div class="finance-item">
+                    <div class="finance-label">변동비율</div>
+                    <div class="finance-val" id="fin-variable">0%</div>
+                </div>
+            </div>
+
             <div class="bep-card">
-                <div class="bep-title">이번 달 목표 매출 달성률</div>
+                <div class="bep-title">매출 달성률 그래프</div>
                 <div class="progress-container" style="margin-top:10px;">
                     <div id="sales-bar" class="progress-bar bar-green" style="width: 0%;"></div>
                 </div>
                 <div class="bep-info">
-                    <span>현재 <span id="current-sales" style="font-weight:bold; color:#27ae60;">0</span> / 목표 <span id="target-sales">0</span></span>
-                    <span id="sales-percent">0%</span>
+                    <span id="sales-percent-text">0% 달성</span>
+                    <span id="bep-gap-text">BEP까지 0원 남음</span>
                 </div>
+                
                 <hr style="margin:15px 0; border:0; border-top:1px solid #eee;">
                 
                 <div class="bep-title">손익분기점 (BEP)</div>
-                <div class="bep-amount" id="bep-amount" style="font-size:18px;">0 원</div>
+                <div class="bep-amount" id="bep-amount" style="font-size:18px; color:#e67e22;">0 원</div>
                 <div style="text-align:center;">
                     <span id="status-badge" class="status-badge status-loss">데이터 조회 중...</span>
                 </div>
@@ -163,8 +189,8 @@
             } else if (code === '020') {
                 document.getElementById('workspace-020').style.display = 'block';
                 document.getElementById('page-title').innerText = "020 사업기획_운영";
-                loadBEP();      // 손익 로드
-                loadMenuCost(); // [NEW] 메뉴원가 로드
+                loadBEP();      
+                loadMenuCost(); 
             }
         }
 
@@ -177,25 +203,40 @@
         // --- 020 기능 ---
         function loadBEP() {
             fetch(`${gasUrl}?action=bep`).then(r=>r.json()).then(data => {
-                const target = data.target; const current = data.current; const bep = data.bep;
-                document.getElementById('target-sales').innerText = (target/10000).toLocaleString() + "만";
-                document.getElementById('current-sales').innerText = (current/10000).toLocaleString() + "만";
-                
+                const target = data.target; 
+                const current = data.current; 
+                const bep = data.bep;
+                const fixed = data.fixed;
+                const variable = data.variableRatio;
+
+                // [NEW] 상단 4가지 지표 바인딩
+                document.getElementById('fin-target').innerText = Number(target).toLocaleString() + " 원";
+                document.getElementById('fin-current').innerText = Number(current).toLocaleString() + " 원";
+                document.getElementById('fin-fixed').innerText = Number(fixed).toLocaleString() + " 원";
+                document.getElementById('fin-variable').innerText = (variable * 100).toFixed(0) + "%";
+
+                // 그래프 및 BEP
                 let salesPct = Math.min((current/target)*100, 100);
                 document.getElementById('sales-bar').style.width = salesPct+"%";
-                document.getElementById('sales-percent').innerText = Math.round((current/target)*100)+"%";
+                document.getElementById('sales-percent-text').innerText = Math.round((current/target)*100)+"% 달성";
                 document.getElementById('bep-amount').innerText = bep.toLocaleString() + " 원";
 
+                const diff = current - bep;
+                const gapText = document.getElementById('bep-gap-text');
                 const badge = document.getElementById('status-badge');
+
                 if (current >= bep) {
                     badge.className = "status-badge status-profit"; badge.innerText = "흑자 전환 성공! 🎉";
+                    gapText.innerText = `+${diff.toLocaleString()}원 이익`;
+                    gapText.style.color = "#27ae60";
                 } else {
                     badge.className = "status-badge status-loss"; badge.innerText = "적자 (BEP 미달) 📉";
+                    gapText.innerText = `BEP까지 -${Math.abs(diff).toLocaleString()}원`;
+                    gapText.style.color = "#e74c3c";
                 }
             });
         }
 
-        // [NEW] 메뉴 원가 리스트 로드
         function loadMenuCost() {
             const area = document.getElementById('menu-list-area');
             const loader = document.getElementById('menu-loading');
@@ -204,14 +245,12 @@
 
             fetch(`${gasUrl}?action=menu_cost`).then(r=>r.json()).then(list => {
                 loader.style.display = 'none';
-                if(list.length === 0) { area.innerHTML = "<p style='text-align:center; color:#999'>메뉴 데이터가 없습니다.<br>('메뉴관리' 시트를 확인해주세요)</p>"; return; }
+                if(list.length === 0) { area.innerHTML = "<p style='text-align:center; color:#999'>메뉴 데이터가 없습니다.</p>"; return; }
 
                 let html = "";
                 list.forEach(item => {
-                    // 원가율 35% 기준 (넘으면 빨간색)
                     let badgeClass = (item.ratio > 35) ? "cost-bad" : "cost-good";
                     let badgeText = (item.ratio > 35) ? "주의" : "양호";
-
                     html += `<div class="menu-card">
                         <div>
                             <div class="menu-name">${item.name}</div>
