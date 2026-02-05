@@ -1,177 +1,136 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chef_dskim SYSTEM</title>
-    <style>
-        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f4f4f4; color: #333; }
-        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+<div id="workspace-400" class="workspace">
+            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
+            <h3 style="margin-bottom:20px;">🔬 R&D 연구 노트</h3>
 
-        /* 메인 버튼 */
-        .main-btn { width: 100%; padding: 20px; margin-bottom: 10px; font-size: 16px; font-weight: bold; border: 1px solid #ccc; border-radius: 8px; background: #fff; cursor: pointer; text-align: left; }
-        .code-tag { color: #888; font-size: 12px; display: block; margin-bottom: 5px; }
-        #submenu-000 { display: none; background: #f8f9fa; margin-top: -5px; margin-bottom: 15px; padding: 5px; border: 1px solid #ddd; border-top: none; }
-        .sub-btn { width: 100%; padding: 15px; border: none; border-bottom: 1px solid #eee; background: none; text-align: left; cursor: pointer; font-size: 15px; }
-        .workspace { display: none; }
-        .back-btn { background: none; border: none; color: #555; margin-bottom:15px; cursor:pointer; }
-        
-        /* 공통 */
-        .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
-        input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
-        .action-btn { padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        
-        /* 레시피 카드 (상세형) */
-        .recipe-card { background: white; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .recipe-header { background: #2c3e50; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .recipe-title { font-size: 20px; font-weight: bold; }
-        .recipe-type { background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 15px; font-size: 12px; }
-        
-        .recipe-body { padding: 15px; }
-        .section-block { margin-bottom: 20px; }
-        .section-title { font-size: 15px; font-weight: bold; color: #d35400; border-bottom: 2px solid #fce3cf; padding-bottom: 5px; margin-bottom: 10px; display: inline-block; }
-        
-        /* 상세 행 스타일 */
-        .detail-row { display: flex; margin-bottom: 8px; font-size: 14px; border-bottom: 1px dashed #eee; padding-bottom: 8px; align-items: flex-start; }
-        .detail-cat { font-weight: bold; color: #555; width: 70px; flex-shrink: 0; font-size: 13px; margin-top: 2px; }
-        .detail-content { flex: 1; line-height: 1.5; color: #333; white-space: pre-wrap; }
-        .detail-note { font-size: 12px; color: #e67e22; background: #fff8f0; padding: 2px 6px; border-radius: 4px; margin-left: 5px; display: inline-block; }
-        .video-tag { font-size: 11px; background: #e8f8f5; color: #27ae60; border: 1px solid #27ae60; padding: 2px 6px; border-radius: 4px; text-decoration: none; margin-left: 5px; font-weight: bold; }
+            <div class="info-card" style="border: 2px solid #3498db;">
+                <h4 style="margin-top:0;">새로운 아이디어 기록</h4>
+                <div style="display:flex; gap:5px; margin-bottom:10px;">
+                    <select id="rnd-status" style="padding:10px; border:1px solid #ddd; border-radius:4px;">
+                        <option value="아이디어">💡 아이디어</option>
+                        <option value="테스트중">🔥 테스트중</option>
+                        <option value="성공">🎉 성공</option>
+                        <option value="보류">🧊 보류</option>
+                    </select>
+                    <input type="text" id="rnd-menu" placeholder="메뉴명 (예: 냉이 파스타)" style="flex:1;">
+                </div>
+                <textarea id="rnd-note" placeholder="연구 노트 (배합비, 조리법 등)" style="width:100%; height:60px; padding:10px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px;"></textarea>
+                <textarea id="rnd-feedback" placeholder="피드백 (맛 평가, 보완점)" style="width:100%; height:40px; padding:10px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px;"></textarea>
+                
+                <div style="margin-bottom:10px;">
+                    <label for="rnd-photo" style="display:inline-block; padding:10px 15px; background:#e67e22; color:white; border-radius:4px; cursor:pointer; font-weight:bold; font-size:13px;">
+                        📷 사진 찍기 / 첨부
+                    </label>
+                    <input type="file" id="rnd-photo" accept="image/*" capture="camera" style="display:none;" onchange="previewImage()">
+                    <span id="file-name" style="font-size:12px; color:#777; margin-left:10px;">선택된 사진 없음</span>
+                </div>
+                <img id="img-preview" style="width:100%; max-height:200px; object-fit:contain; display:none; margin-bottom:10px; border-radius:4px;">
 
-        /* 기타 스타일 (기존 유지) */
-        .finance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .finance-item { background: #f8f9fa; padding: 15px; text-align: center; border-radius: 8px; }
-        .finance-val { font-size: 16px; font-weight: bold; margin-top:5px; }
-        .finance-profit.plus { color: #27ae60; } .finance-profit { color: #e74c3c; }
-        .menu-card { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee; }
-        .cost-good { background:#e8f8f5; color:#27ae60; padding:3px 8px; border-radius:4px; font-size:12px; }
-        .cost-bad { background:#fdedec; color:#e74c3c; padding:3px 8px; border-radius:4px; font-size:12px; }
-        .info-card { padding:15px; border:1px solid #eee; margin-bottom:10px; border-radius:8px; }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <h2 id="page-title">MAIN MENU</h2>
-
-        <div id="main-nav">
-            <button class="main-btn" onclick="toggleSubMenu()"><span class="code-tag">000</span> 기준정보 (ADMIN) ▼</button>
-            <div id="submenu-000">
-                <button class="sub-btn" onclick="openModule('010')">010 자산/재고</button>
-                <button class="sub-btn" onclick="openModule('020')">020 손익/원가</button>
-                <button class="sub-btn" onclick="openModule('030')">030 직원교육</button>
+                <button class="action-btn" onclick="saveRnD()" style="width:100%; background:#3498db;">저장하기</button>
             </div>
-            <button class="main-btn" onclick="openModule('100')"><span class="code-tag">100~300</span> 국가별 요리 (레시피) 📖</button>
-            <button class="main-btn" onclick="alert('준비 중')"><span class="code-tag">400</span> 심화 연구 (R&D)</button>
-        </div>
 
-        <div id="workspace-100" class="workspace">
-            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
-            <h3 style="margin-bottom:20px;">📖 상세 레시피 DB</h3>
-            <div class="search-box">
-                <input type="text" id="recipeInput" placeholder="메뉴명 검색 (예: 봉골레)">
-                <button class="action-btn" onclick="loadRecipe()">검색</button>
-            </div>
-            <div id="recipe-loading" style="text-align:center; padding:20px; color:#999; display:none;">상세 정보를 불러옵니다...</div>
-            <div id="recipe-list-area"></div>
+            <div id="rnd-list-area"></div>
         </div>
-
-        <div id="workspace-010" class="workspace">
-            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
-            <div class="search-box"><input type="text" id="searchInput" placeholder="품목명"><button class="action-btn" id="searchBtn">검색</button></div>
-            <div id="result-list"></div>
-        </div>
-        <div id="workspace-020" class="workspace">
-            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
-            <div class="finance-grid">
-                <div class="finance-item"><div>매출</div><div class="finance-val" id="fin-current">0</div></div>
-                <div class="finance-item"><div>순이익</div><div class="finance-val" id="fin-profit">0</div></div>
-            </div>
-            <div style="margin-top:20px;"><h5>🍔 메뉴 원가</h5><div id="menu-list-area"></div></div>
-        </div>
-        <div id="workspace-030" class="workspace">
-            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
-            <div id="manual-list-area"></div>
-        </div>
-    </div>
 
     <script>
-        const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
+        // ... (기존 변수 및 함수들) ...
 
-        function toggleSubMenu() { const el = document.getElementById('submenu-000'); el.style.display = (el.style.display==='block')?'none':'block'; }
         function openModule(code) {
-            document.getElementById('main-nav').style.display='none';
-            document.querySelectorAll('.workspace').forEach(el=>el.style.display='none');
-            if(code==='100'){ document.getElementById('workspace-100').style.display='block'; loadRecipe(); }
-            else if(code==='010'){ document.getElementById('workspace-010').style.display='block'; }
-            else if(code==='020'){ document.getElementById('workspace-020').style.display='block'; loadBEP(); loadMenuCost(); }
-            else if(code==='030'){ document.getElementById('workspace-030').style.display='block'; loadManual(); }
+            // ... (기존 모듈 오픈 로직) ...
+            if (code === '400') {
+                document.getElementById('workspace-400').style.display = 'block';
+                loadRnD(); // R&D 목록 불러오기
+            }
         }
-        function goBackMain() { document.querySelectorAll('.workspace').forEach(el=>el.style.display='none'); document.getElementById('main-nav').style.display='block'; }
 
-        // [100] 상세 레시피 렌더링
-        function loadRecipe() {
-            const k = document.getElementById('recipeInput').value;
-            const area = document.getElementById('recipe-list-area');
-            const loader = document.getElementById('recipe-loading');
+        // [400] R&D 기능
+        let currentImageBase64 = null; // 사진 데이터 담을 변수
+
+        function previewImage() {
+            const file = document.getElementById('rnd-photo').files[0];
+            if (file) {
+                document.getElementById('file-name').innerText = file.name;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('img-preview').src = e.target.result;
+                    document.getElementById('img-preview').style.display = 'block';
+                    // Base64 데이터 저장 (앞에 'data:image/jpeg;base64,' 부분 제거하고 순수 데이터만)
+                    currentImageBase64 = {
+                        data: e.target.result.split(',')[1],
+                        type: file.type
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function saveRnD() {
+            const status = document.getElementById('rnd-status').value;
+            const menu = document.getElementById('rnd-menu').value;
+            const note = document.getElementById('rnd-note').value;
+            const feedback = document.getElementById('rnd-feedback').value;
+
+            if (!menu) { alert("메뉴명을 입력해주세요."); return; }
+
+            // 버튼 비활성화 (중복 클릭 방지)
+            const btn = document.querySelector('#workspace-400 .action-btn');
+            btn.innerText = "저장 중...";
+            btn.disabled = true;
+
+            const item = {
+                date: new Date().toISOString().split('T')[0],
+                status: status,
+                menu: menu,
+                note: note,
+                feedback: feedback,
+                image: currentImageBase64 // 사진 데이터
+            };
+
+            // 서버로 전송 (google.script.run 사용)
+            google.script.run.withSuccessHandler(function(res) {
+                alert("저장되었습니다!");
+                // 입력창 초기화
+                document.getElementById('rnd-menu').value = "";
+                document.getElementById('rnd-note').value = "";
+                document.getElementById('rnd-feedback').value = "";
+                document.getElementById('rnd-photo').value = "";
+                document.getElementById('file-name').innerText = "선택된 사진 없음";
+                document.getElementById('img-preview').style.display = "none";
+                currentImageBase64 = null;
+                btn.innerText = "저장하기";
+                btn.disabled = false;
+                loadRnD(); // 목록 갱신
+            }).saveRnDItem(item);
+        }
+
+        function loadRnD() {
+            const area = document.getElementById('rnd-list-area');
+            area.innerHTML = "<p style='text-align:center; color:#999'>로딩 중...</p>";
             
-            loader.style.display='block'; area.innerHTML="";
-
-            fetch(`${gasUrl}?action=recipe&keyword=${encodeURIComponent(k)}`).then(r=>r.json()).then(list=>{
-                loader.style.display='none';
-                if(list.length===0){ area.innerHTML="<p style='text-align:center; color:#999'>검색 결과가 없습니다.</p>"; return; }
-
+            fetch(`${gasUrl}?action=rnd`).then(r => r.json()).then(list => {
+                if(list.length === 0) { area.innerHTML = "<p style='text-align:center; color:#999'>기록된 연구가 없습니다.</p>"; return; }
+                
                 let html = "";
                 list.forEach(item => {
-                    // 섹션별 그룹화
-                    let grouped = {};
-                    item.details.forEach(d => {
-                        if(!grouped[d.section]) grouped[d.section] = [];
-                        grouped[d.section].push(d);
-                    });
+                    // 상태별 색상
+                    let color = "#777";
+                    if(item.status === "아이디어") color = "#f39c12";
+                    if(item.status === "테스트중") color = "#e74c3c";
+                    if(item.status === "성공") color = "#27ae60";
 
-                    let bodyHtml = "";
-                    for(let section in grouped) {
-                        if(!section) continue; // 구분 없는 행 제외
-                        let rowsHtml = "";
-                        grouped[section].forEach(row => {
-                            let noteHtml = row.note ? `<span class="detail-note">Tip: ${row.note}</span>` : "";
-                            let videoHtml = row.video ? `<a href="${row.video}" target="_blank" class="video-tag">📺 영상</a>` : "";
-                            rowsHtml += `<div class="detail-row">
-                                <div class="detail-cat">${row.category}</div>
-                                <div class="detail-content">${row.content}${noteHtml}${videoHtml}</div>
-                            </div>`;
-                        });
-                        bodyHtml += `<div class="section-block"><div class="section-title">${section}</div>${rowsHtml}</div>`;
-                    }
+                    let imgHtml = item.photo ? `<div style="margin-top:10px;"><img src="${item.photo}" style="width:100%; border-radius:8px;"></div>` : "";
 
-                    html += `<div class="recipe-card">
-                        <div class="recipe-header">
-                            <span class="recipe-title">${item.name}</span>
-                            <span class="recipe-type">${item.type}</span>
+                    html += `<div class="info-card">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <span style="font-weight:bold; font-size:16px;">${item.menu}</span>
+                            <span style="font-size:12px; font-weight:bold; color:${color}; border:1px solid ${color}; padding:2px 6px; border-radius:4px;">${item.status}</span>
                         </div>
-                        <div class="recipe-body">${bodyHtml}</div>
+                        <div style="font-size:12px; color:#999; margin-bottom:10px;">${item.date}</div>
+                        <div style="font-size:14px; color:#555; white-space:pre-wrap; margin-bottom:5px;">${item.note}</div>
+                        ${item.feedback ? `<div style="background:#f9f9f9; padding:8px; font-size:13px; color:#333; border-radius:4px;">💬 ${item.feedback}</div>` : ""}
+                        ${imgHtml}
                     </div>`;
                 });
                 area.innerHTML = html;
             });
         }
-
-        // 기존 기능 (간소화)
-        function loadBEP(){ fetch(`${gasUrl}?action=bep`).then(r=>r.json()).then(d=>{ document.getElementById('fin-current').innerText=Number(d.current).toLocaleString(); const p=document.getElementById('fin-profit'); p.innerText=Number(d.netProfit).toLocaleString(); p.className=d.netProfit>0?"finance-val finance-profit plus":"finance-val finance-profit"; }); }
-        function loadMenuCost(){ fetch(`${gasUrl}?action=menu_cost`).then(r=>r.json()).then(l=>{ let h=""; l.forEach(i=>{ let c=i.ratio>35?"cost-bad":"cost-good"; h+=`<div class="menu-card"><div><b>${i.name}</b><br><small>${Number(i.cost).toLocaleString()}/${Number(i.price).toLocaleString()}</small></div><div class="cost-badge ${c}">${i.ratio}%</div></div>`; }); document.getElementById('menu-list-area').innerHTML=h; }); }
-        function loadManual(){ fetch(`${gasUrl}?action=manual`).then(r=>r.json()).then(l=>{ let h=""; l.forEach(i=>{ h+=`<div class="info-card"><b>${i.title}</b><br><small>${i.category}</small><p>${i.content}</p></div>`; }); document.getElementById('manual-list-area').innerHTML=h; }); }
-        
-        // 010 검색 이벤트
-        document.getElementById('searchBtn').addEventListener('click', ()=>{
-             const v=document.getElementById('searchInput').value;
-             fetch(`${gasUrl}?action=search&item=${v}`).then(r=>r.json()).then(d=>{
-                 let h=""; d.forEach(i=>{ h+=`<div style="padding:10px; border-bottom:1px solid #eee;"><b>${i.name}</b> (${i.spec})</div>`; });
-                 document.getElementById('result-list').innerHTML=h;
-             });
-        });
-        document.getElementById('recipeInput').addEventListener('keypress',e=>{if(e.key==='Enter')loadRecipe();});
     </script>
-</body>
-</html>
