@@ -15,10 +15,9 @@
         .workspace { display: none; }
         .back-btn { background: none; border: none; color: #555; margin-bottom:15px; cursor:pointer; }
         .info-card { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
-        .rnd-btn { display:block; width:100%; padding:15px; background:#2980b9; color:white; font-size:16px; font-weight:bold; border:none; border-radius:8px; cursor:pointer; text-align:center; text-decoration:none; }
         .photo-link-btn { display:inline-block; padding:5px 10px; background:#eee; color:#333; text-decoration:none; border-radius:4px; font-size:12px; margin-top:5px; border:1px solid #ccc; }
         .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
-        input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
+        input[type="text"], textarea { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box; }
         .action-btn { padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .recipe-card { background: white; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .recipe-header { background: #2c3e50; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
@@ -41,6 +40,10 @@
         .menu-card { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee; }
         .cost-good { background:#e8f8f5; color:#27ae60; padding:3px 8px; border-radius:4px; font-size:12px; }
         .cost-bad { background:#fdedec; color:#e74c3c; padding:3px 8px; border-radius:4px; font-size:12px; }
+
+        /* [수정] 팝업창 스타일 */
+        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; }
+        .modal-box { background:white; padding:20px; border-radius:8px; width:90%; max-width:400px; }
     </style>
 </head>
 <body>
@@ -83,21 +86,53 @@
 
         <div id="workspace-400" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
-            <div class="info-card" style="border: 2px solid #3498db; text-align:center;">
-                <h4 style="margin-top:0;">💡 R&D 연구 노트</h4>
-                <p style="font-size:13px; color:#666; margin-bottom:15px;">사진은 '구글 설문지'로 올리는 게 제일 빠릅니다.<br>아래 버튼을 눌러 작성해주세요.</p>
-                <button class="rnd-btn" onclick="openForm()">📝 새 기록 작성하기</button>
+            
+            <div class="info-card" style="padding:0; overflow:hidden;">
+                <div style="background:#2980b9; color:white; padding:10px; font-weight:bold; text-align:center;">📝 연구 기록 입력 (설문지)</div>
+                <iframe id="google-form-frame" style="width:100%; height:450px; border:none;"></iframe>
             </div>
-            <div style="margin-top:20px; border-bottom:2px solid #eee; padding-bottom:10px; font-weight:bold; color:#555;">📋 연구 기록 (최신순)</div>
+
+            <div style="margin-top:20px; border-bottom:2px solid #eee; padding-bottom:10px; font-weight:bold; color:#555; display:flex; justify-content:space-between; align-items:center;">
+                <span>📋 연구 기록 목록</span>
+                <button onclick="loadRnD()" style="font-size:12px; padding:5px 10px; border:1px solid #ccc; background:white; border-radius:4px; cursor:pointer;">🔄 새로고침</button>
+            </div>
             <div id="rnd-list-area"></div>
+        </div>
+    </div>
+
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="margin-top:0;">✏️ 기록 수정</h3>
+            <input type="hidden" id="edit-row">
+            <div style="margin-bottom:10px;">
+                <label style="font-size:12px; font-weight:bold;">메뉴명</label>
+                <input type="text" id="edit-menu">
+            </div>
+            <div style="margin-bottom:10px;">
+                <label style="font-size:12px; font-weight:bold;">상태</label>
+                <select id="edit-status" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px;">
+                    <option value="아이디어">아이디어</option>
+                    <option value="테스트중">테스트중</option>
+                    <option value="성공">성공</option>
+                    <option value="보류">보류</option>
+                </select>
+            </div>
+            <div style="margin-bottom:10px;">
+                <label style="font-size:12px; font-weight:bold;">연구노트</label>
+                <textarea id="edit-note" style="height:80px;"></textarea>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button onclick="closeEditModal()" style="flex:1; padding:10px; background:#ccc; border:none; border-radius:4px; cursor:pointer;">취소</button>
+                <button onclick="submitEdit()" style="flex:1; padding:10px; background:#2980b9; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">수정 저장</button>
+            </div>
         </div>
     </div>
 
     <script>
         const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
         
-        // 셰프님이 주신 주소를 제가 미리 넣었습니다. (수정 불필요)
-        const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSejJy628hEvS5_0QpukHJsFJF228YCEBgW0W6BDutfpjm-UDQ/viewform"; 
+        // 셰프님 주소 (유지)
+        const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSejJy628hEvS5_0QpukHJsFJF228YCEBgW0W6BDutfpjm-UDQ/viewform?embedded=true"; 
 
         function toggleSubMenu() { const el = document.getElementById('submenu-000'); el.style.display = (el.style.display==='block')?'none':'block'; }
         function goBackMain() { document.querySelectorAll('.workspace').forEach(el=>el.style.display='none'); document.getElementById('main-nav').style.display='block'; document.getElementById('page-title').innerText="MAIN MENU"; }
@@ -110,18 +145,21 @@
             else if(code==='020'){document.getElementById('workspace-020').style.display='block'; loadBEP(); loadMenuCost();}
             else if(code==='030'){document.getElementById('workspace-030').style.display='block'; loadManual();}
             else if(code==='100'){document.getElementById('workspace-100').style.display='block'; loadRecipe();}
-            else if(code==='400'){document.getElementById('workspace-400').style.display='block'; loadRnD();}
+            else if(code==='400'){
+                document.getElementById('workspace-400').style.display='block';
+                // 설문지 로딩
+                document.getElementById('google-form-frame').src = formUrl;
+                loadRnD();
+            }
         }
 
-        // [400] R&D Logic (이미지 표시 기능 강화)
-        function openForm() { window.open(formUrl, '_blank'); }
-        
+        // [400] R&D Logic (수정 기능 추가)
         function loadRnD() {
             const area = document.getElementById('rnd-list-area');
             area.innerHTML = "<p style='text-align:center; color:#999'>불러오는 중...</p>";
             
             fetch(`${gasUrl}?action=rnd`).then(r => r.json()).then(l => {
-                if(l.length === 0) { area.innerHTML = "<p style='text-align:center; color:#999'>기록이 없습니다.<br>위 버튼을 눌러 작성해주세요.</p>"; return; }
+                if(l.length === 0) { area.innerHTML = "<p style='text-align:center; color:#999'>기록이 없습니다.<br>위 설문지로 작성해주세요.</p>"; return; }
                 
                 let html = "";
                 l.forEach(i => {
@@ -133,27 +171,24 @@
                     let imgHtml = "";
                     if (i.photo) {
                         try {
-                            // 구글 설문지 이미지 ID 추출 (정규식 사용)
                             let match = i.photo.match(/[-\w]{25,}/);
                             if(match) {
-                                let fileId = match[0];
-                                let thumbUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
-                                
+                                let thumbUrl = `https://drive.google.com/uc?export=view&id=${match[0]}`;
                                 imgHtml = `<div style="margin-top:10px; text-align:center;">
-                                     <img src="${thumbUrl}" style="width:100%; max-width:300px; border-radius:8px;" referrerpolicy="no-referrer" onerror="this.style.display='none';">
-                                     <br><a href="${thumbUrl}" target="_blank" class="photo-link-btn">📷 사진 원본 보기</a>
+                                     <img src="${thumbUrl}" style="width:100%; max-width:200px; border-radius:8px;" referrerpolicy="no-referrer" onerror="this.style.display='none';">
                                    </div>`;
-                            } else {
-                                // ID 추출 실패 시 링크만 표시
-                                imgHtml = `<div style="margin-top:5px;"><a href="${i.photo}" target="_blank" class="photo-link-btn">📷 사진 링크</a></div>`;
                             }
-                        } catch(e) { console.log("이미지 파싱 에러"); }
+                        } catch(e) {}
                     }
 
+                    // 수정 버튼 추가
                     html += `<div class="info-card">
                         <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                             <span style="font-weight:bold; font-size:16px;">${i.menu}</span>
-                            <span style="font-size:11px; font-weight:bold; color:${c}; border:1px solid ${c}; padding:2px 6px; border-radius:4px;">${i.status}</span>
+                            <div>
+                                <span style="font-size:11px; font-weight:bold; color:${c}; border:1px solid ${c}; padding:2px 6px; border-radius:4px; margin-right:5px;">${i.status}</span>
+                                <button onclick='openEditModal(${JSON.stringify(i)})' style="font-size:11px; padding:2px 6px; cursor:pointer;">✏️ 수정</button>
+                            </div>
                         </div>
                         <div style="font-size:12px; color:#999; margin-bottom:10px;">${i.date}</div>
                         <p style="font-size:14px; color:#333; white-space:pre-wrap;">${i.note}</p>
@@ -162,6 +197,37 @@
                 });
                 area.innerHTML = html;
             });
+        }
+
+        // 수정 팝업 관련 함수
+        function openEditModal(item) {
+            document.getElementById('edit-row').value = item.row;
+            document.getElementById('edit-menu').value = item.menu;
+            document.getElementById('edit-status').value = item.status;
+            document.getElementById('edit-note').value = item.note;
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+        function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
+        
+        function submitEdit() {
+            const item = {
+                row: document.getElementById('edit-row').value,
+                menu: document.getElementById('edit-menu').value,
+                status: document.getElementById('edit-status').value,
+                note: document.getElementById('edit-note').value
+            };
+            
+            const btn = document.querySelector('#edit-modal button:last-child');
+            btn.innerText = "저장 중...";
+            btn.disabled = true;
+
+            google.script.run.withSuccessHandler(function(res) {
+                alert("수정되었습니다.");
+                closeEditModal();
+                btn.innerText = "수정 저장";
+                btn.disabled = false;
+                loadRnD(); // 목록 갱신
+            }).updateRnDItem(item);
         }
 
         // [010~100] 공통 로직
