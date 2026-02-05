@@ -43,7 +43,7 @@
         .save-btn { width: 100%; padding: 15px; color: white; border: none; border-radius: 8px; margin-top: 20px; font-weight: bold; cursor: pointer; }
         .bg-in { background: #27ae60; } .bg-out { background: #c0392b; }
 
-        /* [020] 손익분기점 대시보드 스타일 (NEW!) */
+        /* [020] 손익분기점 & 메뉴원가 스타일 */
         .bep-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .bep-title { font-size: 14px; color: #888; font-weight: bold; }
         .bep-amount { font-size: 24px; color: #2c3e50; font-weight: bold; margin: 5px 0 15px 0; }
@@ -55,6 +55,14 @@
         .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; }
         .status-profit { background: #e8f8f5; color: #27ae60; border: 1px solid #27ae60; }
         .status-loss { background: #fdedec; color: #e74c3c; border: 1px solid #e74c3c; }
+
+        /* 메뉴 원가 리스트 */
+        .menu-card { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 15px 0; }
+        .menu-name { font-weight: bold; font-size: 15px; color: #333; }
+        .menu-cost-info { font-size: 12px; color: #777; margin-top: 4px; }
+        .cost-badge { padding: 5px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .cost-good { background: #e8f8f5; color: #27ae60; } /* 원가율 좋음 (낮음) */
+        .cost-bad { background: #fdedec; color: #e74c3c; } /* 원가율 나쁨 (높음) */
 
     </style>
 </head>
@@ -108,39 +116,30 @@
         <div id="workspace-020" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
             
-            <h3 style="margin-bottom:20px;">📊 이번 달 손익 현황</h3>
+            <h3 style="margin-bottom:20px;">📊 사업 기획 & 운영</h3>
 
             <div class="bep-card">
-                <div class="bep-title">이번 달 목표 매출</div>
-                <div class="bep-amount" id="target-sales">0 원</div>
-                
-                <div class="progress-container">
+                <div class="bep-title">이번 달 목표 매출 달성률</div>
+                <div class="progress-container" style="margin-top:10px;">
                     <div id="sales-bar" class="progress-bar bar-green" style="width: 0%;"></div>
                 </div>
                 <div class="bep-info">
-                    <span>현재: <span id="current-sales" style="color:#27ae60; font-weight:bold;">0 원</span></span>
-                    <span id="sales-percent">0% 달성</span>
+                    <span>현재 <span id="current-sales" style="font-weight:bold; color:#27ae60;">0</span> / 목표 <span id="target-sales">0</span></span>
+                    <span id="sales-percent">0%</span>
                 </div>
-            </div>
-
-            <div class="bep-card">
+                <hr style="margin:15px 0; border:0; border-top:1px solid #eee;">
+                
                 <div class="bep-title">손익분기점 (BEP)</div>
-                <div class="bep-amount" id="bep-amount" style="color:#e67e22;">0 원</div>
-                <p style="font-size:13px; color:#777; margin-bottom:10px;">
-                    이 금액을 넘겨야 흑자입니다.
-                </p>
-                <div class="progress-container">
-                    <div id="bep-bar" class="progress-bar bar-red" style="width: 0%;"></div>
-                </div>
-                <div class="bep-info">
-                    <span>BEP 달성률</span>
-                    <span id="bep-percent">0%</span>
+                <div class="bep-amount" id="bep-amount" style="font-size:18px;">0 원</div>
+                <div style="text-align:center;">
+                    <span id="status-badge" class="status-badge status-loss">데이터 조회 중...</span>
                 </div>
             </div>
 
-            <div style="text-align:center; padding:20px;">
-                <span id="status-badge" class="status-badge status-loss">데이터 불러오는 중...</span>
-                <p id="profit-msg" style="margin-top:10px; font-weight:bold;">잠시만 기다려주세요.</p>
+            <div style="margin-top:30px;">
+                <h3 style="border-bottom:2px solid #333; padding-bottom:10px;">🍔 메뉴 원가 분석</h3>
+                <div id="menu-loading" style="text-align:center; padding:20px; color:#999;">분석 중...</div>
+                <div id="menu-list-area"></div>
             </div>
 
         </div>
@@ -155,7 +154,7 @@
         
         function openModule(code) {
             document.getElementById('main-nav').style.display = 'none';
-            document.querySelectorAll('.workspace').forEach(el => el.style.display = 'none'); // 모두 숨김
+            document.querySelectorAll('.workspace').forEach(el => el.style.display = 'none'); 
             
             if (code === '010') {
                 document.getElementById('workspace-010').style.display = 'block';
@@ -164,7 +163,8 @@
             } else if (code === '020') {
                 document.getElementById('workspace-020').style.display = 'block';
                 document.getElementById('page-title').innerText = "020 사업기획_운영";
-                loadBEP(); // [NEW] 손익 데이터 로드
+                loadBEP();      // 손익 로드
+                loadMenuCost(); // [NEW] 메뉴원가 로드
             }
         }
 
@@ -174,149 +174,112 @@
             document.getElementById('page-title').innerText = "MAIN MENU";
         }
 
-        // --- 020 손익분기점 기능 (NEW!) ---
+        // --- 020 기능 ---
         function loadBEP() {
-            fetch(`${gasUrl}?action=bep`)
-                .then(res => res.json())
-                .then(data => {
-                    // 데이터 바인딩
-                    const target = data.target;
-                    const current = data.current;
-                    const bep = data.bep;
+            fetch(`${gasUrl}?action=bep`).then(r=>r.json()).then(data => {
+                const target = data.target; const current = data.current; const bep = data.bep;
+                document.getElementById('target-sales').innerText = (target/10000).toLocaleString() + "만";
+                document.getElementById('current-sales').innerText = (current/10000).toLocaleString() + "만";
+                
+                let salesPct = Math.min((current/target)*100, 100);
+                document.getElementById('sales-bar').style.width = salesPct+"%";
+                document.getElementById('sales-percent').innerText = Math.round((current/target)*100)+"%";
+                document.getElementById('bep-amount').innerText = bep.toLocaleString() + " 원";
 
-                    // 1. 목표 매출 카드
-                    document.getElementById('target-sales').innerText = target.toLocaleString() + " 원";
-                    document.getElementById('current-sales').innerText = current.toLocaleString() + " 원";
-                    
-                    let salesPct = Math.min((current / target) * 100, 100);
-                    document.getElementById('sales-bar').style.width = salesPct + "%";
-                    document.getElementById('sales-percent').innerText = Math.round((current / target) * 100) + "% 달성";
-
-                    // 2. BEP 카드
-                    document.getElementById('bep-amount').innerText = bep.toLocaleString() + " 원";
-                    
-                    let bepPct = Math.min((current / bep) * 100, 100);
-                    document.getElementById('bep-bar').style.width = bepPct + "%";
-                    document.getElementById('bep-percent').innerText = Math.round((current / bep) * 100) + "%";
-
-                    // 3. 상태 메시지
-                    const badge = document.getElementById('status-badge');
-                    const msg = document.getElementById('profit-msg');
-                    const diff = current - bep;
-
-                    if (diff >= 0) {
-                        badge.className = "status-badge status-profit";
-                        badge.innerText = "흑자 전환 성공! 🎉";
-                        msg.innerText = `현재 ${diff.toLocaleString()}원 이익 중입니다.`;
-                        msg.style.color = "#27ae60";
-                    } else {
-                        badge.className = "status-badge status-loss";
-                        badge.innerText = "아직 적자 구간입니다 📉";
-                        msg.innerText = `BEP까지 ${Math.abs(diff).toLocaleString()}원 남았습니다.`;
-                        msg.style.color = "#e74c3c";
-                    }
-                })
-                .catch(err => {
-                    alert("데이터 로드 실패: " + err);
-                });
-        }
-
-
-        // --- 010 입출고 기능 (기존 유지) ---
-        let currentMode = 'in'; 
-        let workList = []; 
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const input = document.getElementById("searchInput");
-            const btn = document.getElementById("searchBtn");
-            if(input) input.addEventListener("keypress", function(e) { if(e.key==="Enter") { e.preventDefault(); btn.click(); } });
-            if(btn) btn.addEventListener("click", runSearch);
-        });
-
-        function loadAsset() {
-            fetch(`${gasUrl}?action=asset`)
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('asset-value').innerText = Number(data.total).toLocaleString() + " 원";
-                    renderAssetDetail(data.list);
-                });
-        }
-        function toggleAssetDetail() {
-            const d = document.getElementById('asset-detail');
-            d.style.display = (d.style.display==='block')?'none':'block';
-        }
-        function renderAssetDetail(list) {
-            const box = document.getElementById('asset-detail');
-            if(!list || list.length===0){ box.innerHTML="<p style='text-align:center;color:#999'>내역 없음</p>"; return;}
-            let h=""; list.forEach(i=>{ h+=`<div class="detail-row"><span>${i.name}</span><span>${i.value.toLocaleString()}원</span></div>`; });
-            box.innerHTML=h;
-        }
-
-        function setMode(mode) {
-            currentMode = mode;
-            document.getElementById('btn-in').className="mode-btn";
-            document.getElementById('btn-out').className="mode-btn";
-            document.getElementById('btn-stock').className="mode-btn";
-            document.getElementById('search-area').style.display='flex';
-            document.getElementById('work-area').style.display='block';
-            document.getElementById('result-list').innerHTML="";
-            document.getElementById('asset-detail').style.display='none';
-
-            if(mode==='in') {
-                document.getElementById('btn-in').className="mode-btn active-in";
-                setupWorkArea("매입장 저장하기","bg-in","📥 매입 리스트");
-            } else {
-                document.getElementById('btn-out').className="mode-btn active-out";
-                setupWorkArea("출고장 저장하기","bg-out","📤 출고 리스트");
-            }
-        }
-        function setupWorkArea(txt,cls,tit) {
-            const btn=document.getElementById('send-btn');
-            btn.innerText=txt; btn.className="save-btn "+cls;
-            document.getElementById('list-title').innerText=tit;
-            renderList();
-        }
-        function loadStock() {
-            document.getElementById('btn-in').className="mode-btn";
-            document.getElementById('btn-out').className="mode-btn";
-            document.getElementById('btn-stock').className="mode-btn active-stock";
-            document.getElementById('search-area').style.display='none';
-            document.getElementById('work-area').style.display='none';
-            document.getElementById('asset-detail').style.display='none';
-            const res=document.getElementById('result-list');
-            res.innerHTML="<p style='text-align:center'>재고 확인 중...</p>";
-            fetch(`${gasUrl}?action=inventory`).then(r=>r.json()).then(d=>{
-                if(d.length===0){res.innerHTML="<p>데이터 없음</p>";return;}
-                let h='<table><tr><th>품목</th><th>재고</th></tr>';
-                d.forEach(i=>{ 
-                    let c=i.qty<0?'red':'blue';
-                    h+=`<tr><td>${i.name}<br><small>${i.spec}</small></td><td style='color:${c};font-weight:bold'>${i.qty} ${i.unit}</td></tr>`;
-                });
-                res.innerHTML=h+'</table>';
+                const badge = document.getElementById('status-badge');
+                if (current >= bep) {
+                    badge.className = "status-badge status-profit"; badge.innerText = "흑자 전환 성공! 🎉";
+                } else {
+                    badge.className = "status-badge status-loss"; badge.innerText = "적자 (BEP 미달) 📉";
+                }
             });
         }
-        function runSearch() {
-            const v=document.getElementById('searchInput').value; if(!v)return;
-            const r=document.getElementById('result-list'); r.innerHTML="검색 중...";
-            fetch(`${gasUrl}?action=search&item=${encodeURIComponent(v)}`).then(x=>x.json()).then(d=>{
-                let h='<table>'; d.forEach(i=>{ h+=`<tr><td>${i.name}<br><small>${i.spec}</small></td><td style='text-align:right'><button class='action-btn' style='padding:5px' onclick="addToList('${i.name}','${i.spec}','${i.unit}')">추가</button></td></tr>`;});
+
+        // [NEW] 메뉴 원가 리스트 로드
+        function loadMenuCost() {
+            const area = document.getElementById('menu-list-area');
+            const loader = document.getElementById('menu-loading');
+            loader.style.display = 'block';
+            area.innerHTML = "";
+
+            fetch(`${gasUrl}?action=menu_cost`).then(r=>r.json()).then(list => {
+                loader.style.display = 'none';
+                if(list.length === 0) { area.innerHTML = "<p style='text-align:center; color:#999'>메뉴 데이터가 없습니다.<br>('메뉴관리' 시트를 확인해주세요)</p>"; return; }
+
+                let html = "";
+                list.forEach(item => {
+                    // 원가율 35% 기준 (넘으면 빨간색)
+                    let badgeClass = (item.ratio > 35) ? "cost-bad" : "cost-good";
+                    let badgeText = (item.ratio > 35) ? "주의" : "양호";
+
+                    html += `<div class="menu-card">
+                        <div>
+                            <div class="menu-name">${item.name}</div>
+                            <div class="menu-cost-info">원가 ${item.cost.toLocaleString()}원 / 판매가 ${item.price.toLocaleString()}원</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="cost-badge ${badgeClass}">${item.ratio}% (${badgeText})</div>
+                        </div>
+                    </div>`;
+                });
+                area.innerHTML = html;
+            });
+        }
+
+        // --- 010 기능 (기존 유지) ---
+        let currentMode='in'; let workList=[]; 
+        document.addEventListener("DOMContentLoaded", function() {
+            const i=document.getElementById("searchInput"); const b=document.getElementById("searchBtn");
+            if(i) i.addEventListener("keypress",e=>{if(e.key==="Enter"){e.preventDefault();b.click();}});
+            if(b) b.addEventListener("click",runSearch);
+        });
+        function loadAsset() {
+            fetch(`${gasUrl}?action=asset`).then(r=>r.json()).then(d=>{
+                document.getElementById('asset-value').innerText = Number(d.total).toLocaleString() + " 원";
+                let h=""; d.list.forEach(i=>{h+=`<div class="detail-row"><span>${i.name}</span><span>${i.value.toLocaleString()}원</span></div>`;});
+                document.getElementById('asset-detail').innerHTML = h || "<p style='text-align:center'>내역 없음</p>";
+            });
+        }
+        function toggleAssetDetail(){const d=document.getElementById('asset-detail');d.style.display=(d.style.display==='block')?'none':'block';}
+        function setMode(m){currentMode=m; 
+            document.getElementById('btn-in').className=(m==='in')?"mode-btn active-in":"mode-btn";
+            document.getElementById('btn-out').className=(m==='out')?"mode-btn active-out":"mode-btn";
+            document.getElementById('btn-stock').className=(m==='stock')?"mode-btn active-stock":"mode-btn";
+            document.getElementById('search-area').style.display=(m==='stock')?'none':'flex';
+            document.getElementById('work-area').style.display=(m==='stock')?'none':'block';
+            document.getElementById('saved-list').innerHTML="";
+        }
+        function loadStock(){ setMode('stock'); 
+            const r=document.getElementById('result-list'); r.innerHTML="<p style='text-align:center'>조회 중...</p>";
+            fetch(`${gasUrl}?action=inventory`).then(r=>r.json()).then(d=>{
+                if(d.length===0){r.innerHTML="<p>재고 없음</p>";return;}
+                let h='<table><tr><th>품목</th><th>재고</th></tr>';
+                d.forEach(i=>{h+=`<tr><td>${i.name}<br><small>${i.spec}</small></td><td style='color:${i.qty<0?'red':'blue'}'>${i.qty} ${i.unit}</td></tr>`;});
                 r.innerHTML=h+'</table>';
             });
         }
-        function addToList(n,s,u){ workList.push({date:new Date().toISOString().split('T')[0], name:n, spec:s, unit:u, qty:1}); renderList(); }
-        function updateQty(i,v){ workList[i].qty=v; }
+        function runSearch(){
+            const v=document.getElementById('searchInput').value; if(!v)return;
+            const r=document.getElementById('result-list'); r.innerHTML="검색 중...";
+            fetch(`${gasUrl}?action=search&item=${encodeURIComponent(v)}`).then(r=>r.json()).then(d=>{
+                let h='<table>'; d.forEach(i=>{h+=`<tr><td>${i.name}<br><small>${i.spec}</small></td><td style='text-align:right'><button class='action-btn' onclick="addToList('${i.name}','${i.spec}','${i.unit}')">추가</button></td></tr>`;});
+                r.innerHTML=h+'</table>';
+            });
+        }
+        function addToList(n,s,u){workList.push({date:new Date().toISOString().split('T')[0],name:n,spec:s,unit:u,qty:1}); renderList();}
+        function updateQty(i,v){workList[i].qty=v;}
         function renderList(){
             const l=document.getElementById('saved-list'); const b=document.getElementById('send-btn');
             if(workList.length===0){l.innerHTML="";b.style.display='none';return;}
             let h='<table><tr><th>품목</th><th>수량</th></tr>';
-            workList.forEach((item,idx)=>{ h+=`<tr><td>${item.name}</td><td><input type='number' value='${item.qty}' onchange='updateQty(${idx},this.value)'> ${item.unit}</td></tr>`; });
+            workList.forEach((t,i)=>{h+=`<tr><td>${t.name}</td><td><input type='number' value='${t.qty}' onchange='updateQty(${i},this.value)'> ${t.unit}</td></tr>`;});
             l.innerHTML=h+'</table>'; b.style.display='block';
         }
         function saveToSheet(){
-            if(!confirm("저장할까요?"))return;
+            if(!confirm("저장?"))return;
             const b=document.getElementById('send-btn'); b.disabled=true; b.innerText="저장 중...";
             fetch(`${gasUrl}?action=save&type=${currentMode}&data=${encodeURIComponent(JSON.stringify(workList))}`)
-            .then(()=>{ alert("완료!"); workList=[]; renderList(); b.disabled=false; setMode(currentMode); });
+            .then(()=>{alert("완료!"); workList=[]; renderList(); b.disabled=false; setMode(currentMode);});
         }
     </script>
 </body>
