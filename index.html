@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chef_dskim SYSTEM</title>
-    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f4f4f4; color: #333; }
         .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -23,14 +22,14 @@
         .detail-name { font-weight: bold; color: #555; }
         .detail-val { color: #2c3e50; }
 
-        /* 네비게이션 */
+        /* 메인 메뉴 버튼 */
         .main-btn { width: 100%; padding: 20px; margin-bottom: 10px; font-size: 16px; font-weight: bold; border: 1px solid #ccc; border-radius: 8px; background: #fff; cursor: pointer; text-align: left; }
         .code-tag { color: #888; font-size: 12px; display: block; margin-bottom: 5px; }
         #submenu-000 { display: none; background: #f8f9fa; margin-top: -5px; margin-bottom: 15px; padding: 5px; border: 1px solid #ddd; border-top: none; }
         .sub-btn { width: 100%; padding: 15px; border: none; border-bottom: 1px solid #eee; background: none; text-align: left; cursor: pointer; font-size: 15px; }
         .sub-btn:hover { background: #e9ecef; font-weight: bold; }
 
-        /* 작업창 및 검색 */
+        /* 작업창 */
         #workspace-010 { display: none; } 
         .mode-switch { display: flex; gap: 5px; margin-bottom: 20px; }
         .mode-btn { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-weight: bold; cursor: pointer; background: #fff; color: #777; font-size: 13px; }
@@ -41,22 +40,18 @@
         .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
         input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
         .action-btn { padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        /* 카메라 버튼 스타일 */
-        .camera-btn { padding: 10px 15px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 18px; }
+        
+        /* 카메라 버튼 (기능은 임시 중지) */
+        .camera-btn { padding: 10px 15px; background: #ccc; color: white; border: none; border-radius: 4px; cursor: not-allowed; font-size: 18px; }
 
         table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
         th, td { border: 1px solid #eee; padding: 10px; text-align: left; vertical-align: middle; }
         th { background: #f1f1f1; }
         .save-btn { width: 100%; padding: 15px; color: white; border: none; border-radius: 8px; margin-top: 20px; font-weight: bold; cursor: pointer; }
         .bg-in { background: #27ae60; } .bg-out { background: #c0392b; }
-        
-        /* 로딩 오버레이 */
-        #ocr-loading { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); color:white; text-align:center; padding-top:200px; z-index:9999; }
-    </script>
+    </style>
 </head>
 <body>
-
-    <div id="ocr-loading">📷 이미지를 분석 중입니다...<br>잠시만 기다려주세요.</div>
 
     <div class="container">
         <h2 id="page-title">MAIN MENU</h2>
@@ -90,11 +85,8 @@
             </div>
 
             <div id="search-area" class="search-box">
-                <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="processImage(this)">
-                
-                <button class="camera-btn" onclick="document.getElementById('cameraInput').click()">📷</button>
-                
-                <input type="text" id="searchInput" placeholder="품목명 입력 또는 카메라">
+                <button class="camera-btn" onclick="alert('카메라 기능은 현재 점검 중입니다.')">📷</button>
+                <input type="text" id="searchInput" placeholder="품목명 입력">
                 <button class="action-btn" id="searchBtn">검색</button>
             </div>
 
@@ -121,36 +113,6 @@
             input.addEventListener("keypress", function(e) { if(e.key==="Enter") { e.preventDefault(); btn.click(); } });
             btn.addEventListener("click", runSearch);
         });
-
-        // [OCR] 이미지 텍스트 추출 함수
-        function processImage(input) {
-            if (input.files && input.files[0]) {
-                const file = input.files[0];
-                document.getElementById('ocr-loading').style.display = 'block'; // 로딩 시작
-
-                // Tesseract.js 실행 (한국어 + 영어)
-                Tesseract.recognize(
-                    file,
-                    'kor+eng', 
-                    { logger: m => console.log(m) }
-                ).then(({ data: { text } }) => {
-                    document.getElementById('ocr-loading').style.display = 'none'; // 로딩 끝
-                    
-                    // 공백/특수문자 정리하고 검색창에 입력
-                    const cleanText = text.replace(/\n/g, " ").trim();
-                    if(cleanText) {
-                        // 너무 긴 문장이면 앞부분만 자름 (라벨 인식 최적화)
-                        document.getElementById('searchInput').value = cleanText.substring(0, 10);
-                        alert("인식된 글자: " + cleanText.substring(0, 20) + "...");
-                    } else {
-                        alert("글자를 찾지 못했습니다. 다시 찍어주세요.");
-                    }
-                }).catch(err => {
-                    document.getElementById('ocr-loading').style.display = 'none';
-                    alert("오류 발생: " + err);
-                });
-            }
-        }
 
         function toggleSubMenu() { const el = document.getElementById('submenu-000'); el.style.display = (el.style.display==='block')?'none':'block'; }
         
