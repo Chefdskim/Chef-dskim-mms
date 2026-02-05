@@ -9,62 +9,45 @@
         .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
 
-        /* 버튼 및 메뉴 스타일 */
+        /* 메인 버튼 */
         .main-btn { width: 100%; padding: 20px; margin-bottom: 10px; font-size: 16px; font-weight: bold; border: 1px solid #ccc; border-radius: 8px; background: #fff; cursor: pointer; text-align: left; }
         .code-tag { color: #888; font-size: 12px; display: block; margin-bottom: 5px; }
         #submenu-000 { display: none; background: #f8f9fa; margin-top: -5px; margin-bottom: 15px; padding: 5px; border: 1px solid #ddd; border-top: none; }
         .sub-btn { width: 100%; padding: 15px; border: none; border-bottom: 1px solid #eee; background: none; text-align: left; cursor: pointer; font-size: 15px; }
-        .sub-btn:hover { background: #e9ecef; font-weight: bold; }
         .workspace { display: none; }
         .back-btn { background: none; border: none; color: #555; margin-bottom:15px; cursor:pointer; }
         
-        /* 공통 UI 요소 */
-        .mode-switch { display: flex; gap: 5px; margin-bottom: 20px; }
-        .mode-btn { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-weight: bold; cursor: pointer; background: #fff; color: #777; font-size: 13px; }
-        .mode-btn.active-in { background: #e8f8f5; border-color: #27ae60; color: #27ae60; }
-        .mode-btn.active-out { background: #fdedec; border-color: #e74c3c; color: #e74c3c; }
-        .mode-btn.active-stock { background: #eaf2f8; border-color: #3498db; color: #3498db; }
+        /* 공통 */
         .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
         input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
         .action-btn { padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         
-        /* 020 스타일 */
-        .finance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .finance-item { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee; text-align: center; }
-        .finance-label { font-size: 12px; color: #7f8c8d; margin-bottom: 5px; }
-        .finance-val { font-size: 16px; font-weight: bold; color: #2c3e50; }
-        .finance-profit { color: #e74c3c !important; } .finance-profit.plus { color: #27ae60 !important; }
-        .status-box { text-align: center; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 30px; font-size: 14px; }
-        .status-box.plus { background: #e8f8f5; color: #27ae60; border: 1px solid #d1f2eb; }
-        .status-box.minus { background: #fdedec; color: #e74c3c; border: 1px solid #fadbd8; }
-        .menu-card { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 15px 0; }
-        .menu-name { font-weight: bold; font-size: 15px; color: #333; }
-        .menu-cost-info { font-size: 12px; color: #777; margin-top: 4px; }
-        .cost-badge { padding: 5px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .cost-good { background: #e8f8f5; color: #27ae60; } .cost-bad { background: #fdedec; color: #e74c3c; } 
-        
-        /* [100] 레시피 상세 카드 스타일 */
-        .recipe-card { background: white; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+        /* 레시피 카드 (상세형) */
+        .recipe-card { background: white; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .recipe-header { background: #2c3e50; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .recipe-title { font-size: 18px; font-weight: bold; }
-        .recipe-type { background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 15px; font-size: 12px; }
+        .recipe-title { font-size: 20px; font-weight: bold; }
+        .recipe-type { background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 15px; font-size: 12px; }
+        
         .recipe-body { padding: 15px; }
-        .recipe-section { margin-bottom: 15px; }
-        .section-title { font-size: 14px; color: #e67e22; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 8px; }
-        .ing-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; border-bottom: 1px dashed #f4f4f4; padding-bottom: 2px; }
-        .step-row { display: flex; gap: 10px; font-size: 13px; margin-bottom: 10px; }
-        .step-num { font-weight: bold; color: #2c3e50; min-width: 50px; }
-        .step-txt { line-height: 1.5; color: #555; }
-        .tip-box { background: #fffbe6; border: 1px solid #ffe58f; padding: 10px; border-radius: 5px; font-size: 12px; color: #856404; margin-top: 10px; }
-        .video-link { display: inline-block; font-size: 11px; color: #3498db; text-decoration: none; border: 1px solid #3498db; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
+        .section-block { margin-bottom: 20px; }
+        .section-title { font-size: 15px; font-weight: bold; color: #d35400; border-bottom: 2px solid #fce3cf; padding-bottom: 5px; margin-bottom: 10px; display: inline-block; }
+        
+        /* 상세 행 스타일 */
+        .detail-row { display: flex; margin-bottom: 8px; font-size: 14px; border-bottom: 1px dashed #eee; padding-bottom: 8px; align-items: flex-start; }
+        .detail-cat { font-weight: bold; color: #555; width: 70px; flex-shrink: 0; font-size: 13px; margin-top: 2px; }
+        .detail-content { flex: 1; line-height: 1.5; color: #333; white-space: pre-wrap; }
+        .detail-note { font-size: 12px; color: #e67e22; background: #fff8f0; padding: 2px 6px; border-radius: 4px; margin-left: 5px; display: inline-block; }
+        .video-tag { font-size: 11px; background: #e8f8f5; color: #27ae60; border: 1px solid #27ae60; padding: 2px 6px; border-radius: 4px; text-decoration: none; margin-left: 5px; font-weight: bold; }
 
-        /* 매뉴얼 카드 스타일 */
-        .info-card { background: white; border: 1px solid #eee; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
-        .info-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .info-title { font-size: 16px; font-weight: bold; color: #2c3e50; }
-        .info-cat { font-size: 11px; background: #f1f1f1; padding: 3px 8px; border-radius: 12px; color: #666; }
-        .info-content { font-size: 13px; color: #555; line-height: 1.6; white-space: pre-wrap; margin-top:10px; border-top:1px dashed #eee; padding-top:10px;}
-
+        /* 기타 스타일 (기존 유지) */
+        .finance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .finance-item { background: #f8f9fa; padding: 15px; text-align: center; border-radius: 8px; }
+        .finance-val { font-size: 16px; font-weight: bold; margin-top:5px; }
+        .finance-profit.plus { color: #27ae60; } .finance-profit { color: #e74c3c; }
+        .menu-card { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee; }
+        .cost-good { background:#e8f8f5; color:#27ae60; padding:3px 8px; border-radius:4px; font-size:12px; }
+        .cost-bad { background:#fdedec; color:#e74c3c; padding:3px 8px; border-radius:4px; font-size:12px; }
+        .info-card { padding:15px; border:1px solid #eee; margin-bottom:10px; border-radius:8px; }
     </style>
 </head>
 <body>
@@ -75,120 +58,120 @@
         <div id="main-nav">
             <button class="main-btn" onclick="toggleSubMenu()"><span class="code-tag">000</span> 기준정보 (ADMIN) ▼</button>
             <div id="submenu-000">
-                <button class="sub-btn" onclick="openModule('010')">010 입출고/원가 관리</button>
-                <button class="sub-btn" onclick="openModule('020')">020 사업기획_운영</button>
-                <button class="sub-btn" onclick="openModule('030')">030 직원교육 (매뉴얼)</button>
+                <button class="sub-btn" onclick="openModule('010')">010 자산/재고</button>
+                <button class="sub-btn" onclick="openModule('020')">020 손익/원가</button>
+                <button class="sub-btn" onclick="openModule('030')">030 직원교육</button>
             </div>
             <button class="main-btn" onclick="openModule('100')"><span class="code-tag">100~300</span> 국가별 요리 (레시피) 📖</button>
             <button class="main-btn" onclick="alert('준비 중')"><span class="code-tag">400</span> 심화 연구 (R&D)</button>
-            <button class="main-btn" onclick="alert('준비 중')"><span class="code-tag">900</span> 자료실 (ARCHIVE)</button>
-        </div>
-
-        <div id="workspace-010" class="workspace">
-            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
-            <div class="asset-box"><div style="font-size:13px; color:#3498db; font-weight:bold;">💰 현재 총 재고 자산</div><div id="asset-value" style="font-size:24px; font-weight:bold;">0 원</div></div>
-            <div class="mode-switch" style="margin-top:20px;"><button id="btn-in" class="mode-btn active-in" onclick="setMode('in')">📥 매입</button><button id="btn-out" class="mode-btn" onclick="setMode('out')">📤 출고</button><button id="btn-stock" class="mode-btn" onclick="loadStock()">📦 재고</button></div>
-            <div id="search-area" class="search-box"><input type="text" id="searchInput" placeholder="품목명 입력"><button class="action-btn" id="searchBtn">검색</button></div>
-            <div id="result-list"></div><div id="work-area" style="margin-top:30px; border-top:2px solid #eee; padding-top:15px;"><strong id="list-title">📋 매입 리스트</strong><div id="saved-list"></div><button id="send-btn" class="save-btn bg-in" onclick="saveToSheet()" style="display:none; width:100%; padding:15px; border:none; border-radius:8px; margin-top:20px; font-weight:bold; color:white;">저장하기</button></div>
-        </div>
-        <div id="workspace-020" class="workspace">
-            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button><h3 style="margin-bottom:20px;">📊 사업 기획 & 운영</h3>
-            <div class="finance-grid"><div class="finance-item"><div class="finance-label">매출</div><div class="finance-val" id="fin-current">0</div></div><div class="finance-item"><div class="finance-label">고정비</div><div class="finance-val" id="fin-fixed">0</div></div><div class="finance-item"><div class="finance-label">변동비</div><div class="finance-val" id="fin-variable">0</div></div><div class="finance-item"><div class="finance-label">순이익</div><div class="finance-val finance-profit" id="fin-profit">0</div></div></div>
-            <div id="status-msg-box" class="status-box">분석 중...</div><div style="margin-top:30px;"><h3 style="border-bottom:2px solid #333; padding-bottom:10px;">🍔 메뉴 원가 분석</h3><div id="menu-list-area"></div></div>
-        </div>
-        <div id="workspace-030" class="workspace">
-            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button><h3 style="margin-bottom:20px;">📘 직원 교육 매뉴얼</h3><div id="manual-list-area"></div>
         </div>
 
         <div id="workspace-100" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
-            <h3 style="margin-bottom:20px;">📖 레시피 데이터베이스</h3>
+            <h3 style="margin-bottom:20px;">📖 상세 레시피 DB</h3>
             <div class="search-box">
-                <input type="text" id="recipeInput" placeholder="메뉴명 검색 (예: 불고기, 파스타)">
+                <input type="text" id="recipeInput" placeholder="메뉴명 검색 (예: 봉골레)">
                 <button class="action-btn" onclick="loadRecipe()">검색</button>
             </div>
-            <div id="recipe-loading" style="text-align:center; padding:20px; color:#999; display:none;">레시피를 찾고 있습니다...</div>
+            <div id="recipe-loading" style="text-align:center; padding:20px; color:#999; display:none;">상세 정보를 불러옵니다...</div>
             <div id="recipe-list-area"></div>
+        </div>
+
+        <div id="workspace-010" class="workspace">
+            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
+            <div class="search-box"><input type="text" id="searchInput" placeholder="품목명"><button class="action-btn" id="searchBtn">검색</button></div>
+            <div id="result-list"></div>
+        </div>
+        <div id="workspace-020" class="workspace">
+            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
+            <div class="finance-grid">
+                <div class="finance-item"><div>매출</div><div class="finance-val" id="fin-current">0</div></div>
+                <div class="finance-item"><div>순이익</div><div class="finance-val" id="fin-profit">0</div></div>
+            </div>
+            <div style="margin-top:20px;"><h5>🍔 메뉴 원가</h5><div id="menu-list-area"></div></div>
+        </div>
+        <div id="workspace-030" class="workspace">
+            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
+            <div id="manual-list-area"></div>
         </div>
     </div>
 
     <script>
         const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
-        
-        function toggleSubMenu() { const el = document.getElementById('submenu-000'); el.style.display = (el.style.display==='block')?'none':'block'; }
-        
-        function openModule(code) {
-            document.getElementById('main-nav').style.display = 'none';
-            document.querySelectorAll('.workspace').forEach(el => el.style.display = 'none'); 
-            if (code === '010') { document.getElementById('workspace-010').style.display = 'block'; document.getElementById('page-title').innerText = "010 자산/재고"; setMode('in'); loadAsset(); }
-            else if (code === '020') { document.getElementById('workspace-020').style.display = 'block'; document.getElementById('page-title').innerText = "020 손익/원가"; loadBEP(); loadMenuCost(); }
-            else if (code === '030') { document.getElementById('workspace-030').style.display = 'block'; document.getElementById('page-title').innerText = "030 직원교육"; loadManual(); }
-            else if (code === '100') { document.getElementById('workspace-100').style.display = 'block'; document.getElementById('page-title').innerText = "100~300 레시피 DB"; loadRecipe(); }
-        }
-        function goBackMain() { document.querySelectorAll('.workspace').forEach(el => el.style.display = 'none'); document.getElementById('main-nav').style.display = 'block'; document.getElementById('page-title').innerText = "MAIN MENU"; }
 
-        // [100] 레시피 로드 (NEW!)
+        function toggleSubMenu() { const el = document.getElementById('submenu-000'); el.style.display = (el.style.display==='block')?'none':'block'; }
+        function openModule(code) {
+            document.getElementById('main-nav').style.display='none';
+            document.querySelectorAll('.workspace').forEach(el=>el.style.display='none');
+            if(code==='100'){ document.getElementById('workspace-100').style.display='block'; loadRecipe(); }
+            else if(code==='010'){ document.getElementById('workspace-010').style.display='block'; }
+            else if(code==='020'){ document.getElementById('workspace-020').style.display='block'; loadBEP(); loadMenuCost(); }
+            else if(code==='030'){ document.getElementById('workspace-030').style.display='block'; loadManual(); }
+        }
+        function goBackMain() { document.querySelectorAll('.workspace').forEach(el=>el.style.display='none'); document.getElementById('main-nav').style.display='block'; }
+
+        // [100] 상세 레시피 렌더링
         function loadRecipe() {
-            const keyword = document.getElementById('recipeInput').value;
+            const k = document.getElementById('recipeInput').value;
             const area = document.getElementById('recipe-list-area');
             const loader = document.getElementById('recipe-loading');
             
-            loader.style.display = 'block'; area.innerHTML = "";
+            loader.style.display='block'; area.innerHTML="";
 
-            fetch(`${gasUrl}?action=recipe&keyword=${encodeURIComponent(keyword)}`)
-                .then(r => r.json())
-                .then(list => {
-                    loader.style.display = 'none';
-                    if(list.length === 0) { area.innerHTML = "<p style='text-align:center; color:#999'>검색 결과가 없습니다.</p>"; return; }
+            fetch(`${gasUrl}?action=recipe&keyword=${encodeURIComponent(k)}`).then(r=>r.json()).then(list=>{
+                loader.style.display='none';
+                if(list.length===0){ area.innerHTML="<p style='text-align:center; color:#999'>검색 결과가 없습니다.</p>"; return; }
 
-                    let html = "";
-                    list.forEach(item => {
-                        // 재료 HTML 생성
-                        let ingHtml = "";
-                        item.ingredients.forEach(ing => {
-                            ingHtml += `<div class="ing-row"><span>${ing.item}</span><span style="color:#888; font-size:11px;">${ing.type}</span></div>`;
-                        });
-                        // 조리공정 HTML 생성
-                        let stepHtml = "";
-                        item.steps.forEach(st => {
-                            let vid = st.video ? `<a href="${st.video}" target="_blank" class="video-link">📺 영상</a>` : "";
-                            stepHtml += `<div class="step-row"><div class="step-num">${st.step}</div><div class="step-txt">${st.action}${vid}</div></div>`;
-                        });
-                        // 팁 HTML 생성
-                        let tipHtml = item.tips.length > 0 ? `<div class="tip-box">💡 <b>Chef's Tip:</b> ${item.tips.join("<br>")}</div>` : "";
-
-                        html += `<div class="recipe-card">
-                            <div class="recipe-header">
-                                <span class="recipe-title">${item.name}</span>
-                                <span class="recipe-type">${item.type || 'General'}</span>
-                            </div>
-                            <div class="recipe-body">
-                                ${ingHtml ? `<div class="recipe-section"><div class="section-title">🥕 식재료</div>${ingHtml}</div>` : ""}
-                                ${stepHtml ? `<div class="recipe-section"><div class="section-title">🍳 조리 공정</div>${stepHtml}</div>` : ""}
-                                ${tipHtml}
-                            </div>
-                        </div>`;
+                let html = "";
+                list.forEach(item => {
+                    // 섹션별 그룹화
+                    let grouped = {};
+                    item.details.forEach(d => {
+                        if(!grouped[d.section]) grouped[d.section] = [];
+                        grouped[d.section].push(d);
                     });
-                    area.innerHTML = html;
+
+                    let bodyHtml = "";
+                    for(let section in grouped) {
+                        if(!section) continue; // 구분 없는 행 제외
+                        let rowsHtml = "";
+                        grouped[section].forEach(row => {
+                            let noteHtml = row.note ? `<span class="detail-note">Tip: ${row.note}</span>` : "";
+                            let videoHtml = row.video ? `<a href="${row.video}" target="_blank" class="video-tag">📺 영상</a>` : "";
+                            rowsHtml += `<div class="detail-row">
+                                <div class="detail-cat">${row.category}</div>
+                                <div class="detail-content">${row.content}${noteHtml}${videoHtml}</div>
+                            </div>`;
+                        });
+                        bodyHtml += `<div class="section-block"><div class="section-title">${section}</div>${rowsHtml}</div>`;
+                    }
+
+                    html += `<div class="recipe-card">
+                        <div class="recipe-header">
+                            <span class="recipe-title">${item.name}</span>
+                            <span class="recipe-type">${item.type}</span>
+                        </div>
+                        <div class="recipe-body">${bodyHtml}</div>
+                    </div>`;
                 });
+                area.innerHTML = html;
+            });
         }
 
-        // --- 기존 함수들 (간소화) ---
-        function loadManual() { fetch(`${gasUrl}?action=manual`).then(r=>r.json()).then(l => { const a=document.getElementById('manual-list-area'); if(l.length===0){a.innerHTML="<p>데이터 없음</p>";return;} let h=""; l.forEach(i=>{ let link=i.link?`<a href="${i.link}" target="_blank" style="display:block;margin-top:10px;">🔗 영상</a>`:""; h+=`<div class="info-card"><div class="info-head"><span class="info-title">${i.title}</span><span class="info-cat">${i.category}</span></div><div class="info-content">${i.content}</div>${link}</div>`; }); a.innerHTML=h; }); }
-        function loadBEP() { fetch(`${gasUrl}?action=bep`).then(r=>r.json()).then(d => { document.getElementById('fin-current').innerText=Number(d.current).toLocaleString(); document.getElementById('fin-fixed').innerText=Number(d.fixed).toLocaleString(); document.getElementById('fin-variable').innerText=Number(d.variableCost).toLocaleString(); const p=document.getElementById('fin-profit'); p.innerText=Number(d.netProfit).toLocaleString(); p.className=d.netProfit>0?"finance-val finance-profit plus":"finance-val finance-profit"; document.getElementById('status-msg-box').innerText=d.netProfit>0?"🎉 흑자":"📉 적자"; }); }
-        function loadMenuCost() { fetch(`${gasUrl}?action=menu_cost`).then(r=>r.json()).then(l => { let h=""; l.forEach(i=>{ let c=i.ratio>35?"cost-bad":"cost-good"; h+=`<div class="menu-card"><div><div class="menu-name">${i.name}</div><div class="menu-cost-info">${Number(i.cost).toLocaleString()} / ${Number(i.price).toLocaleString()}</div></div><div class="cost-badge ${c}">${i.ratio}%</div></div>`; }); document.getElementById('menu-list-area').innerHTML=h||"<p>데이터 없음</p>"; }); }
-        let currentMode='in'; let workList=[]; 
-        document.addEventListener("DOMContentLoaded", function() {
-            const i=document.getElementById("searchInput"), b=document.getElementById("searchBtn"), ri=document.getElementById("recipeInput"); 
-            if(i) i.addEventListener("keypress",e=>{if(e.key==="Enter"){e.preventDefault();b.click();}}); if(b) b.addEventListener("click",runSearch); if(ri) ri.addEventListener("keypress",e=>{if(e.key==="Enter"){e.preventDefault();loadRecipe();}});
+        // 기존 기능 (간소화)
+        function loadBEP(){ fetch(`${gasUrl}?action=bep`).then(r=>r.json()).then(d=>{ document.getElementById('fin-current').innerText=Number(d.current).toLocaleString(); const p=document.getElementById('fin-profit'); p.innerText=Number(d.netProfit).toLocaleString(); p.className=d.netProfit>0?"finance-val finance-profit plus":"finance-val finance-profit"; }); }
+        function loadMenuCost(){ fetch(`${gasUrl}?action=menu_cost`).then(r=>r.json()).then(l=>{ let h=""; l.forEach(i=>{ let c=i.ratio>35?"cost-bad":"cost-good"; h+=`<div class="menu-card"><div><b>${i.name}</b><br><small>${Number(i.cost).toLocaleString()}/${Number(i.price).toLocaleString()}</small></div><div class="cost-badge ${c}">${i.ratio}%</div></div>`; }); document.getElementById('menu-list-area').innerHTML=h; }); }
+        function loadManual(){ fetch(`${gasUrl}?action=manual`).then(r=>r.json()).then(l=>{ let h=""; l.forEach(i=>{ h+=`<div class="info-card"><b>${i.title}</b><br><small>${i.category}</small><p>${i.content}</p></div>`; }); document.getElementById('manual-list-area').innerHTML=h; }); }
+        
+        // 010 검색 이벤트
+        document.getElementById('searchBtn').addEventListener('click', ()=>{
+             const v=document.getElementById('searchInput').value;
+             fetch(`${gasUrl}?action=search&item=${v}`).then(r=>r.json()).then(d=>{
+                 let h=""; d.forEach(i=>{ h+=`<div style="padding:10px; border-bottom:1px solid #eee;"><b>${i.name}</b> (${i.spec})</div>`; });
+                 document.getElementById('result-list').innerHTML=h;
+             });
         });
-        function loadAsset(){fetch(`${gasUrl}?action=asset`).then(r=>r.json()).then(d=>{document.getElementById('asset-value').innerText=Number(d.total).toLocaleString()+" 원";});}
-        function setMode(m){currentMode=m;document.getElementById('search-area').style.display=(m==='stock')?'none':'flex';document.getElementById('work-area').style.display=(m==='stock')?'none':'block';document.getElementById('result-list').innerHTML="";document.getElementById('saved-list').innerHTML="";}
-        function loadStock(){setMode('stock');fetch(`${gasUrl}?action=inventory`).then(r=>r.json()).then(d=>{let h='<table>';d.forEach(i=>{h+=`<tr><td>${i.name}</td><td>${i.qty}</td></tr>`});document.getElementById('result-list').innerHTML=h+'</table>';});}
-        function runSearch(){const v=document.getElementById('searchInput').value;fetch(`${gasUrl}?action=search&item=${v}`).then(r=>r.json()).then(d=>{let h='<table>';d.forEach(i=>{h+=`<tr><td>${i.name}</td><td><button class='action-btn' onclick="addToList('${i.name}','${i.spec}','${i.unit}')">추가</button></td></tr>`});document.getElementById('result-list').innerHTML=h+'</table>';});}
-        function addToList(n,s,u){workList.push({date:new Date().toISOString().split('T')[0],name:n,spec:s,unit:u,qty:1});renderList();}
-        function renderList(){let h='<table>';workList.forEach((t,i)=>{h+=`<tr><td>${t.name}</td><td><input type='number' value='${t.qty}' onchange='workList[${i}].qty=this.value'></td></tr>`});document.getElementById('saved-list').innerHTML=h+'</table>';document.getElementById('send-btn').style.display='block';}
-        function saveToSheet(){fetch(`${gasUrl}?action=save&type=${currentMode}&data=${encodeURIComponent(JSON.stringify(workList))}`).then(()=>{alert("완료");workList=[];renderList();});}
+        document.getElementById('recipeInput').addEventListener('keypress',e=>{if(e.key==='Enter')loadRecipe();});
     </script>
 </body>
 </html>
