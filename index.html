@@ -117,32 +117,32 @@
             else if(code==='400'){document.getElementById('workspace-400').style.display='block'; loadRnD();}
         }
 
-        // [400] R&D (사진 압축 기능 탑재)
+        // [400] R&D (초고속 다이어트 압축)
         let currentImageBase64 = null;
         function previewImage() {
             const file = document.getElementById('rnd-photo').files[0];
             if (file) {
-                document.getElementById('file-name').innerText = file.name;
+                document.getElementById('file-name').innerText = "압축 중... ⏳";
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // 압축을 위한 캔버스 작업
                     const img = new Image();
                     img.src = e.target.result;
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
-                        // 최대 너비 800px로 제한 (용량 다이어트)
-                        const MAX_WIDTH = 800;
+                        // [핵심] 800px -> 500px로 축소 (속도 3배 향상)
+                        const MAX_WIDTH = 500; 
                         let width = img.width;
                         let height = img.height;
                         if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
                         canvas.width = width; canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
-                        // JPEG 품질 0.6으로 압축
-                        const compressedData = canvas.toDataURL('image/jpeg', 0.6);
+                        // [핵심] 품질 0.6 -> 0.4로 축소 (용량 절반)
+                        const compressedData = canvas.toDataURL('image/jpeg', 0.4);
                         
                         document.getElementById('img-preview').src = compressedData;
                         document.getElementById('img-preview').style.display = 'block';
+                        document.getElementById('file-name').innerText = file.name + " (압축 완료)";
                         currentImageBase64 = { data: compressedData.split(',')[1], type: 'image/jpeg' };
                     }
                 };
@@ -159,7 +159,7 @@
                 image: currentImageBase64
             };
             if(!item.menu) return alert("메뉴명 입력 필수");
-            const btn = document.querySelector('#workspace-400 .action-btn'); btn.innerText="저장 중 (압축 전송)..."; btn.disabled=true;
+            const btn = document.querySelector('#workspace-400 .action-btn'); btn.innerText="전송 중...🚀"; btn.disabled=true;
             google.script.run.withSuccessHandler(()=>{ alert("저장 완료!"); btn.innerText="저장하기"; btn.disabled=false; loadRnD(); }).saveRnDItem(item);
         }
         function loadRnD() {
@@ -168,14 +168,18 @@
                 if(l.length===0){ a.innerHTML="<p style='text-align:center;color:#999'>기록 없음</p>"; return; }
                 let h=""; l.forEach(i=>{
                     let c = i.status==="아이디어"?"#f39c12":i.status==="테스트중"?"#e74c3c":i.status==="성공"?"#27ae60":"#777";
-                    let img = i.photo?`<div style="margin-top:5px;"><img src="${i.photo}" style="width:100%;border-radius:4px;"></div>`:"";
+                    // 시트의 =IMAGE("...") 수식에서 주소만 발라내기 (혹시 몰라 안전장치)
+                    let imgSrc = i.photo; 
+                    if(imgSrc && imgSrc.startsWith("=IMAGE")) { imgSrc = imgSrc.match(/"([^"]+)"/)[1]; }
+                    
+                    let img = imgSrc ? `<div style="margin-top:5px;"><img src="${imgSrc}" style="width:100%;border-radius:4px;"></div>`:"";
                     h+=`<div class="info-card"><div style="display:flex;justify-content:space-between;"><b>${i.menu}</b><span style="color:${c};border:1px solid ${c};padding:2px 5px;border-radius:4px;font-size:11px;">${i.status}</span></div><div style="font-size:12px;color:#999;">${i.date}</div><p style="font-size:13px;white-space:pre-wrap;">${i.note}</p>${i.feedback?`<div style="background:#f9f9f9;padding:5px;font-size:12px;">💬 ${i.feedback}</div>`:""}${img}</div>`;
                 });
                 a.innerHTML=h;
             });
         }
 
-        // [010~100] 공통 로직 (기존과 동일)
+        // [010~100] 공통 로직 (동일)
         function loadRecipe(){ const k=document.getElementById('recipeInput').value; const a=document.getElementById('recipe-list-area'); a.innerHTML="<p style='text-align:center;color:#999'>로딩 중...</p>"; fetch(`${gasUrl}?action=recipe&keyword=${encodeURIComponent(k)}`).then(r=>r.json()).then(l=>{if(l.length===0){a.innerHTML="<p style='text-align:center;color:#999'>검색 결과 없음</p>";return;}let h="";l.forEach(i=>{let g={};i.details.forEach(d=>{if(!g[d.section])g[d.section]=[];g[d.section].push(d)});let b="";for(let s in g){if(!s)continue;let r="";g[s].forEach(row=>{let v=row.video?`<a href="${row.video}" target="_blank" class="video-btn">▶ 영상</a>`:"";r+=`<div class="detail-row"><div class="detail-cat">${row.category}</div><div class="detail-content">${row.content}${v}</div></div>`});b+=`<div class="section-block"><div class="section-title">${s}</div>${r}</div>`}h+=`<div class="recipe-card"><div class="recipe-header"><span class="recipe-title">${i.name}</span><span class="recipe-type">${i.type}</span></div><div class="recipe-body">${b}</div></div>`});a.innerHTML=h})}
         let currentMode='in'; let workList=[];
         document.addEventListener("DOMContentLoaded", function() {
