@@ -15,9 +15,7 @@
         .workspace { display: none; }
         .back-btn { background: none; border: none; color: #555; margin-bottom:15px; cursor:pointer; }
         .info-card { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
-        /* R&D 버튼 스타일 */
         .rnd-btn { display:block; width:100%; padding:15px; background:#2980b9; color:white; font-size:16px; font-weight:bold; border:none; border-radius:8px; cursor:pointer; text-align:center; text-decoration:none; }
-        /* 나머지 UI 스타일들 */
         .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
         input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
         .action-btn { padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
@@ -65,14 +63,17 @@
             <div id="search-area" class="search-box"><input type="text" id="searchInput" placeholder="품목명"><button class="action-btn" id="searchBtn">검색</button></div>
             <div id="result-list"></div><div id="work-area" style="margin-top:20px; display:none;"><strong id="list-title">📋 작업 리스트</strong><div id="saved-list"></div><button id="send-btn" class="action-btn" onclick="saveToSheet()" style="width:100%; margin-top:10px;">저장하기</button></div>
         </div>
+
         <div id="workspace-020" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
             <div class="finance-grid"><div class="finance-item"><div>매출</div><div class="finance-val" id="fin-current">0</div></div><div class="finance-item"><div>순이익</div><div class="finance-val" id="fin-profit">0</div></div></div>
             <div style="margin-top:20px;"><h5>🍔 메뉴 원가</h5><div id="menu-list-area"></div></div>
         </div>
+
         <div id="workspace-030" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button><div id="manual-list-area"></div>
         </div>
+
         <div id="workspace-100" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
             <div class="search-box"><input type="text" id="recipeInput" placeholder="메뉴명 검색"><button class="action-btn" onclick="loadRecipe()">검색</button></div>
@@ -83,7 +84,7 @@
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
             <div class="info-card" style="border: 2px solid #3498db; text-align:center;">
                 <h4 style="margin-top:0;">💡 R&D 연구 노트</h4>
-                <p style="font-size:13px; color:#666; margin-bottom:15px;">사진 업로드는 '구글 설문지'가 제일 빠릅니다.<br>버튼을 눌러 작성해주세요.</p>
+                <p style="font-size:13px; color:#666; margin-bottom:15px;">사진 업로드는 '구글 설문지'가 가장 빠릅니다.<br>버튼을 눌러 작성해주세요.</p>
                 <button class="rnd-btn" onclick="openForm()">📝 새 기록 작성하기</button>
             </div>
             <div style="margin-top:20px; border-bottom:2px solid #eee; padding-bottom:10px; font-weight:bold; color:#555;">📋 연구 기록 (최신순)</div>
@@ -94,8 +95,8 @@
     <script>
         const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
 
-        // ★★★ 여기에 셰프님의 설문지 주소를 붙여넣으세요! ★★★
-        const formUrl = "https://docs.google.com/forms/d/e/......(여기에 붙여넣기)...../viewform"; 
+        // [중요] 셰프님의 설문지 주소가 여기에 들어갔습니다.
+        const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSejJy628hEvS5_0QpukHJsFJF228YCEBgW0W6BDutfpjm-UDQ/viewform"; 
 
         function toggleSubMenu() { const el = document.getElementById('submenu-000'); el.style.display = (el.style.display==='block')?'none':'block'; }
         function goBackMain() { document.querySelectorAll('.workspace').forEach(el=>el.style.display='none'); document.getElementById('main-nav').style.display='block'; document.getElementById('page-title').innerText="MAIN MENU"; }
@@ -126,7 +127,6 @@
 
                     let img = "";
                     if (i.photo) {
-                        // 구글 설문지 사진 링크 변환 (open?id= -> uc?export=view&id=)
                         let fileId = i.photo.split('id=')[1];
                         if (fileId) {
                             let thumbUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
@@ -147,7 +147,7 @@
             });
         }
 
-        // [010~100] 공통 로직 (기존 동일)
+        // [010~100] 공통 로직
         function loadRecipe(){const k=document.getElementById('recipeInput').value;const a=document.getElementById('recipe-list-area');a.innerHTML="<p style='text-align:center;color:#999'>로딩 중...</p>";fetch(`${gasUrl}?action=recipe&keyword=${encodeURIComponent(k)}`).then(r=>r.json()).then(l=>{if(l.length===0){a.innerHTML="<p style='text-align:center;color:#999'>검색 결과 없음</p>";return;}let h="";l.forEach(i=>{let g={};i.details.forEach(d=>{if(!g[d.section])g[d.section]=[];g[d.section].push(d)});let b="";for(let s in g){if(!s)continue;let r="";g[s].forEach(row=>{let v=row.video?`<a href="${row.video}" target="_blank" class="video-btn">▶ 영상</a>`:"";r+=`<div class="detail-row"><div class="detail-cat">${row.category}</div><div class="detail-content">${row.content}${v}</div></div>`});b+=`<div class="section-block"><div class="section-title">${s}</div>${r}</div>`}h+=`<div class="recipe-card"><div class="recipe-header"><span class="recipe-title">${i.name}</span><span class="recipe-type">${i.type}</span></div><div class="recipe-body">${b}</div></div>`});a.innerHTML=h})}
         let currentMode='in'; let workList=[];
         document.addEventListener("DOMContentLoaded", function() {
