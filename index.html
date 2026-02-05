@@ -96,7 +96,7 @@
     <script>
         const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
         
-        // 셰프님 설문지 주소
+        // 셰프님이 주신 주소를 제가 미리 넣었습니다. (수정 불필요)
         const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSejJy628hEvS5_0QpukHJsFJF228YCEBgW0W6BDutfpjm-UDQ/viewform"; 
 
         function toggleSubMenu() { const el = document.getElementById('submenu-000'); el.style.display = (el.style.display==='block')?'none':'block'; }
@@ -113,7 +113,7 @@
             else if(code==='400'){document.getElementById('workspace-400').style.display='block'; loadRnD();}
         }
 
-        // [400] R&D Logic (강력한 이미지 주소 처리)
+        // [400] R&D Logic (이미지 표시 기능 강화)
         function openForm() { window.open(formUrl, '_blank'); }
         
         function loadRnD() {
@@ -132,21 +132,22 @@
 
                     let imgHtml = "";
                     if (i.photo) {
-                        // [핵심] 주소에서 ID만 추출하는 정규식 (어떤 주소든 다 잡아냄)
-                        // 25자 이상의 알파벳+숫자 조합을 찾아냄 (=File ID)
-                        let match = i.photo.match(/[-\w]{25,}/);
-                        if(match) {
-                            let fileId = match[0];
-                            let thumbUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
-                            
-                            imgHtml = `<div style="margin-top:10px; text-align:center;">
-                                <img src="${thumbUrl}" style="width:100%; max-width:300px; border-radius:8px;" referrerpolicy="no-referrer" onerror="this.style.display='none';">
-                                <br><a href="${thumbUrl}" target="_blank" class="photo-link-btn">📷 사진 보기 (Click)</a>
-                            </div>`;
-                        } else {
-                            // ID 추출 실패 시 링크만 표시
-                            imgHtml = `<div style="margin-top:5px;"><a href="${i.photo}" target="_blank" class="photo-link-btn">📷 사진 링크</a></div>`;
-                        }
+                        try {
+                            // 구글 설문지 이미지 ID 추출 (정규식 사용)
+                            let match = i.photo.match(/[-\w]{25,}/);
+                            if(match) {
+                                let fileId = match[0];
+                                let thumbUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+                                
+                                imgHtml = `<div style="margin-top:10px; text-align:center;">
+                                     <img src="${thumbUrl}" style="width:100%; max-width:300px; border-radius:8px;" referrerpolicy="no-referrer" onerror="this.style.display='none';">
+                                     <br><a href="${thumbUrl}" target="_blank" class="photo-link-btn">📷 사진 원본 보기</a>
+                                   </div>`;
+                            } else {
+                                // ID 추출 실패 시 링크만 표시
+                                imgHtml = `<div style="margin-top:5px;"><a href="${i.photo}" target="_blank" class="photo-link-btn">📷 사진 링크</a></div>`;
+                            }
+                        } catch(e) { console.log("이미지 파싱 에러"); }
                     }
 
                     html += `<div class="info-card">
