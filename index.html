@@ -43,35 +43,31 @@
         .save-btn { width: 100%; padding: 15px; color: white; border: none; border-radius: 8px; margin-top: 20px; font-weight: bold; cursor: pointer; }
         .bg-in { background: #27ae60; } .bg-out { background: #c0392b; }
 
-        /* [020] 손익분기점 & 메뉴원가 스타일 */
-        .bep-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .bep-title { font-size: 14px; color: #888; font-weight: bold; }
-        .bep-amount { font-size: 24px; color: #2c3e50; font-weight: bold; margin: 5px 0 15px 0; }
-        .progress-container { background: #f1f1f1; border-radius: 10px; height: 15px; width: 100%; margin-bottom: 5px; overflow: hidden; }
-        .progress-bar { height: 100%; border-radius: 10px; transition: width 0.5s; }
-        .bar-green { background: #27ae60; }
-        .bar-red { background: #e74c3c; }
-        .bep-info { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-top: 5px; }
-        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; }
-        .status-profit { background: #e8f8f5; color: #27ae60; border: 1px solid #27ae60; }
-        .status-loss { background: #fdedec; color: #e74c3c; border: 1px solid #e74c3c; }
-
-        /* [NEW] 재무 지표 요약 그리드 */
-        .finance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        /* [020] 스타일 */
+        .finance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .finance-item { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee; text-align: center; }
         .finance-label { font-size: 12px; color: #7f8c8d; margin-bottom: 5px; }
         .finance-val { font-size: 16px; font-weight: bold; color: #2c3e50; }
-        /* 순이익 강조 */
-        .finance-profit { color: #e74c3c !important; } /* 적자일 때 */
-        .finance-profit.plus { color: #27ae60 !important; } /* 흑자일 때 */
-
-        /* 메뉴 원가 리스트 */
+        .finance-profit { color: #e74c3c !important; } 
+        .finance-profit.plus { color: #27ae60 !important; }
+        .status-box { text-align: center; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 30px; font-size: 14px; }
+        .status-box.plus { background: #e8f8f5; color: #27ae60; border: 1px solid #d1f2eb; }
+        .status-box.minus { background: #fdedec; color: #e74c3c; border: 1px solid #fadbd8; }
         .menu-card { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 15px 0; }
         .menu-name { font-weight: bold; font-size: 15px; color: #333; }
         .menu-cost-info { font-size: 12px; color: #777; margin-top: 4px; }
         .cost-badge { padding: 5px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
         .cost-good { background: #e8f8f5; color: #27ae60; } 
         .cost-bad { background: #fdedec; color: #e74c3c; } 
+
+        /* [030] 매뉴얼 카드 스타일 (NEW!) */
+        .manual-card { background: white; border: 1px solid #eee; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+        .manual-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .manual-title { font-size: 16px; font-weight: bold; color: #2c3e50; }
+        .manual-cat { font-size: 11px; background: #f1f1f1; padding: 3px 8px; border-radius: 12px; color: #666; }
+        .manual-content { font-size: 13px; color: #555; line-height: 1.6; white-space: pre-wrap; }
+        .manual-link { display: inline-block; margin-top: 10px; font-size: 12px; color: #3498db; text-decoration: none; border: 1px solid #3498db; padding: 5px 10px; border-radius: 4px; }
+        .manual-link:hover { background: #eaf2f8; }
 
     </style>
 </head>
@@ -85,7 +81,7 @@
             <div id="submenu-000">
                 <button class="sub-btn" onclick="openModule('010')">010 입출고/원가 관리</button>
                 <button class="sub-btn" onclick="openModule('020')">020 사업기획_운영</button>
-                <button class="sub-btn" onclick="alert('준비 중')">030 직원교육</button>
+                <button class="sub-btn" onclick="openModule('030')">030 직원교육 (매뉴얼)</button>
             </div>
             <button class="main-btn" onclick="alert('준비 중')"><span class="code-tag">100~300</span> 국가별 요리</button>
             <button class="main-btn" onclick="alert('준비 중')"><span class="code-tag">400</span> 심화 연구 (R&D)</button>
@@ -124,9 +120,7 @@
 
         <div id="workspace-020" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
-            
             <h3 style="margin-bottom:20px;">📊 사업 기획 & 운영</h3>
-
             <div class="finance-grid">
                 <div class="finance-item">
                     <div class="finance-label">현재 총 매출액</div>
@@ -145,32 +139,20 @@
                     <div class="finance-val finance-profit" id="fin-profit">0 원</div>
                 </div>
             </div>
-
-            <div class="bep-card">
-                <div class="bep-title">매출 달성률 그래프</div>
-                <div class="progress-container" style="margin-top:10px;">
-                    <div id="sales-bar" class="progress-bar bar-green" style="width: 0%;"></div>
-                </div>
-                <div class="bep-info">
-                    <span id="sales-percent-text">0% 달성</span>
-                    <span id="bep-gap-text">BEP까지 0원 남음</span>
-                </div>
-                
-                <hr style="margin:15px 0; border:0; border-top:1px solid #eee;">
-                
-                <div class="bep-title">손익분기점 (BEP)</div>
-                <div class="bep-amount" id="bep-amount" style="font-size:18px; color:#e67e22;">0 원</div>
-                <div style="text-align:center;">
-                    <span id="status-badge" class="status-badge status-loss">데이터 조회 중...</span>
-                </div>
-            </div>
-
+            <div id="status-msg-box" class="status-box">데이터를 분석 중입니다...</div>
             <div style="margin-top:30px;">
                 <h3 style="border-bottom:2px solid #333; padding-bottom:10px;">🍔 메뉴 원가 분석</h3>
                 <div id="menu-loading" style="text-align:center; padding:20px; color:#999;">분석 중...</div>
                 <div id="menu-list-area"></div>
             </div>
+        </div>
 
+        <div id="workspace-030" class="workspace">
+            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
+            <h3 style="margin-bottom:20px;">📘 직원 교육 매뉴얼</h3>
+            
+            <div id="manual-loading" style="text-align:center; padding:20px; color:#999;">매뉴얼 불러오는 중...</div>
+            <div id="manual-list-area"></div>
         </div>
 
     </div>
@@ -192,8 +174,11 @@
             } else if (code === '020') {
                 document.getElementById('workspace-020').style.display = 'block';
                 document.getElementById('page-title').innerText = "020 사업기획_운영";
-                loadBEP();      
-                loadMenuCost(); 
+                loadBEP(); loadMenuCost(); 
+            } else if (code === '030') {
+                document.getElementById('workspace-030').style.display = 'block';
+                document.getElementById('page-title').innerText = "030 직원교육";
+                loadManual(); // [NEW] 매뉴얼 로드
             }
         }
 
@@ -203,78 +188,73 @@
             document.getElementById('page-title').innerText = "MAIN MENU";
         }
 
-        // --- 020 기능 (수정됨) ---
-        function loadBEP() {
-            fetch(`${gasUrl}?action=bep`).then(r=>r.json()).then(data => {
-                const target = data.target; 
-                const current = data.current; 
-                const bep = data.bep;
-                const fixed = data.fixed;
-                const varCost = data.variableCost;
-                const profit = data.netProfit;
-
-                // [NEW] 4대 핵심 지표 바인딩
-                document.getElementById('fin-current').innerText = Number(current).toLocaleString() + " 원";
-                document.getElementById('fin-fixed').innerText = Number(fixed).toLocaleString() + " 원";
-                document.getElementById('fin-variable').innerText = Number(varCost).toLocaleString() + " 원";
-                
-                const profitEl = document.getElementById('fin-profit');
-                profitEl.innerText = Number(profit).toLocaleString() + " 원";
-                // 흑자면 초록색, 적자면 빨간색
-                if (profit > 0) profitEl.className = "finance-val finance-profit plus";
-                else profitEl.className = "finance-val finance-profit";
-
-                // 그래프 및 BEP
-                let salesPct = Math.min((current/target)*100, 100);
-                document.getElementById('sales-bar').style.width = salesPct+"%";
-                document.getElementById('sales-percent-text').innerText = Math.round((current/target)*100)+"% 달성";
-                document.getElementById('bep-amount').innerText = bep.toLocaleString() + " 원";
-
-                const diff = current - bep;
-                const gapText = document.getElementById('bep-gap-text');
-                const badge = document.getElementById('status-badge');
-
-                if (current >= bep) {
-                    badge.className = "status-badge status-profit"; badge.innerText = "흑자 전환 성공! 🎉";
-                    gapText.innerText = `+${diff.toLocaleString()}원 이익`;
-                    gapText.style.color = "#27ae60";
-                } else {
-                    badge.className = "status-badge status-loss"; badge.innerText = "적자 (BEP 미달) 📉";
-                    gapText.innerText = `BEP까지 -${Math.abs(diff).toLocaleString()}원`;
-                    gapText.style.color = "#e74c3c";
-                }
-            });
-        }
-
-        function loadMenuCost() {
-            const area = document.getElementById('menu-list-area');
-            const loader = document.getElementById('menu-loading');
+        // --- 030 기능 (NEW!) ---
+        function loadManual() {
+            const area = document.getElementById('manual-list-area');
+            const loader = document.getElementById('manual-loading');
             loader.style.display = 'block';
             area.innerHTML = "";
 
-            fetch(`${gasUrl}?action=menu_cost`).then(r=>r.json()).then(list => {
+            fetch(`${gasUrl}?action=manual`).then(r=>r.json()).then(list => {
                 loader.style.display = 'none';
-                if(list.length === 0) { area.innerHTML = "<p style='text-align:center; color:#999'>메뉴 데이터가 없습니다.</p>"; return; }
+                if(list.length === 0) { area.innerHTML = "<p style='text-align:center; color:#999'>등록된 매뉴얼이 없습니다.<br>('교육관리' 시트에 내용을 추가해주세요)</p>"; return; }
 
                 let html = "";
                 list.forEach(item => {
-                    let badgeClass = (item.ratio > 35) ? "cost-bad" : "cost-good";
-                    let badgeText = (item.ratio > 35) ? "주의" : "양호";
-                    html += `<div class="menu-card">
-                        <div>
-                            <div class="menu-name">${item.name}</div>
-                            <div class="menu-cost-info">원가 ${item.cost.toLocaleString()}원 / 판매가 ${item.price.toLocaleString()}원</div>
+                    let linkHtml = "";
+                    if (item.link) {
+                        linkHtml = `<a href="${item.link}" target="_blank" class="manual-link">🔗 참고 자료 보기</a>`;
+                    }
+                    
+                    html += `<div class="manual-card">
+                        <div class="manual-head">
+                            <span class="manual-title">${item.title}</span>
+                            <span class="manual-cat">${item.category}</span>
                         </div>
-                        <div style="text-align:right;">
-                            <div class="cost-badge ${badgeClass}">${item.ratio}% (${badgeText})</div>
-                        </div>
+                        <div class="manual-content">${item.content}</div>
+                        ${linkHtml}
                     </div>`;
                 });
                 area.innerHTML = html;
             });
         }
 
-        // --- 010 기능 (기존 유지) ---
+        // --- 020 기능 ---
+        function loadBEP() {
+            fetch(`${gasUrl}?action=bep`).then(r=>r.json()).then(data => {
+                const current = data.current; const fixed = data.fixed; const varCost = data.variableCost; const profit = data.netProfit;
+                document.getElementById('fin-current').innerText = Number(current).toLocaleString() + " 원";
+                document.getElementById('fin-fixed').innerText = Number(fixed).toLocaleString() + " 원";
+                document.getElementById('fin-variable').innerText = Number(varCost).toLocaleString() + " 원";
+                const profitEl = document.getElementById('fin-profit');
+                profitEl.innerText = Number(profit).toLocaleString() + " 원";
+                const msgBox = document.getElementById('status-msg-box');
+                if (profit > 0) {
+                    profitEl.className = "finance-val finance-profit plus";
+                    msgBox.className = "status-box plus"; msgBox.innerText = "🎉 현재 " + Number(profit).toLocaleString() + "원 흑자입니다!";
+                } else {
+                    profitEl.className = "finance-val finance-profit";
+                    msgBox.className = "status-box minus"; msgBox.innerText = "📉 현재 " + Number(Math.abs(profit)).toLocaleString() + "원 적자입니다.";
+                }
+            });
+        }
+        function loadMenuCost() {
+            const area = document.getElementById('menu-list-area');
+            area.innerHTML = "";
+            fetch(`${gasUrl}?action=menu_cost`).then(r=>r.json()).then(list => {
+                document.getElementById('menu-loading').style.display = 'none';
+                if(list.length === 0) { area.innerHTML = "<p style='text-align:center; color:#999'>메뉴 데이터 없음</p>"; return; }
+                let html = "";
+                list.forEach(item => {
+                    let badgeClass = (item.ratio > 35) ? "cost-bad" : "cost-good";
+                    let badgeText = (item.ratio > 35) ? "주의" : "양호";
+                    html += `<div class="menu-card"><div><div class="menu-name">${item.name}</div><div class="menu-cost-info">원가 ${item.cost.toLocaleString()}원 / 판매가 ${item.price.toLocaleString()}원</div></div><div style="text-align:right;"><div class="cost-badge ${badgeClass}">${item.ratio}% (${badgeText})</div></div></div>`;
+                });
+                area.innerHTML = html;
+            });
+        }
+
+        // --- 010 기능 ---
         let currentMode='in'; let workList=[]; 
         document.addEventListener("DOMContentLoaded", function() {
             const i=document.getElementById("searchInput"); const b=document.getElementById("searchBtn");
