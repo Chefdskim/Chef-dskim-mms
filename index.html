@@ -61,6 +61,9 @@
         .finance-item { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee; text-align: center; }
         .finance-label { font-size: 12px; color: #7f8c8d; margin-bottom: 5px; }
         .finance-val { font-size: 16px; font-weight: bold; color: #2c3e50; }
+        /* 순이익 강조 */
+        .finance-profit { color: #e74c3c !important; } /* 적자일 때 */
+        .finance-profit.plus { color: #27ae60 !important; } /* 흑자일 때 */
 
         /* 메뉴 원가 리스트 */
         .menu-card { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 15px 0; }
@@ -126,10 +129,6 @@
 
             <div class="finance-grid">
                 <div class="finance-item">
-                    <div class="finance-label">이번 달 목표 매출</div>
-                    <div class="finance-val" id="fin-target" style="color:#3498db;">0 원</div>
-                </div>
-                <div class="finance-item">
                     <div class="finance-label">현재 총 매출액</div>
                     <div class="finance-val" id="fin-current" style="color:#2c3e50;">0 원</div>
                 </div>
@@ -138,8 +137,12 @@
                     <div class="finance-val" id="fin-fixed">0 원</div>
                 </div>
                 <div class="finance-item">
-                    <div class="finance-label">변동비율</div>
-                    <div class="finance-val" id="fin-variable">0%</div>
+                    <div class="finance-label">변동비 (재료비 등)</div>
+                    <div class="finance-val" id="fin-variable">0 원</div>
+                </div>
+                <div class="finance-item">
+                    <div class="finance-label">현재 순이익</div>
+                    <div class="finance-val finance-profit" id="fin-profit">0 원</div>
                 </div>
             </div>
 
@@ -200,20 +203,26 @@
             document.getElementById('page-title').innerText = "MAIN MENU";
         }
 
-        // --- 020 기능 ---
+        // --- 020 기능 (수정됨) ---
         function loadBEP() {
             fetch(`${gasUrl}?action=bep`).then(r=>r.json()).then(data => {
                 const target = data.target; 
                 const current = data.current; 
                 const bep = data.bep;
                 const fixed = data.fixed;
-                const variable = data.variableRatio;
+                const varCost = data.variableCost;
+                const profit = data.netProfit;
 
-                // [NEW] 상단 4가지 지표 바인딩
-                document.getElementById('fin-target').innerText = Number(target).toLocaleString() + " 원";
+                // [NEW] 4대 핵심 지표 바인딩
                 document.getElementById('fin-current').innerText = Number(current).toLocaleString() + " 원";
                 document.getElementById('fin-fixed').innerText = Number(fixed).toLocaleString() + " 원";
-                document.getElementById('fin-variable').innerText = (variable * 100).toFixed(0) + "%";
+                document.getElementById('fin-variable').innerText = Number(varCost).toLocaleString() + " 원";
+                
+                const profitEl = document.getElementById('fin-profit');
+                profitEl.innerText = Number(profit).toLocaleString() + " 원";
+                // 흑자면 초록색, 적자면 빨간색
+                if (profit > 0) profitEl.className = "finance-val finance-profit plus";
+                else profitEl.className = "finance-val finance-profit";
 
                 // 그래프 및 BEP
                 let salesPct = Math.min((current/target)*100, 100);
