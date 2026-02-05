@@ -16,6 +16,7 @@
         .back-btn { background: none; border: none; color: #555; margin-bottom:15px; cursor:pointer; }
         .info-card { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
         .rnd-btn { display:block; width:100%; padding:15px; background:#2980b9; color:white; font-size:16px; font-weight:bold; border:none; border-radius:8px; cursor:pointer; text-align:center; text-decoration:none; }
+        .photo-link-btn { display:inline-block; padding:5px 10px; background:#eee; color:#333; text-decoration:none; border-radius:4px; font-size:12px; margin-top:5px; border:1px solid #ccc; }
         .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
         input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
         .action-btn { padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
@@ -95,7 +96,7 @@
     <script>
         const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
         
-        // 셰프님이 주신 주소를 여기에 심었습니다.
+        // 셰프님 설문지 주소
         const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSejJy628hEvS5_0QpukHJsFJF228YCEBgW0W6BDutfpjm-UDQ/viewform"; 
 
         function toggleSubMenu() { const el = document.getElementById('submenu-000'); el.style.display = (el.style.display==='block')?'none':'block'; }
@@ -112,7 +113,7 @@
             else if(code==='400'){document.getElementById('workspace-400').style.display='block'; loadRnD();}
         }
 
-        // [400] R&D Logic (사진 표시 개선)
+        // [400] R&D Logic (강력한 이미지 주소 처리)
         function openForm() { window.open(formUrl, '_blank'); }
         
         function loadRnD() {
@@ -129,23 +130,23 @@
                     if(i.status && i.status.includes("테스트")) c = "#e74c3c";
                     if(i.status && i.status.includes("성공")) c = "#27ae60";
 
-                    // 사진 링크 자동 변환
-                    let img = "";
+                    let imgHtml = "";
                     if (i.photo) {
-                        try {
-                            // 구글 폼 주소에서 ID만 쏙 빼내기
-                            let fileId = "";
-                            if(i.photo.includes("id=")) fileId = i.photo.split('id=')[1].split(',')[0].trim();
-                            else if(i.photo.includes("/d/")) fileId = i.photo.split('/d/')[1].split('/')[0];
+                        // [핵심] 주소에서 ID만 추출하는 정규식 (어떤 주소든 다 잡아냄)
+                        // 25자 이상의 알파벳+숫자 조합을 찾아냄 (=File ID)
+                        let match = i.photo.match(/[-\w]{25,}/);
+                        if(match) {
+                            let fileId = match[0];
+                            let thumbUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
                             
-                            if(fileId) {
-                                let thumbUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
-                                // referrerpolicy="no-referrer" 필수!
-                                img = `<div style="margin-top:10px; text-align:center;">
-                                         <img src="${thumbUrl}" style="width:100%; max-width:300px; border-radius:8px;" referrerpolicy="no-referrer" onerror="this.style.display='none';">
-                                       </div>`;
-                            }
-                        } catch(e) { console.log("이미지 변환 실패"); }
+                            imgHtml = `<div style="margin-top:10px; text-align:center;">
+                                <img src="${thumbUrl}" style="width:100%; max-width:300px; border-radius:8px;" referrerpolicy="no-referrer" onerror="this.style.display='none';">
+                                <br><a href="${thumbUrl}" target="_blank" class="photo-link-btn">📷 사진 보기 (Click)</a>
+                            </div>`;
+                        } else {
+                            // ID 추출 실패 시 링크만 표시
+                            imgHtml = `<div style="margin-top:5px;"><a href="${i.photo}" target="_blank" class="photo-link-btn">📷 사진 링크</a></div>`;
+                        }
                     }
 
                     html += `<div class="info-card">
@@ -155,7 +156,7 @@
                         </div>
                         <div style="font-size:12px; color:#999; margin-bottom:10px;">${i.date}</div>
                         <p style="font-size:14px; color:#333; white-space:pre-wrap;">${i.note}</p>
-                        ${img}
+                        ${imgHtml}
                     </div>`;
                 });
                 area.innerHTML = html;
