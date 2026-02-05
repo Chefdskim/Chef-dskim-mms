@@ -84,7 +84,7 @@
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
             <div class="info-card" style="border: 2px solid #3498db; text-align:center;">
                 <h4 style="margin-top:0;">💡 R&D 연구 노트</h4>
-                <p style="font-size:13px; color:#666; margin-bottom:15px;">사진 업로드는 '구글 설문지'가 가장 빠릅니다.<br>버튼을 눌러 작성해주세요.</p>
+                <p style="font-size:13px; color:#666; margin-bottom:15px;">사진은 '구글 설문지'로 올리는 게 제일 빠릅니다.<br>아래 버튼을 눌러 작성해주세요.</p>
                 <button class="rnd-btn" onclick="openForm()">📝 새 기록 작성하기</button>
             </div>
             <div style="margin-top:20px; border-bottom:2px solid #eee; padding-bottom:10px; font-weight:bold; color:#555;">📋 연구 기록 (최신순)</div>
@@ -94,12 +94,13 @@
 
     <script>
         const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
-
-        // [중요] 셰프님의 설문지 주소가 여기에 들어갔습니다.
+        
+        // 셰프님이 주신 주소를 여기에 심었습니다.
         const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSejJy628hEvS5_0QpukHJsFJF228YCEBgW0W6BDutfpjm-UDQ/viewform"; 
 
         function toggleSubMenu() { const el = document.getElementById('submenu-000'); el.style.display = (el.style.display==='block')?'none':'block'; }
         function goBackMain() { document.querySelectorAll('.workspace').forEach(el=>el.style.display='none'); document.getElementById('main-nav').style.display='block'; document.getElementById('page-title').innerText="MAIN MENU"; }
+        
         function openModule(code) {
             document.getElementById('main-nav').style.display='none'; document.querySelectorAll('.workspace').forEach(el=>el.style.display='none');
             const titles = {'010':'010 자산/재고', '020':'020 손익/원가', '030':'030 직원교육', '100':'100~300 레시피', '400':'400 심화 연구'};
@@ -111,13 +112,16 @@
             else if(code==='400'){document.getElementById('workspace-400').style.display='block'; loadRnD();}
         }
 
-        // [400] R&D Logic
+        // [400] R&D Logic (사진 표시 개선)
         function openForm() { window.open(formUrl, '_blank'); }
+        
         function loadRnD() {
             const area = document.getElementById('rnd-list-area');
             area.innerHTML = "<p style='text-align:center; color:#999'>불러오는 중...</p>";
+            
             fetch(`${gasUrl}?action=rnd`).then(r => r.json()).then(l => {
                 if(l.length === 0) { area.innerHTML = "<p style='text-align:center; color:#999'>기록이 없습니다.<br>위 버튼을 눌러 작성해주세요.</p>"; return; }
+                
                 let html = "";
                 l.forEach(i => {
                     let c = "#777";
@@ -125,14 +129,25 @@
                     if(i.status && i.status.includes("테스트")) c = "#e74c3c";
                     if(i.status && i.status.includes("성공")) c = "#27ae60";
 
+                    // 사진 링크 자동 변환
                     let img = "";
                     if (i.photo) {
-                        let fileId = i.photo.split('id=')[1];
-                        if (fileId) {
-                            let thumbUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
-                            img = `<div style="margin-top:10px;"><img src="${thumbUrl}" style="width:100%; border-radius:8px;"></div>`;
-                        }
+                        try {
+                            // 구글 폼 주소에서 ID만 쏙 빼내기
+                            let fileId = "";
+                            if(i.photo.includes("id=")) fileId = i.photo.split('id=')[1].split(',')[0].trim();
+                            else if(i.photo.includes("/d/")) fileId = i.photo.split('/d/')[1].split('/')[0];
+                            
+                            if(fileId) {
+                                let thumbUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+                                // referrerpolicy="no-referrer" 필수!
+                                img = `<div style="margin-top:10px; text-align:center;">
+                                         <img src="${thumbUrl}" style="width:100%; max-width:300px; border-radius:8px;" referrerpolicy="no-referrer" onerror="this.style.display='none';">
+                                       </div>`;
+                            }
+                        } catch(e) { console.log("이미지 변환 실패"); }
                     }
+
                     html += `<div class="info-card">
                         <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                             <span style="font-weight:bold; font-size:16px;">${i.menu}</span>
