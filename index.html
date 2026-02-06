@@ -43,9 +43,13 @@
 
         .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; }
         .modal-box { background:white; padding:20px; border-radius:8px; width:90%; max-width:400px; }
+        /* 저장 중 알림 스타일 */
+        #toast-msg { display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#333; color:white; padding:10px 20px; border-radius:20px; font-size:12px; z-index:2000; box-shadow:0 2px 10px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
+    <div id="toast-msg">💾 백그라운드 저장 중...</div>
+
     <div class="container">
         <h2 id="page-title">MAIN MENU</h2>
         <div id="main-nav">
@@ -119,7 +123,7 @@
             </div>
             <div style="display:flex; gap:10px;">
                 <button onclick="closeEditModal()" style="flex:1; padding:10px; background:#ccc; border:none; border-radius:4px; cursor:pointer;">취소</button>
-                <button onclick="submitEdit()" style="flex:1; padding:10px; background:#2980b9; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">수정 저장</button>
+                <button onclick="submitEdit()" style="flex:1; padding:10px; background:#2980b9; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">수정 완료</button>
             </div>
         </div>
     </div>
@@ -146,7 +150,6 @@
             }
         }
 
-        // [R&D]
         function loadRnD() {
             const area = document.getElementById('rnd-list-area');
             area.innerHTML = "<p style='text-align:center; color:#999'>불러오는 중...</p>";
@@ -176,16 +179,17 @@
                         } catch(e) {}
                     }
 
-                    html += `<div class="info-card">
+                    // [중요] ID 부여 (즉시 수정을 위함)
+                    html += `<div class="info-card" id="card-${i.row}">
                         <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                            <span style="font-weight:bold; font-size:16px;">${i.menu}</span>
+                            <span id="title-${i.row}" style="font-weight:bold; font-size:16px;">${i.menu}</span>
                             <div>
-                                <span style="font-size:11px; font-weight:bold; color:${c}; border:1px solid ${c}; padding:2px 6px; border-radius:4px; margin-right:5px;">${i.status}</span>
+                                <span id="status-${i.row}" style="font-size:11px; font-weight:bold; color:${c}; border:1px solid ${c}; padding:2px 6px; border-radius:4px; margin-right:5px;">${i.status}</span>
                                 <button onclick='openEditModal(${JSON.stringify(i)})' style="font-size:11px; padding:2px 6px; cursor:pointer;">✏️ 수정</button>
                             </div>
                         </div>
                         <div style="font-size:12px; color:#999; margin-bottom:10px;">${i.date}</div>
-                        <p style="font-size:14px; color:#333; white-space:pre-wrap;">${i.note}</p>
+                        <p id="note-${i.row}" style="font-size:14px; color:#333; white-space:pre-wrap;">${i.note}</p>
                         ${imgHtml}
                     </div>`;
                 });
@@ -193,7 +197,7 @@
             });
         }
 
-        // [수정] 즉시 닫기
+        // [즉시 수정 기능]
         function openEditModal(item) {
             document.getElementById('edit-row').value = item.row;
             document.getElementById('edit-menu').value = item.menu;
@@ -204,24 +208,39 @@
         function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
         
         function submitEdit() {
-            const item = {
-                row: document.getElementById('edit-row').value,
-                menu: document.getElementById('edit-menu').value,
-                status: document.getElementById('edit-status').value,
-                note: document.getElementById('edit-note').value
-            };
-            const btn = document.querySelector('#edit-modal button:last-child');
-            btn.innerText = "저장 중..."; btn.disabled = true;
+            // 1. 값 가져오기
+            const row = document.getElementById('edit-row').value;
+            const menu = document.getElementById('edit-menu').value;
+            const status = document.getElementById('edit-status').value;
+            const note = document.getElementById('edit-note').value;
+            
+            // 2. [즉시 반영] 화면의 글자를 바로 바꿔버림 (서버 안 기다림)
+            document.getElementById(`title-${row}`).innerText = menu;
+            document.getElementById(`note-${row}`).innerText = note;
+            const statusSpan = document.getElementById(`status-${row}`);
+            statusSpan.innerText = status;
+            
+            // 상태별 색상 즉시 변경
+            let c = "#777";
+            if(status === "아이디어") c = "#f39c12";
+            else if(status === "테스트중") c = "#e74c3c";
+            else if(status === "성공") c = "#27ae60";
+            statusSpan.style.color = c;
+            statusSpan.style.borderColor = c;
 
-            // [변경] 알림 없이 바로 닫고 새로고침
-            google.script.run.withSuccessHandler(function(res) {
-                closeEditModal();
-                btn.innerText = "수정 저장"; btn.disabled = false;
-                loadRnD(); 
-            }).updateRnDItem(item);
+            // 3. 창 닫고 토스트 메시지 띄우기
+            closeEditModal();
+            const toast = document.getElementById('toast-msg');
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+
+            // 4. [백그라운드 저장] 서버에는 천천히 보냄
+            google.script.run.withSuccessHandler(()=>{
+                console.log("백그라운드 저장 완료");
+            }).updateRnDItem({row, menu, status, note});
         }
 
-        // [공통]
+        // [공통 로직]
         function loadRecipe(){const k=document.getElementById('recipeInput').value;const a=document.getElementById('recipe-list-area');a.innerHTML="<p style='text-align:center;color:#999'>로딩 중...</p>";fetch(`${gasUrl}?action=recipe&keyword=${encodeURIComponent(k)}`).then(r=>r.json()).then(l=>{if(l.length===0){a.innerHTML="<p style='text-align:center;color:#999'>검색 결과 없음</p>";return;}let h="";l.forEach(i=>{let g={};i.details.forEach(d=>{if(!g[d.section])g[d.section]=[];g[d.section].push(d)});let b="";for(let s in g){if(!s)continue;let r="";g[s].forEach(row=>{let v=row.video?`<a href="${row.video}" target="_blank" class="video-btn">▶ 영상</a>`:"";r+=`<div class="detail-row"><div class="detail-cat">${row.category}</div><div class="detail-content">${row.content}${v}</div></div>`});b+=`<div class="section-block"><div class="section-title">${s}</div>${r}</div>`}h+=`<div class="recipe-card"><div class="recipe-header"><span class="recipe-title">${i.name}</span><span class="recipe-type">${i.type}</span></div><div class="recipe-body">${b}</div></div>`});a.innerHTML=h})}
         let currentMode='in'; let workList=[];
         document.addEventListener("DOMContentLoaded", function() {
