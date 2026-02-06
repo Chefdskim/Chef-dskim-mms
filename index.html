@@ -13,15 +13,14 @@
             --white: #ffffff;
             --border: #e1e4e8;
             --text-main: #222;
-            --text-sub: #666;
             --point-blue: #3498db;
-            --point-green: #27ae60;
             --point-red: #e74c3c;
+            --point-green: #27ae60;
         }
         
         body { font-family: 'Noto Sans KR', sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: var(--text-main); padding-bottom: 80px; }
         
-        /* 헤더 스타일 */
+        /* 헤더 & 기본 레이아웃 */
         .app-header {
             background: url('https://images.unsplash.com/photo-1556910103-1c02745a30bf?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80') center/cover;
             height: 160px; position: relative; display: flex; align-items: flex-end; padding: 20px;
@@ -33,7 +32,7 @@
 
         .container { max-width: 600px; margin: 0 auto; }
         
-        /* 바로가기 아이콘 그리드 */
+        /* 바로가기 그리드 */
         .shortcut-grid {
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px 5px;
             background: var(--white); padding: 25px 10px; margin-bottom: 10px;
@@ -54,379 +53,42 @@
         }
         .back-btn { border: none; background: none; font-size: 20px; margin-right: 15px; cursor: pointer; color: var(--text-main); }
         .page-name { font-size: 18px; font-weight: 700; color: var(--primary); }
-
-        /* 상세 리스트 컨테이너 */
         .detail-container { padding: 15px; }
 
-        /* [레시피] 카드 스타일 */
-        .recipe-card {
-            background: white; border-radius: 12px; overflow: hidden; margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #eee;
-        }
-        .recipe-head {
-            background: var(--primary); color: white; padding: 15px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .recipe-name { font-size: 18px; font-weight: bold; }
-        .recipe-badge { background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 12px; }
-        .recipe-body { padding: 20px; }
-        .recipe-step { margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 15px; }
-        .recipe-cat { font-size: 12px; color: #888; font-weight: bold; margin-bottom: 5px; display:block; }
-        .recipe-content { font-size: 15px; line-height: 1.6; color: #333; white-space: pre-wrap; }
-        .video-link {
-            display: inline-block; margin-top: 8px; background: #e74c3c; color: white; 
-            padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold;
-        }
+        /* [자산/재고] 입력 콘솔 스타일 (NEW) */
+        .console-box { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .mode-tabs { display: flex; background: #f0f0f0; border-radius: 8px; padding: 4px; margin-bottom: 15px; }
+        .mode-tab { flex: 1; border: none; background: none; padding: 8px; font-size: 13px; font-weight: bold; color: #777; cursor: pointer; border-radius: 6px; }
+        .mode-tab.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .mode-tab.active.out { color: var(--point-red); } /* 출고는 빨강 */
+        
+        .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+        .console-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
+        .console-btn { padding: 0 15px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        
+        .staging-list { background: #f9f9f9; border: 1px dashed #ddd; border-radius: 6px; padding: 10px; margin-bottom: 10px; min-height: 50px; }
+        .stage-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+        .save-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; }
 
-        /* [R&D] 카드 스타일 */
-        .rnd-card {
-            background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03); display: flex; gap: 15px;
-        }
-        .rnd-thumb { 
-            width: 80px; height: 80px; border-radius: 8px; object-fit: cover; background: #eee; flex-shrink: 0; cursor: pointer;
-        }
-        .rnd-info { flex: 1; }
-        .rnd-status { font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #ddd; margin-left: 5px; }
-
-        /* [자산/손익] 테이블 스타일 */
+        /* 테이블 및 기타 스타일 (기존 유지) */
+        .total-box { background: var(--primary); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; }
         .data-table { width: 100%; border-collapse: collapse; background: white; font-size: 13px; }
         .data-table th { background: #f8f9fa; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; color: #555; }
         .data-table td { padding: 12px 10px; border-bottom: 1px solid #eee; }
-        .total-box { background: var(--primary); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; }
+
+        /* 레시피, R&D 등 기존 스타일 */
+        .recipe-card { background: white; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #eee; }
+        .recipe-head { background: var(--primary); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .recipe-name { font-size: 18px; font-weight: bold; }
+        .recipe-body { padding: 20px; }
+        .recipe-step { margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 15px; }
+        .video-link { display: inline-block; margin-top: 8px; background: #e74c3c; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; }
         
-        /* [교육] 아코디언 스타일 */
+        .rnd-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); display: flex; gap: 15px; }
+        .rnd-thumb { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; background: #eee; flex-shrink: 0; cursor: pointer; }
+        .rnd-info { flex: 1; }
+        
         .manual-item { background: white; border-bottom: 1px solid #eee; }
         .manual-header { padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 500; }
         .manual-body { display: none; padding: 15px; background: #fafafa; border-top: 1px solid #eee; font-size: 14px; line-height: 1.6; color: #444; }
-        .manual-item.active .manual-body { display: block; }
-        .manual-item.active .manual-header { color: var(--point-blue); font-weight: bold; }
-
-        /* 하단 네비게이션 */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 60px;
-            background: white; border-top: 1px solid #eee; display: flex;
-            justify-content: space-around; align-items: center; z-index: 100;
-        }
-        .nav-btn { display: flex; flex-direction: column; align-items: center; color: #999; font-size: 10px; cursor: pointer; flex: 1; }
-        .nav-btn.active { color: var(--primary); font-weight: bold; }
-        .nav-btn i { font-size: 20px; margin-bottom: 4px; }
-
-        /* 검색창 */
-        .search-wrap { padding: 10px 20px; background: white; border-bottom: 1px solid #eee; display: flex; gap: 10px; }
-        .search-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
-        .search-btn { padding: 0 15px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-
-    </style>
-</head>
-<body>
-
-    <div id="main-view">
-        <div class="app-header">
-            <div class="header-overlay"></div>
-            <div class="header-content">
-                <h1 class="header-title">CHEF DSKIM</h1>
-                <div class="header-sub">Professional Kitchen Management</div>
-            </div>
-        </div>
-
-        <div class="container">
-            <div class="shortcut-grid">
-                <div class="shortcut-item" onclick="openModule('100')"><div class="icon-box" style="background:#f39c12"><i class="fas fa-book-open"></i></div><span class="shortcut-label">레시피</span></div>
-                <div class="shortcut-item" onclick="openModule('400')"><div class="icon-box" style="background:#9b59b6"><i class="fas fa-flask"></i></div><span class="shortcut-label">연구노트</span></div>
-                <div class="shortcut-item" onclick="openModule('010')"><div class="icon-box" style="background:#34495e"><i class="fas fa-boxes"></i></div><span class="shortcut-label">자산/재고</span></div>
-                <div class="shortcut-item" onclick="openModule('020')"><div class="icon-box" style="background:#e74c3c"><i class="fas fa-chart-line"></i></div><span class="shortcut-label">손익관리</span></div>
-                <div class="shortcut-item" onclick="openModule('030')"><div class="icon-box" style="background:#27ae60"><i class="fas fa-graduation-cap"></i></div><span class="shortcut-label">직원교육</span></div>
-                <div class="shortcut-item" onclick="openModule('900')"><div class="icon-box" style="background:#3498db"><i class="fas fa-folder-open"></i></div><span class="shortcut-label">자료실</span></div>
-                <div class="shortcut-item" onclick="alert('준비중')"><div class="icon-box" style="background:#bdc3c7"><i class="fas fa-calendar-alt"></i></div><span class="shortcut-label">일정</span></div>
-                <div class="shortcut-item" onclick="alert('준비중')"><div class="icon-box" style="background:#bdc3c7"><i class="fas fa-bullhorn"></i></div><span class="shortcut-label">공지사항</span></div>
-            </div>
-
-            <div style="padding: 10px 20px; font-weight: bold; color: #333; display: flex; justify-content: space-between;">
-                <span>최신 연구 기록</span>
-                <span style="font-size:12px; color:#888; font-weight:normal;" onclick="openModule('400')">더보기 ></span>
-            </div>
-            <div id="recent-rnd" style="padding: 0 20px;"></div>
-        </div>
-    </div>
-
-    <div id="workspace-100" class="workspace">
-        <div class="page-header"><button class="back-btn" onclick="goMain()">←</button><span class="page-name">표준 레시피</span></div>
-        <div class="search-wrap">
-            <input type="text" id="recipeInput" class="search-input" placeholder="메뉴명 입력 (예: 파스타)">
-            <button class="search-btn" onclick="loadRecipe()">검색</button>
-        </div>
-        <div id="recipe-list-area" class="detail-container"></div>
-    </div>
-
-    <div id="workspace-400" class="workspace">
-        <div class="page-header"><button class="back-btn" onclick="goMain()">←</button><span class="page-name">R&D 연구노트</span></div>
-        <div style="height:400px; border-bottom:1px solid #eee;">
-            <iframe id="google-form-frame" style="width:100%; height:100%; border:none;"></iframe>
-        </div>
-        <div style="padding:15px; font-weight:bold; background:#f9f9f9; display:flex; justify-content:space-between;">
-            <span>연구 기록 목록</span>
-            <button onclick="loadRnD()" style="border:1px solid #ddd; background:white; padding:5px 10px; border-radius:4px; font-size:11px;">새로고침</button>
-        </div>
-        <div id="rnd-list-area" class="detail-container"></div>
-    </div>
-
-    <div id="workspace-010" class="workspace">
-        <div class="page-header"><button class="back-btn" onclick="goMain()">←</button><span class="page-name">자산 및 재고</span></div>
-        <div class="detail-container">
-            <div class="total-box">
-                <div style="font-size:13px; opacity:0.8;">현재 총 재고 자산</div>
-                <div id="asset-value" style="font-size:28px; font-weight:bold;">0 원</div>
-            </div>
-            <h4 style="margin: 20px 0 10px 0;">📦 재고 상세 목록</h4>
-            <div id="stock-list-area"></div>
-        </div>
-    </div>
-
-    <div id="workspace-020" class="workspace">
-        <div class="page-header"><button class="back-btn" onclick="goMain()">←</button><span class="page-name">손익 및 원가</span></div>
-        <div class="detail-container">
-            <div class="total-box" style="background:#2c3e50;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                    <span>월 매출</span> <span id="fin-current" style="font-weight:bold;">0</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; color:#e74c3c; background:white; padding:10px; border-radius:8px;">
-                    <span style="color:#333;">순이익</span> <span id="fin-profit" style="font-weight:bold; font-size:18px;">0</span>
-                </div>
-            </div>
-            <h4 style="margin: 20px 0 10px 0;">📊 메뉴별 원가율 상세</h4>
-            <div id="menu-cost-area"></div>
-        </div>
-    </div>
-
-    <div id="workspace-030" class="workspace">
-        <div class="page-header"><button class="back-btn" onclick="goMain()">←</button><span class="page-name">직원 교육 매뉴얼</span></div>
-        <div id="manual-list-area"></div>
-    </div>
-
-    <div id="workspace-900" class="workspace">
-        <div class="page-header"><button class="back-btn" onclick="goMain()">←</button><span class="page-name">자료실 (Drive)</span></div>
-        <div style="text-align:center; padding:20px; color:#666; font-size:13px; background:#f0f7ff;">
-            <i class="fab fa-google-drive"></i> 구글 드라이브와 연동된 파일 목록입니다.
-        </div>
-        <div id="archive-list-area"></div>
-    </div>
-
-    <div class="bottom-nav">
-        <div class="nav-btn active" onclick="goMain()"><i class="fas fa-home"></i><span>홈</span></div>
-        <div class="nav-btn" onclick="openModule('100')"><i class="fas fa-book"></i><span>레시피</span></div>
-        <div class="nav-btn" onclick="openModule('400')"><i class="fas fa-flask"></i><span>연구</span></div>
-        <div class="nav-btn" onclick="openModule('900')"><i class="fas fa-folder"></i><span>자료실</span></div>
-        <div class="nav-btn" onclick="openModule('010')"><i class="fas fa-bars"></i><span>관리</span></div>
-    </div>
-
-    <script>
-        const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
-        const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSejJy628hEvS5_0QpukHJsFJF228YCEBgW0W6BDutfpjm-UDQ/viewform?embedded=true"; 
-
-        // [공통] 네비게이션
-        function goMain() {
-            document.querySelectorAll('.workspace').forEach(e => e.style.display='none');
-            document.getElementById('main-view').style.display='block';
-            window.scrollTo(0,0);
-            updateNav('홈');
-        }
-        function openModule(code) {
-            document.getElementById('main-view').style.display='none';
-            document.querySelectorAll('.workspace').forEach(e => e.style.display='none');
-            
-            if(code==='100'){document.getElementById('workspace-100').style.display='block'; loadRecipe(); updateNav('레시피');}
-            else if(code==='400'){
-                document.getElementById('workspace-400').style.display='block'; 
-                document.getElementById('google-form-frame').src = formUrl;
-                loadRnD(); updateNav('연구');
-            }
-            else if(code==='900'){document.getElementById('workspace-900').style.display='block'; loadArchive(); updateNav('자료실');}
-            else if(code==='010'){document.getElementById('workspace-010').style.display='block'; loadAsset(); updateNav('관리');}
-            else if(code==='020'){document.getElementById('workspace-020').style.display='block'; loadBEP(); updateNav('관리');}
-            else if(code==='030'){document.getElementById('workspace-030').style.display='block'; loadManual(); updateNav('관리');}
-        }
-        function updateNav(name) {
-            document.querySelectorAll('.nav-btn').forEach(b => {
-                b.classList.remove('active');
-                if(b.querySelector('span').innerText === name) b.classList.add('active');
-            });
-        }
-
-        // [100] 레시피: 엔터 검색 + 상세 디자인 + 영상 버튼
-        document.getElementById('recipeInput').addEventListener('keypress', function(e) {
-            if(e.key === 'Enter') loadRecipe();
-        });
-        function loadRecipe() {
-            const k = document.getElementById('recipeInput').value;
-            const area = document.getElementById('recipe-list-area');
-            area.innerHTML = "<div style='text-align:center; padding:20px; color:#999;'>검색 중...</div>";
-            
-            fetch(`${gasUrl}?action=recipe&keyword=${encodeURIComponent(k)}`).then(r=>r.json()).then(l => {
-                if(l.length===0) { area.innerHTML = "<div style='text-align:center; padding:20px;'>결과가 없습니다.</div>"; return; }
-                let html = "";
-                l.forEach(i => {
-                    let detailsHtml = "";
-                    let grouped = {};
-                    i.details.forEach(d => { if(!grouped[d.section]) grouped[d.section]=[]; grouped[d.section].push(d); });
-                    
-                    for(let sec in grouped) {
-                        if(!sec) continue;
-                        let rows = "";
-                        grouped[sec].forEach(d => {
-                            let videoBtn = d.video ? `<a href="${d.video}" target="_blank" class="video-link">▶ 영상 보기</a>` : "";
-                            rows += `<div class="recipe-step">
-                                <span class="recipe-cat">${d.category}</span>
-                                <div class="recipe-content">${d.content}</div>
-                                ${videoBtn}
-                            </div>`;
-                        });
-                        detailsHtml += `<div style="margin-top:15px;"><h5 style="margin:0 0 10px 0; color:#e67e22; border-bottom:2px solid #fce3cf; display:inline-block;">${sec}</h5>${rows}</div>`;
-                    }
-                    html += `<div class="recipe-card">
-                        <div class="recipe-head"><span class="recipe-name">${i.name}</span><span class="recipe-badge">${i.type}</span></div>
-                        <div class="recipe-body">${detailsHtml}</div>
-                    </div>`;
-                });
-                area.innerHTML = html;
-            });
-        }
-
-        // [400] R&D: 사진 크게 보기 + 썸네일
-        function loadRnD() {
-            const area = document.getElementById('rnd-list-area');
-            area.innerHTML = "<div style='text-align:center; padding:20px;'>로딩 중...</div>";
-            fetch(`${gasUrl}?action=rnd`).then(r => r.json()).then(l => {
-                // 메인화면 미리보기용
-                let previewHtml = "";
-                l.slice(0,3).forEach(i => {
-                    previewHtml += `<div onclick="openModule('400')" style="padding:10px 0; border-bottom:1px solid #eee; font-size:14px;">
-                        <span style="font-weight:bold;">${i.menu}</span> <span style="font-size:12px; color:#888; float:right;">${i.date}</span>
-                    </div>`;
-                });
-                document.getElementById('recent-rnd').innerHTML = previewHtml;
-
-                // 상세 리스트
-                let html = "";
-                l.forEach(i => {
-                    let imgTag = `<div class="rnd-thumb" style="display:flex; align-items:center; justify-content:center; color:#ccc;"><i class="fas fa-image"></i></div>`;
-                    if(i.photo && i.photo.length > 5) {
-                        // 구글 드라이브 ID 추출 시도
-                        let match = i.photo.match(/[-\w]{25,}/);
-                        if(match) {
-                            let id = match[0];
-                            let thumbUrl = `https://drive.google.com/uc?export=view&id=${id}`;
-                            // 클릭하면 새창으로 원본보기
-                            imgTag = `<img src="${thumbUrl}" class="rnd-thumb" onclick="window.open('${thumbUrl}')">`;
-                        }
-                    }
-                    html += `<div class="rnd-card">
-                        ${imgTag}
-                        <div class="rnd-info">
-                            <div style="font-weight:bold; font-size:16px;">${i.menu} <span class="rnd-status">${i.status}</span></div>
-                            <div style="font-size:12px; color:#999; margin:5px 0;">${i.date}</div>
-                            <div style="font-size:14px; color:#444;">${i.note}</div>
-                        </div>
-                    </div>`;
-                });
-                area.innerHTML = html;
-            });
-        }
-
-        // [010] 자산: 상세 표 보여주기
-        function loadAsset() {
-            fetch(`${gasUrl}?action=asset`).then(r=>r.json()).then(d => {
-                document.getElementById('asset-value').innerText = Number(d.total).toLocaleString() + " 원";
-                // 상세 목록 렌더링
-                let h = `<table class="data-table"><thead><tr><th>품목</th><th style="text-align:right">금액</th></tr></thead><tbody>`;
-                d.list.forEach(item => {
-                    h += `<tr><td>${item.name}</td><td style="text-align:right;">${Number(item.value).toLocaleString()}</td></tr>`;
-                });
-                h += `</tbody></table>`;
-                document.getElementById('stock-list-area').innerHTML = h;
-                
-                // 추가로 재고 수량도 가져오기 (inventory action)
-                fetch(`${gasUrl}?action=inventory`).then(r2=>r2.json()).then(inv => {
-                    if(inv.length > 0) {
-                        let ih = `<h4 style="margin:20px 0 10px 0;">📦 실재고 수량</h4><table class="data-table"><thead><tr><th>품목</th><th style="text-align:right">수량</th></tr></thead><tbody>`;
-                        inv.forEach(i => { ih += `<tr><td>${i.name}</td><td style="text-align:right;">${i.qty}</td></tr>`; });
-                        ih += `</tbody></table>`;
-                        document.getElementById('stock-list-area').innerHTML += ih;
-                    }
-                });
-            });
-        }
-
-        // [020] 손익: 상세 표 보여주기
-        function loadBEP() {
-            fetch(`${gasUrl}?action=bep`).then(r=>r.json()).then(d => {
-                document.getElementById('fin-current').innerText = Number(d.current).toLocaleString();
-                document.getElementById('fin-profit').innerText = Number(d.netProfit).toLocaleString();
-            });
-            // 메뉴별 원가 리스트
-            fetch(`${gasUrl}?action=menu_cost`).then(r=>r.json()).then(l => {
-                let h = `<table class="data-table"><thead><tr><th>메뉴명</th><th>원가/판매가</th><th style="text-align:right">원가율</th></tr></thead><tbody>`;
-                l.forEach(i => {
-                    let color = i.ratio >= 35 ? "red" : "green";
-                    h += `<tr>
-                        <td><b>${i.name}</b></td>
-                        <td style="font-size:11px; color:#888;">${Number(i.cost).toLocaleString()} / ${Number(i.price).toLocaleString()}</td>
-                        <td style="text-align:right; font-weight:bold; color:${color}">${i.ratio}%</td>
-                    </tr>`;
-                });
-                h += `</tbody></table>`;
-                document.getElementById('menu-cost-area').innerHTML = h;
-            });
-        }
-
-        // [030] 교육: 아코디언 기능
-        function loadManual() {
-            fetch(`${gasUrl}?action=manual`).then(r=>r.json()).then(l => {
-                let h = "";
-                l.forEach(i => {
-                    let linkHtml = i.link ? `<br><br><a href="${i.link}" target="_blank" style="background:#3498db; color:white; padding:5px 10px; border-radius:4px; text-decoration:none;">📺 교육 영상 보기</a>` : "";
-                    h += `<div class="manual-item" onclick="this.classList.toggle('active')">
-                        <div class="manual-header">
-                            <span>${i.title} <small style='color:#999; font-weight:normal;'>| ${i.category}</small></span>
-                            <i class="fas fa-chevron-down" style="font-size:12px; color:#ddd;"></i>
-                        </div>
-                        <div class="manual-body">${i.content}${linkHtml}</div>
-                    </div>`;
-                });
-                document.getElementById('manual-list-area').innerHTML = h;
-            });
-        }
-
-        // [900] 자료실
-        function loadArchive() {
-            const area = document.getElementById('archive-list-area');
-            area.innerHTML = "<div style='padding:20px; text-align:center;'>로딩 중...</div>";
-            fetch(`${gasUrl}?action=archive`).then(r => r.json()).then(list => {
-                if(list.length === 0) { area.innerHTML = "<div style='padding:20px; text-align:center;'>비어있음</div>"; return; }
-                let html = "";
-                list.forEach(f => {
-                    let icon = "fa-file"; let color = "#999";
-                    if(f.type.includes("folder")) { icon = "fa-folder"; color = "#f39c12"; }
-                    else if(f.type.includes("image")) { icon = "fa-image"; color = "#27ae60"; }
-                    else if(f.type.includes("pdf")) { icon = "fa-file-pdf"; color = "#e74c3c"; }
-                    
-                    html += `<a href="${f.url}" target="_blank" style="display:flex; padding:15px; border-bottom:1px solid #eee; align-items:center; text-decoration:none; color:#333;">
-                        <div style="font-size:24px; color:${color}; margin-right:15px; width:30px; text-align:center;"><i class="fas ${icon}"></i></div>
-                        <div style="flex:1;">
-                            <div style="font-weight:500; font-size:14px;">${f.name}</div>
-                            <div style="font-size:11px; color:#888;">${f.date}</div>
-                        </div>
-                        <i class="fas fa-chevron-right" style="color:#ddd;"></i>
-                    </a>`;
-                });
-                area.innerHTML = html;
-            });
-        }
-        
-        // 초기 로딩
-        document.addEventListener("DOMContentLoaded", function() {
-            loadRnD(); // 메인화면 미리보기용
-        });
-    </script>
-</body>
-</html>
+        .manual-item.active .
