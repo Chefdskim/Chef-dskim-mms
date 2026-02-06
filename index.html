@@ -17,7 +17,7 @@
         .info-card { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
         .photo-link-btn { display:inline-block; padding:5px 10px; background:#eee; color:#333; text-decoration:none; border-radius:4px; font-size:12px; margin-top:5px; border:1px solid #ccc; }
         .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
-        input[type="text"], textarea { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box; }
+        input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box; }
         .action-btn { padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .recipe-card { background: white; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .recipe-header { background: #2c3e50; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
@@ -40,16 +40,11 @@
         .menu-card { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee; }
         .cost-good { background:#e8f8f5; color:#27ae60; padding:3px 8px; border-radius:4px; font-size:12px; }
         .cost-bad { background:#fdedec; color:#e74c3c; padding:3px 8px; border-radius:4px; font-size:12px; }
-
-        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; }
-        .modal-box { background:white; padding:20px; border-radius:8px; width:90%; max-width:400px; }
-        /* 저장 중 알림 스타일 */
-        #toast-msg { display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#333; color:white; padding:10px 20px; border-radius:20px; font-size:12px; z-index:2000; box-shadow:0 2px 10px rgba(0,0,0,0.3); }
+        /* 900번 자료실 버튼 스타일 */
+        .archive-btn { display:block; width:100%; padding:20px; background:#8e44ad; color:white; font-size:18px; font-weight:bold; border:none; border-radius:8px; cursor:pointer; text-align:center; text-decoration:none; margin-top:10px; }
     </style>
 </head>
 <body>
-    <div id="toast-msg">💾 백그라운드 저장 중...</div>
-
     <div class="container">
         <h2 id="page-title">MAIN MENU</h2>
         <div id="main-nav">
@@ -61,6 +56,7 @@
             </div>
             <button class="main-btn" onclick="openModule('100')"><span class="code-tag">100~300</span> 국가별 요리 (레시피) 📖</button>
             <button class="main-btn" onclick="openModule('400')"><span class="code-tag">400</span> 심화 연구 (R&D) 🔬</button>
+            <button class="main-btn" onclick="openModule('900')"><span class="code-tag">900</span> 자료실 (ARCHIVE) 📂</button>
         </div>
 
         <div id="workspace-010" class="workspace">
@@ -70,14 +66,17 @@
             <div id="search-area" class="search-box"><input type="text" id="searchInput" placeholder="품목명"><button class="action-btn" id="searchBtn">검색</button></div>
             <div id="result-list"></div><div id="work-area" style="margin-top:20px; display:none;"><strong id="list-title">📋 작업 리스트</strong><div id="saved-list"></div><button id="send-btn" class="action-btn" onclick="saveToSheet()" style="width:100%; margin-top:10px;">저장하기</button></div>
         </div>
+
         <div id="workspace-020" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
             <div class="finance-grid"><div class="finance-item"><div>매출</div><div class="finance-val" id="fin-current">0</div></div><div class="finance-item"><div>순이익</div><div class="finance-val" id="fin-profit">0</div></div></div>
             <div style="margin-top:20px;"><h5>🍔 메뉴 원가</h5><div id="menu-list-area"></div></div>
         </div>
+
         <div id="workspace-030" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button><div id="manual-list-area"></div>
         </div>
+
         <div id="workspace-100" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
             <div class="search-box"><input type="text" id="recipeInput" placeholder="메뉴명 검색"><button class="action-btn" onclick="loadRecipe()">검색</button></div>
@@ -98,32 +97,17 @@
             </div>
             <div id="rnd-list-area"></div>
         </div>
-    </div>
 
-    <div id="edit-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h3 style="margin-top:0;">✏️ 기록 수정</h3>
-            <input type="hidden" id="edit-row">
-            <div style="margin-bottom:10px;">
-                <label style="font-size:12px; font-weight:bold;">메뉴명</label>
-                <input type="text" id="edit-menu">
-            </div>
-            <div style="margin-bottom:10px;">
-                <label style="font-size:12px; font-weight:bold;">상태</label>
-                <select id="edit-status" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px;">
-                    <option value="아이디어">아이디어</option>
-                    <option value="테스트중">테스트중</option>
-                    <option value="성공">성공</option>
-                    <option value="보류">보류</option>
-                </select>
-            </div>
-            <div style="margin-bottom:10px;">
-                <label style="font-size:12px; font-weight:bold;">연구노트</label>
-                <textarea id="edit-note" style="height:80px;"></textarea>
-            </div>
-            <div style="display:flex; gap:10px;">
-                <button onclick="closeEditModal()" style="flex:1; padding:10px; background:#ccc; border:none; border-radius:4px; cursor:pointer;">취소</button>
-                <button onclick="submitEdit()" style="flex:1; padding:10px; background:#2980b9; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">수정 완료</button>
+        <div id="workspace-900" class="workspace">
+            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
+            <div class="info-card" style="text-align:center; padding:30px;">
+                <h3 style="margin-top:0; color:#8e44ad;">📂 셰프님의 비밀 서재</h3>
+                <p style="color:#666; font-size:14px; margin-bottom:20px;">
+                    계약서, 레시피 원본 PDF, 시장조사 자료 등<br>
+                    중요한 파일은 구글 드라이브에 안전하게 보관됩니다.
+                </p>
+                <a href="https://drive.google.com/drive/folders/1tnHFvE6bjKUGliUoZ1t2F2sgVQaZOUQm" target="_blank" class="archive-btn">🚀 자료실 폴더 열기</a>
+                <p style="color:#999; font-size:12px; margin-top:15px;">※ 버튼을 누르면 구글 드라이브 앱/웹이 열립니다.</p>
             </div>
         </div>
     </div>
@@ -137,7 +121,7 @@
         
         function openModule(code) {
             document.getElementById('main-nav').style.display='none'; document.querySelectorAll('.workspace').forEach(el=>el.style.display='none');
-            const titles = {'010':'010 자산/재고', '020':'020 손익/원가', '030':'030 직원교육', '100':'100~300 레시피', '400':'400 심화 연구'};
+            const titles = {'010':'010 자산/재고', '020':'020 손익/원가', '030':'030 직원교육', '100':'100~300 레시피', '400':'400 심화 연구', '900':'900 자료실'};
             document.getElementById('page-title').innerText = titles[code];
             if(code==='010'){document.getElementById('workspace-010').style.display='block'; loadAsset(); setMode('in');}
             else if(code==='020'){document.getElementById('workspace-020').style.display='block'; loadBEP(); loadMenuCost();}
@@ -148,8 +132,12 @@
                 document.getElementById('google-form-frame').src = formUrl;
                 loadRnD();
             }
+            else if(code==='900'){
+                document.getElementById('workspace-900').style.display='block';
+            }
         }
 
+        // [R&D] 조회 전용
         function loadRnD() {
             const area = document.getElementById('rnd-list-area');
             area.innerHTML = "<p style='text-align:center; color:#999'>불러오는 중...</p>";
@@ -179,65 +167,19 @@
                         } catch(e) {}
                     }
 
-                    // [중요] ID 부여 (즉시 수정을 위함)
-                    html += `<div class="info-card" id="card-${i.row}">
+                    // 수정 버튼 제거된 순수 리스트
+                    html += `<div class="info-card">
                         <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                            <span id="title-${i.row}" style="font-weight:bold; font-size:16px;">${i.menu}</span>
-                            <div>
-                                <span id="status-${i.row}" style="font-size:11px; font-weight:bold; color:${c}; border:1px solid ${c}; padding:2px 6px; border-radius:4px; margin-right:5px;">${i.status}</span>
-                                <button onclick='openEditModal(${JSON.stringify(i)})' style="font-size:11px; padding:2px 6px; cursor:pointer;">✏️ 수정</button>
-                            </div>
+                            <span style="font-weight:bold; font-size:16px;">${i.menu}</span>
+                            <span style="font-size:11px; font-weight:bold; color:${c}; border:1px solid ${c}; padding:2px 6px; border-radius:4px;">${i.status}</span>
                         </div>
                         <div style="font-size:12px; color:#999; margin-bottom:10px;">${i.date}</div>
-                        <p id="note-${i.row}" style="font-size:14px; color:#333; white-space:pre-wrap;">${i.note}</p>
+                        <p style="font-size:14px; color:#333; white-space:pre-wrap;">${i.note}</p>
                         ${imgHtml}
                     </div>`;
                 });
                 area.innerHTML = html;
             });
-        }
-
-        // [즉시 수정 기능]
-        function openEditModal(item) {
-            document.getElementById('edit-row').value = item.row;
-            document.getElementById('edit-menu').value = item.menu;
-            document.getElementById('edit-status').value = item.status;
-            document.getElementById('edit-note').value = item.note;
-            document.getElementById('edit-modal').style.display = 'flex';
-        }
-        function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
-        
-        function submitEdit() {
-            // 1. 값 가져오기
-            const row = document.getElementById('edit-row').value;
-            const menu = document.getElementById('edit-menu').value;
-            const status = document.getElementById('edit-status').value;
-            const note = document.getElementById('edit-note').value;
-            
-            // 2. [즉시 반영] 화면의 글자를 바로 바꿔버림 (서버 안 기다림)
-            document.getElementById(`title-${row}`).innerText = menu;
-            document.getElementById(`note-${row}`).innerText = note;
-            const statusSpan = document.getElementById(`status-${row}`);
-            statusSpan.innerText = status;
-            
-            // 상태별 색상 즉시 변경
-            let c = "#777";
-            if(status === "아이디어") c = "#f39c12";
-            else if(status === "테스트중") c = "#e74c3c";
-            else if(status === "성공") c = "#27ae60";
-            statusSpan.style.color = c;
-            statusSpan.style.borderColor = c;
-
-            // 3. 창 닫고 토스트 메시지 띄우기
-            closeEditModal();
-            const toast = document.getElementById('toast-msg');
-            toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 3000);
-
-            // 4. [백그라운드 저장] 서버에는 천천히 보냄
-            google.script.run.withSuccessHandler(()=>{
-                console.log("백그라운드 저장 완료");
-            }).updateRnDItem({row, menu, status, note});
         }
 
         // [공통 로직]
