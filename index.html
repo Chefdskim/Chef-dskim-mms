@@ -51,7 +51,6 @@
         .console-input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
         .console-btn { padding: 0 15px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
         
-        /* 달력 관련 */
         .calendar-wrap { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .cal-header { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; }
         .cal-select { font-size: 18px; font-weight: bold; border: none; background: transparent; padding: 5px; cursor: pointer; outline: none; border-bottom: 2px solid transparent; }
@@ -192,7 +191,6 @@
         const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
         const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSejJy628hEvS5_0QpukHJsFJF228YCEBgW0W6BDutfpjm-UDQ/viewform?embedded=true"; 
         
-        // 중요: 화면 충돌 방지 변수
         let currentMode = 'in';
 
         function goMain() { document.querySelectorAll('.workspace').forEach(e=>e.style.display='none'); document.getElementById('main-view').style.display='block'; window.scrollTo(0,0); updateNav('홈'); }
@@ -201,8 +199,8 @@
             
             if(code==='010'){
                 document.getElementById('workspace-010').style.display='block'; 
-                loadAssetValueOnly(); // 텍스트만 로딩 (충돌 방지)
-                setMode('in'); // 리스트 로딩
+                loadAssetValueOnly();
+                setMode('in');
                 updateNav('관리');
             }
             else if(code==='020'){document.getElementById('workspace-020').style.display='block'; initCalendar(); updateNav('관리');}
@@ -213,7 +211,6 @@
         }
         function updateNav(n){ document.querySelectorAll('.nav-btn').forEach(b=>{ b.classList.remove('active'); if(b.querySelector('span').innerText===n) b.classList.add('active'); }); }
 
-        // [010] 자산/재고: 안전장치 적용
         function setMode(m) {
             currentMode = m;
             document.querySelectorAll('.mode-tab').forEach(t=>t.classList.remove('active'));
@@ -221,45 +218,41 @@
             
             if(m === 'stock') { 
                 document.getElementById('input-area').style.display='none'; 
-                loadStockTableSafe(); // 재고조회 (안전모드)
+                loadStockTableSafe();
             } else {
                 document.getElementById('input-area').style.display='block';
-                loadAssetListSafe(); // 자산목록조회 (안전모드)
+                loadAssetListSafe();
             }
         }
 
-        // 텍스트만 업데이트 (화면 안 건드림)
         function loadAssetValueOnly() {
             fetch(`${gasUrl}?action=asset`).then(r=>r.json()).then(d => {
                 document.getElementById('asset-value').innerText = Number(d.total).toLocaleString() + " 원";
             });
         }
         
-        // 자산 목록 (다른 탭이면 취소)
         function loadAssetListSafe() {
-            if(currentMode === 'stock') return; // 재고 탭이면 중단!
+            if(currentMode === 'stock') return;
             document.getElementById('stock-list-area').innerHTML = "<div style='text-align:center; padding:20px; color:#999;'>자산 목록 로딩 중...</div>";
             fetch(`${gasUrl}?action=asset`).then(r=>r.json()).then(d => {
-                if(currentMode === 'stock') return; // 로딩 끝났는데 딴 데 갔으면 취소!
+                if(currentMode === 'stock') return;
                 let h = `<table class="data-table"><thead><tr><th>자산 품목</th><th style="text-align:right">금액</th></tr></thead><tbody>`;
                 d.list.forEach(i => h += `<tr><td>${i.name}</td><td style="text-align:right;">${Number(i.value).toLocaleString()}</td></tr>`);
                 document.getElementById('stock-list-area').innerHTML = h+"</tbody></table>";
             });
         }
 
-        // 재고 목록 (다른 탭이면 취소)
         function loadStockTableSafe() {
-            if(currentMode !== 'stock') return; // 재고 탭 아니면 중단!
+            if(currentMode !== 'stock') return;
             document.getElementById('stock-list-area').innerHTML = "<div style='text-align:center; padding:20px; color:#999;'>재고 수량 파악 중...</div>";
             fetch(`${gasUrl}?action=inventory`).then(r=>r.json()).then(d => {
-                if(currentMode !== 'stock') return; // 로딩 끝났는데 딴 데 갔으면 취소!
-                let h = `<table class="data-table"><thead><tr><th>품목 (기초+매입-출고)</th><th style="text-align:right">수량</th></tr></thead><tbody>`;
+                if(currentMode !== 'stock') return;
+                let h = `<table class="data-table"><thead><tr><th>품목</th><th style="text-align:right">수량</th></tr></thead><tbody>`;
                 d.forEach(i => h += `<tr><td>${i.name}</td><td style="text-align:right;">${i.qty}</td></tr>`);
                 document.getElementById('stock-list-area').innerHTML = h+"</tbody></table>";
             });
         }
 
-        // [020] 손익관리
         let salesData={}, viewYear=new Date().getFullYear(), viewMonth=new Date().getMonth();
         function initCalendar(){
             const yS=document.getElementById('cal-year'), mS=document.getElementById('cal-month'); yS.innerHTML=""; mS.innerHTML="";
@@ -292,7 +285,6 @@
         }
         function loadMenuCost(){fetch(`${gasUrl}?action=menu_cost`).then(r=>r.json()).then(l=>{let h=`<table class="data-table"><thead><tr><th>메뉴</th><th style="text-align:right">원가율(%)</th></tr></thead><tbody>`; l.forEach(i=>{let c=i.ratio>=35?"red":"green"; h+=`<tr><td>${i.name}</td><td style="text-align:right;font-weight:bold;color:${c}">${i.ratio}%</td></tr>`}); document.getElementById('menu-cost-area').innerHTML=h+"</tbody></table>"})}
 
-        // 기타 (기존 로직)
         let workList=[];
         document.getElementById('searchBtn').addEventListener('click',()=>{const v=document.getElementById('searchInput').value; fetch(`${gasUrl}?action=search&item=${v}`).then(r=>r.json()).then(d=>{let h=""; d.forEach(i=>{h+=`<div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;"><span>${i.name}</span><button onclick="addToList('${i.name}','${i.spec}','${i.unit}')" style="font-size:11px; padding:3px 8px; border:1px solid #333; background:white; border-radius:4px;">담기</button></div>`}); document.getElementById('search-result').innerHTML=h})});
         function addToList(n,s,u){workList.push({date:new Date().toISOString().split('T')[0],name:n,spec:s,unit:u,qty:1}); renderList();}
