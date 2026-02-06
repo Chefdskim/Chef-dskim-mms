@@ -1,8 +1,138 @@
-<script>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chef_dskim SYSTEM</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+        .main-btn { width: 100%; padding: 20px; margin-bottom: 10px; font-size: 16px; font-weight: bold; border: 1px solid #ccc; border-radius: 8px; background: #fff; cursor: pointer; text-align: left; }
+        .code-tag { color: #888; font-size: 12px; display: block; margin-bottom: 5px; }
+        #submenu-000 { display: none; background: #f8f9fa; margin-top: -5px; margin-bottom: 15px; padding: 5px; border: 1px solid #ddd; border-top: none; }
+        .sub-btn { width: 100%; padding: 15px; border: none; border-bottom: 1px solid #eee; background: none; text-align: left; cursor: pointer; font-size: 15px; }
+        .workspace { display: none; }
+        .back-btn { background: none; border: none; color: #555; margin-bottom:15px; cursor:pointer; }
+        .info-card { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .photo-link-btn { display:inline-block; padding:5px 10px; background:#eee; color:#333; text-decoration:none; border-radius:4px; font-size:12px; margin-top:5px; border:1px solid #ccc; }
+        .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
+        input[type="text"], textarea { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box; }
+        .action-btn { padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .recipe-card { background: white; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .recipe-header { background: #2c3e50; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .recipe-title { font-size: 20px; font-weight: bold; }
+        .recipe-type { background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 15px; font-size: 12px; }
+        .recipe-body { padding: 15px; }
+        .section-block { margin-bottom: 20px; }
+        .section-title { font-size: 15px; font-weight: bold; color: #d35400; border-bottom: 2px solid #fce3cf; padding-bottom: 5px; margin-bottom: 10px; display: inline-block; }
+        .detail-row { display: flex; margin-bottom: 8px; font-size: 14px; border-bottom: 1px dashed #eee; padding-bottom: 8px; align-items: flex-start; }
+        .detail-cat { font-weight: bold; color: #555; width: 80px; flex-shrink: 0; font-size: 13px; margin-top: 2px; }
+        .detail-content { flex: 1; line-height: 1.5; color: #333; white-space: pre-wrap; }
+        .video-btn { display: inline-block; background: #ff0000; color: white; font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 4px; text-decoration: none; margin-left: 8px; vertical-align: middle; }
+        .mode-switch { display: flex; gap: 5px; margin-bottom: 20px; }
+        .mode-btn { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-weight: bold; cursor: pointer; background: #fff; color: #777; font-size: 13px; }
+        .mode-btn.active-in { background: #e8f8f5; border-color: #27ae60; color: #27ae60; }
+        .finance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .finance-item { background: #f8f9fa; padding: 15px; text-align: center; border-radius: 8px; }
+        .finance-val { font-size: 16px; font-weight: bold; margin-top:5px; }
+        .finance-profit.plus { color: #27ae60; } .finance-profit { color: #e74c3c; }
+        .menu-card { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee; }
+        .cost-good { background:#e8f8f5; color:#27ae60; padding:3px 8px; border-radius:4px; font-size:12px; }
+        .cost-bad { background:#fdedec; color:#e74c3c; padding:3px 8px; border-radius:4px; font-size:12px; }
+
+        /* 수정 팝업 스타일 */
+        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; }
+        .modal-box { background:white; padding:20px; border-radius:8px; width:90%; max-width:400px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 id="page-title">MAIN MENU</h2>
+        <div id="main-nav">
+            <button class="main-btn" onclick="toggleSubMenu()"><span class="code-tag">000</span> 기준정보 (ADMIN) ▼</button>
+            <div id="submenu-000">
+                <button class="sub-btn" onclick="openModule('010')">010 자산/재고</button>
+                <button class="sub-btn" onclick="openModule('020')">020 손익/원가</button>
+                <button class="sub-btn" onclick="openModule('030')">030 직원교육</button>
+            </div>
+            <button class="main-btn" onclick="openModule('100')"><span class="code-tag">100~300</span> 국가별 요리 (레시피) 📖</button>
+            <button class="main-btn" onclick="openModule('400')"><span class="code-tag">400</span> 심화 연구 (R&D) 🔬</button>
+        </div>
+
+        <div id="workspace-010" class="workspace">
+            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
+            <div class="info-card"><div style="font-size:13px; color:#3498db; font-weight:bold;">💰 현재 총 재고 자산</div><div id="asset-value" style="font-size:24px; font-weight:bold;">0 원</div></div>
+            <div class="mode-switch"><button id="btn-in" class="mode-btn active-in" onclick="setMode('in')">📥 매입</button><button id="btn-out" class="mode-btn" onclick="setMode('out')">📤 출고</button><button id="btn-stock" class="mode-btn" onclick="loadStock()">📦 재고</button></div>
+            <div id="search-area" class="search-box"><input type="text" id="searchInput" placeholder="품목명"><button class="action-btn" id="searchBtn">검색</button></div>
+            <div id="result-list"></div><div id="work-area" style="margin-top:20px; display:none;"><strong id="list-title">📋 작업 리스트</strong><div id="saved-list"></div><button id="send-btn" class="action-btn" onclick="saveToSheet()" style="width:100%; margin-top:10px;">저장하기</button></div>
+        </div>
+
+        <div id="workspace-020" class="workspace">
+            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
+            <div class="finance-grid"><div class="finance-item"><div>매출</div><div class="finance-val" id="fin-current">0</div></div><div class="finance-item"><div>순이익</div><div class="finance-val" id="fin-profit">0</div></div></div>
+            <div style="margin-top:20px;"><h5>🍔 메뉴 원가</h5><div id="menu-list-area"></div></div>
+        </div>
+
+        <div id="workspace-030" class="workspace">
+            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button><div id="manual-list-area"></div>
+        </div>
+
+        <div id="workspace-100" class="workspace">
+            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
+            <div class="search-box"><input type="text" id="recipeInput" placeholder="메뉴명 검색"><button class="action-btn" onclick="loadRecipe()">검색</button></div>
+            <div id="recipe-list-area"></div>
+        </div>
+
+        <div id="workspace-400" class="workspace">
+            <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
+            
+            <div class="info-card" style="padding:0; overflow:hidden;">
+                <div style="background:#2980b9; color:white; padding:10px; font-weight:bold; text-align:center;">📝 연구 기록 입력 (설문지)</div>
+                <iframe id="google-form-frame" style="width:100%; height:450px; border:none;"></iframe>
+            </div>
+
+            <div style="margin-top:20px; border-bottom:2px solid #eee; padding-bottom:10px; font-weight:bold; color:#555; display:flex; justify-content:space-between; align-items:center;">
+                <span>📋 연구 기록 목록</span>
+                <button onclick="loadRnD()" style="font-size:12px; padding:5px 10px; border:1px solid #ccc; background:white; border-radius:4px; cursor:pointer;">🔄 새로고침</button>
+            </div>
+            <div id="rnd-list-area"></div>
+        </div>
+    </div>
+
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="margin-top:0;">✏️ 기록 수정</h3>
+            <input type="hidden" id="edit-row">
+            <div style="margin-bottom:10px;">
+                <label style="font-size:12px; font-weight:bold;">메뉴명</label>
+                <input type="text" id="edit-menu">
+            </div>
+            <div style="margin-bottom:10px;">
+                <label style="font-size:12px; font-weight:bold;">상태</label>
+                <select id="edit-status" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px;">
+                    <option value="아이디어">아이디어</option>
+                    <option value="테스트중">테스트중</option>
+                    <option value="성공">성공</option>
+                    <option value="보류">보류</option>
+                </select>
+            </div>
+            <div style="margin-bottom:10px;">
+                <label style="font-size:12px; font-weight:bold;">연구노트</label>
+                <textarea id="edit-note" style="height:80px;"></textarea>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button onclick="closeEditModal()" style="flex:1; padding:10px; background:#ccc; border:none; border-radius:4px; cursor:pointer;">취소</button>
+                <button onclick="submitEdit()" style="flex:1; padding:10px; background:#2980b9; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">수정 저장</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
         const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
         
-        // 셰프님의 설문지 주소
-        const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSejJy628hEvS5_0QpukHJsFJF228YCEBgW0W6BDutfpjm-UDQ/viewform"; 
+        // 셰프님 설문지 주소
+        const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSejJy628hEvS5_0QpukHJsFJF228YCEBgW0W6BDutfpjm-UDQ/viewform?embedded=true"; 
 
         function toggleSubMenu() { const el = document.getElementById('submenu-000'); el.style.display = (el.style.display==='block')?'none':'block'; }
         function goBackMain() { document.querySelectorAll('.workspace').forEach(el=>el.style.display='none'); document.getElementById('main-nav').style.display='block'; document.getElementById('page-title').innerText="MAIN MENU"; }
@@ -16,16 +146,13 @@
             else if(code==='030'){document.getElementById('workspace-030').style.display='block'; loadManual();}
             else if(code==='100'){document.getElementById('workspace-100').style.display='block'; loadRecipe();}
             else if(code==='400'){
-                document.getElementById('workspace-400').style.display='block'; 
-                // iFrame 주소 주입
+                document.getElementById('workspace-400').style.display='block';
                 document.getElementById('google-form-frame').src = formUrl;
                 loadRnD();
             }
         }
 
-        // [400] R&D Logic (강력한 사진 ID 추출기 탑재)
-        function openForm() { window.open(formUrl, '_blank'); }
-        
+        // [400] R&D Logic (이미지 처리 강화)
         function loadRnD() {
             const area = document.getElementById('rnd-list-area');
             area.innerHTML = "<p style='text-align:center; color:#999'>불러오는 중...</p>";
@@ -40,40 +167,25 @@
                     if(i.status && i.status.includes("테스트")) c = "#e74c3c";
                     if(i.status && i.status.includes("성공")) c = "#27ae60";
 
-                    // [핵심] 사진 주소 처리 (어떤 모양이든 다 잡아냄)
+                    // [이미지 처리]
                     let imgHtml = "";
                     if (i.photo && i.photo.trim() !== "") {
                         try {
-                            let fileId = "";
-                            let rawUrl = i.photo.toString();
-
-                            // Case 1: id=xxxxx 형태
-                            if (rawUrl.includes("id=")) {
-                                fileId = rawUrl.split("id=")[1].split("&")[0].split(",")[0];
-                            } 
-                            // Case 2: /d/xxxxx/ 형태
-                            else if (rawUrl.includes("/d/")) {
-                                fileId = rawUrl.split("/d/")[1].split("/")[0];
-                            }
-
-                            if (fileId) {
-                                // 1. 미리보기용 썸네일 주소
+                            // ID 추출 (정규식: 25자리 이상 문자열)
+                            let match = i.photo.match(/[-\w]{25,}/);
+                            if(match) {
+                                let fileId = match[0];
                                 let thumbUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
-                                
-                                imgHtml = `<div style="margin-top:10px; text-align:center; background:#f9f9f9; padding:5px; border-radius:8px;">
-                                     <img src="${thumbUrl}" style="width:100%; max-width:250px; border-radius:4px; display:block; margin:0 auto;" referrerpolicy="no-referrer">
-                                     <div style="margin-top:5px;">
-                                        <a href="${thumbUrl}" target="_blank" class="photo-link-btn">🔍 크게 보기</a>
-                                     </div>
+                                imgHtml = `<div style="margin-top:10px; text-align:center;">
+                                     <img src="${thumbUrl}" style="width:100%; max-width:250px; border-radius:8px;" referrerpolicy="no-referrer" onerror="this.style.display='none';">
+                                     <div style="margin-top:5px;"><a href="${thumbUrl}" target="_blank" class="photo-link-btn">📷 사진 보기</a></div>
                                    </div>`;
                             } else {
-                                // ID 못 찾으면 그냥 링크라도 띄움
-                                imgHtml = `<div style="margin-top:5px;"><a href="${rawUrl}" target="_blank" class="photo-link-btn">📷 사진 링크 열기</a></div>`;
+                                imgHtml = `<div style="margin-top:5px;"><a href="${i.photo}" target="_blank" class="photo-link-btn">📷 사진 링크</a></div>`;
                             }
-                        } catch(e) { console.log("이미지 에러", e); }
+                        } catch(e) {}
                     }
 
-                    // 수정 버튼 포함
                     html += `<div class="info-card">
                         <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                             <span style="font-weight:bold; font-size:16px;">${i.menu}</span>
@@ -91,7 +203,7 @@
             });
         }
 
-        // 수정 팝업 관련 함수
+        // 수정 기능
         function openEditModal(item) {
             document.getElementById('edit-row').value = item.row;
             document.getElementById('edit-menu').value = item.menu;
@@ -135,3 +247,5 @@
         function addToList(n,s,u){workList.push({date:new Date().toISOString().split('T')[0],name:n,spec:s,unit:u,qty:1}); renderList()}
         function saveToSheet(){fetch(`${gasUrl}?action=save&type=${currentMode}&data=${encodeURIComponent(JSON.stringify(workList))}`).then(()=>{alert("완료");workList=[];renderList()})}
     </script>
+</body>
+</html>
