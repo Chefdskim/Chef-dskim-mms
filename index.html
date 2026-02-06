@@ -41,7 +41,6 @@
         .cost-good { background:#e8f8f5; color:#27ae60; padding:3px 8px; border-radius:4px; font-size:12px; }
         .cost-bad { background:#fdedec; color:#e74c3c; padding:3px 8px; border-radius:4px; font-size:12px; }
 
-        /* 수정 팝업 스타일 */
         .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; }
         .modal-box { background:white; padding:20px; border-radius:8px; width:90%; max-width:400px; }
     </style>
@@ -67,17 +66,14 @@
             <div id="search-area" class="search-box"><input type="text" id="searchInput" placeholder="품목명"><button class="action-btn" id="searchBtn">검색</button></div>
             <div id="result-list"></div><div id="work-area" style="margin-top:20px; display:none;"><strong id="list-title">📋 작업 리스트</strong><div id="saved-list"></div><button id="send-btn" class="action-btn" onclick="saveToSheet()" style="width:100%; margin-top:10px;">저장하기</button></div>
         </div>
-
         <div id="workspace-020" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
             <div class="finance-grid"><div class="finance-item"><div>매출</div><div class="finance-val" id="fin-current">0</div></div><div class="finance-item"><div>순이익</div><div class="finance-val" id="fin-profit">0</div></div></div>
             <div style="margin-top:20px;"><h5>🍔 메뉴 원가</h5><div id="menu-list-area"></div></div>
         </div>
-
         <div id="workspace-030" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button><div id="manual-list-area"></div>
         </div>
-
         <div id="workspace-100" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
             <div class="search-box"><input type="text" id="recipeInput" placeholder="메뉴명 검색"><button class="action-btn" onclick="loadRecipe()">검색</button></div>
@@ -130,8 +126,6 @@
 
     <script>
         const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
-        
-        // 셰프님 설문지 주소
         const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSejJy628hEvS5_0QpukHJsFJF228YCEBgW0W6BDutfpjm-UDQ/viewform?embedded=true"; 
 
         function toggleSubMenu() { const el = document.getElementById('submenu-000'); el.style.display = (el.style.display==='block')?'none':'block'; }
@@ -152,14 +146,13 @@
             }
         }
 
-        // [400] R&D Logic (이미지 처리 강화)
+        // [R&D]
         function loadRnD() {
             const area = document.getElementById('rnd-list-area');
             area.innerHTML = "<p style='text-align:center; color:#999'>불러오는 중...</p>";
             
             fetch(`${gasUrl}?action=rnd`).then(r => r.json()).then(l => {
                 if(l.length === 0) { area.innerHTML = "<p style='text-align:center; color:#999'>기록이 없습니다.<br>위 설문지로 작성해주세요.</p>"; return; }
-                
                 let html = "";
                 l.forEach(i => {
                     let c = "#777";
@@ -167,15 +160,12 @@
                     if(i.status && i.status.includes("테스트")) c = "#e74c3c";
                     if(i.status && i.status.includes("성공")) c = "#27ae60";
 
-                    // [이미지 처리]
                     let imgHtml = "";
                     if (i.photo && i.photo.trim() !== "") {
                         try {
-                            // ID 추출 (정규식: 25자리 이상 문자열)
                             let match = i.photo.match(/[-\w]{25,}/);
                             if(match) {
-                                let fileId = match[0];
-                                let thumbUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+                                let thumbUrl = `https://drive.google.com/uc?export=view&id=${match[0]}`;
                                 imgHtml = `<div style="margin-top:10px; text-align:center;">
                                      <img src="${thumbUrl}" style="width:100%; max-width:250px; border-radius:8px;" referrerpolicy="no-referrer" onerror="this.style.display='none';">
                                      <div style="margin-top:5px;"><a href="${thumbUrl}" target="_blank" class="photo-link-btn">📷 사진 보기</a></div>
@@ -203,7 +193,7 @@
             });
         }
 
-        // 수정 기능
+        // [수정] 즉시 닫기
         function openEditModal(item) {
             document.getElementById('edit-row').value = item.row;
             document.getElementById('edit-menu').value = item.menu;
@@ -223,15 +213,15 @@
             const btn = document.querySelector('#edit-modal button:last-child');
             btn.innerText = "저장 중..."; btn.disabled = true;
 
+            // [변경] 알림 없이 바로 닫고 새로고침
             google.script.run.withSuccessHandler(function(res) {
-                alert("수정되었습니다.");
                 closeEditModal();
                 btn.innerText = "수정 저장"; btn.disabled = false;
                 loadRnD(); 
             }).updateRnDItem(item);
         }
 
-        // [010~100] 공통 로직
+        // [공통]
         function loadRecipe(){const k=document.getElementById('recipeInput').value;const a=document.getElementById('recipe-list-area');a.innerHTML="<p style='text-align:center;color:#999'>로딩 중...</p>";fetch(`${gasUrl}?action=recipe&keyword=${encodeURIComponent(k)}`).then(r=>r.json()).then(l=>{if(l.length===0){a.innerHTML="<p style='text-align:center;color:#999'>검색 결과 없음</p>";return;}let h="";l.forEach(i=>{let g={};i.details.forEach(d=>{if(!g[d.section])g[d.section]=[];g[d.section].push(d)});let b="";for(let s in g){if(!s)continue;let r="";g[s].forEach(row=>{let v=row.video?`<a href="${row.video}" target="_blank" class="video-btn">▶ 영상</a>`:"";r+=`<div class="detail-row"><div class="detail-cat">${row.category}</div><div class="detail-content">${row.content}${v}</div></div>`});b+=`<div class="section-block"><div class="section-title">${s}</div>${r}</div>`}h+=`<div class="recipe-card"><div class="recipe-header"><span class="recipe-title">${i.name}</span><span class="recipe-type">${i.type}</span></div><div class="recipe-body">${b}</div></div>`});a.innerHTML=h})}
         let currentMode='in'; let workList=[];
         document.addEventListener("DOMContentLoaded", function() {
