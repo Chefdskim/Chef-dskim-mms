@@ -40,8 +40,7 @@
         .menu-card { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee; }
         .cost-good { background:#e8f8f5; color:#27ae60; padding:3px 8px; border-radius:4px; font-size:12px; }
         .cost-bad { background:#fdedec; color:#e74c3c; padding:3px 8px; border-radius:4px; font-size:12px; }
-        
-        /* [900] 파일 리스트 스타일 */
+        /* 900번 파일 목록 스타일 */
         .file-item { display:flex; align-items:center; padding:15px; border-bottom:1px solid #eee; text-decoration:none; color:#333; transition:background 0.2s; }
         .file-item:hover { background:#f9f9f9; }
         .file-icon { font-size:24px; margin-right:15px; }
@@ -135,7 +134,7 @@
             }
         }
 
-        // [900] 자료실 로직 (NEW)
+        // [900] 자료실 로직
         function loadArchive() {
             const area = document.getElementById('archive-list-area');
             area.innerHTML = "<p style='text-align:center; color:#999; margin-top:20px;'>파일 목록 가져오는 중...</p>";
@@ -148,8 +147,7 @@
                 
                 let html = "";
                 list.forEach(f => {
-                    // 파일 종류별 아이콘
-                    let icon = "📄"; // 기본
+                    let icon = "📄";
                     if(f.type.includes("image")) icon = "🖼️";
                     else if(f.type.includes("pdf")) icon = "📕";
                     else if(f.type.includes("sheet") || f.type.includes("excel")) icon = "📊";
