@@ -40,8 +40,15 @@
         .menu-card { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee; }
         .cost-good { background:#e8f8f5; color:#27ae60; padding:3px 8px; border-radius:4px; font-size:12px; }
         .cost-bad { background:#fdedec; color:#e74c3c; padding:3px 8px; border-radius:4px; font-size:12px; }
-        /* 900번 자료실 버튼 스타일 */
-        .archive-btn { display:block; width:100%; padding:20px; background:#8e44ad; color:white; font-size:18px; font-weight:bold; border:none; border-radius:8px; cursor:pointer; text-align:center; text-decoration:none; margin-top:10px; }
+        
+        /* [900] 파일 리스트 스타일 */
+        .file-item { display:flex; align-items:center; padding:15px; border-bottom:1px solid #eee; text-decoration:none; color:#333; transition:background 0.2s; }
+        .file-item:hover { background:#f9f9f9; }
+        .file-icon { font-size:24px; margin-right:15px; }
+        .file-info { flex:1; }
+        .file-name { font-weight:bold; font-size:14px; margin-bottom:3px; word-break:break-all; }
+        .file-date { font-size:11px; color:#999; }
+        .file-arrow { color:#ccc; }
     </style>
 </head>
 <body>
@@ -66,17 +73,14 @@
             <div id="search-area" class="search-box"><input type="text" id="searchInput" placeholder="품목명"><button class="action-btn" id="searchBtn">검색</button></div>
             <div id="result-list"></div><div id="work-area" style="margin-top:20px; display:none;"><strong id="list-title">📋 작업 리스트</strong><div id="saved-list"></div><button id="send-btn" class="action-btn" onclick="saveToSheet()" style="width:100%; margin-top:10px;">저장하기</button></div>
         </div>
-
         <div id="workspace-020" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
             <div class="finance-grid"><div class="finance-item"><div>매출</div><div class="finance-val" id="fin-current">0</div></div><div class="finance-item"><div>순이익</div><div class="finance-val" id="fin-profit">0</div></div></div>
             <div style="margin-top:20px;"><h5>🍔 메뉴 원가</h5><div id="menu-list-area"></div></div>
         </div>
-
         <div id="workspace-030" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button><div id="manual-list-area"></div>
         </div>
-
         <div id="workspace-100" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
             <div class="search-box"><input type="text" id="recipeInput" placeholder="메뉴명 검색"><button class="action-btn" onclick="loadRecipe()">검색</button></div>
@@ -85,12 +89,10 @@
 
         <div id="workspace-400" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
-            
             <div class="info-card" style="padding:0; overflow:hidden;">
                 <div style="background:#2980b9; color:white; padding:10px; font-weight:bold; text-align:center;">📝 연구 기록 입력 (설문지)</div>
                 <iframe id="google-form-frame" style="width:100%; height:450px; border:none;"></iframe>
             </div>
-
             <div style="margin-top:20px; border-bottom:2px solid #eee; padding-bottom:10px; font-weight:bold; color:#555; display:flex; justify-content:space-between; align-items:center;">
                 <span>📋 연구 기록 목록</span>
                 <button onclick="loadRnD()" style="font-size:12px; padding:5px 10px; border:1px solid #ccc; background:white; border-radius:4px; cursor:pointer;">🔄 새로고침</button>
@@ -100,15 +102,10 @@
 
         <div id="workspace-900" class="workspace">
             <button class="back-btn" onclick="goBackMain()">◀ 메인으로</button>
-            <div class="info-card" style="text-align:center; padding:30px;">
-                <h3 style="margin-top:0; color:#8e44ad;">📂 셰프님의 비밀 서재</h3>
-                <p style="color:#666; font-size:14px; margin-bottom:20px;">
-                    계약서, 레시피 원본 PDF, 시장조사 자료 등<br>
-                    중요한 파일은 구글 드라이브에 안전하게 보관됩니다.
-                </p>
-                <a href="https://drive.google.com/drive/folders/1tnHFvE6bjKUGliUoZ1t2F2sgVQaZOUQm" target="_blank" class="archive-btn">🚀 자료실 폴더 열기</a>
-                <p style="color:#999; font-size:12px; margin-top:15px;">※ 버튼을 누르면 구글 드라이브 앱/웹이 열립니다.</p>
+            <div style="border-bottom:2px solid #8e44ad; padding-bottom:10px; margin-bottom:10px; font-weight:bold; color:#8e44ad;">
+                📂 비밀 서재 파일 목록
             </div>
+            <div id="archive-list-area"></div>
         </div>
     </div>
 
@@ -134,16 +131,49 @@
             }
             else if(code==='900'){
                 document.getElementById('workspace-900').style.display='block';
+                loadArchive();
             }
         }
 
-        // [R&D] 조회 전용
+        // [900] 자료실 로직 (NEW)
+        function loadArchive() {
+            const area = document.getElementById('archive-list-area');
+            area.innerHTML = "<p style='text-align:center; color:#999; margin-top:20px;'>파일 목록 가져오는 중...</p>";
+
+            fetch(`${gasUrl}?action=archive`).then(r => r.json()).then(list => {
+                if(list.length === 0) {
+                    area.innerHTML = "<p style='text-align:center; color:#999; margin-top:20px;'>폴더가 비어있습니다.</p>";
+                    return;
+                }
+                
+                let html = "";
+                list.forEach(f => {
+                    // 파일 종류별 아이콘
+                    let icon = "📄"; // 기본
+                    if(f.type.includes("image")) icon = "🖼️";
+                    else if(f.type.includes("pdf")) icon = "📕";
+                    else if(f.type.includes("sheet") || f.type.includes("excel")) icon = "📊";
+                    else if(f.type.includes("folder")) icon = "📁";
+
+                    html += `<a href="${f.url}" target="_blank" class="file-item">
+                        <div class="file-icon">${icon}</div>
+                        <div class="file-info">
+                            <div class="file-name">${f.name}</div>
+                            <div class="file-date">${f.date}</div>
+                        </div>
+                        <div class="file-arrow">›</div>
+                    </a>`;
+                });
+                area.innerHTML = html;
+            });
+        }
+
+        // [R&D]
         function loadRnD() {
             const area = document.getElementById('rnd-list-area');
             area.innerHTML = "<p style='text-align:center; color:#999'>불러오는 중...</p>";
-            
             fetch(`${gasUrl}?action=rnd`).then(r => r.json()).then(l => {
-                if(l.length === 0) { area.innerHTML = "<p style='text-align:center; color:#999'>기록이 없습니다.<br>위 설문지로 작성해주세요.</p>"; return; }
+                if(l.length === 0) { area.innerHTML = "<p style='text-align:center; color:#999'>기록이 없습니다.</p>"; return; }
                 let html = "";
                 l.forEach(i => {
                     let c = "#777";
@@ -166,8 +196,6 @@
                             }
                         } catch(e) {}
                     }
-
-                    // 수정 버튼 제거된 순수 리스트
                     html += `<div class="info-card">
                         <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                             <span style="font-weight:bold; font-size:16px;">${i.menu}</span>
@@ -182,7 +210,7 @@
             });
         }
 
-        // [공통 로직]
+        // [공통]
         function loadRecipe(){const k=document.getElementById('recipeInput').value;const a=document.getElementById('recipe-list-area');a.innerHTML="<p style='text-align:center;color:#999'>로딩 중...</p>";fetch(`${gasUrl}?action=recipe&keyword=${encodeURIComponent(k)}`).then(r=>r.json()).then(l=>{if(l.length===0){a.innerHTML="<p style='text-align:center;color:#999'>검색 결과 없음</p>";return;}let h="";l.forEach(i=>{let g={};i.details.forEach(d=>{if(!g[d.section])g[d.section]=[];g[d.section].push(d)});let b="";for(let s in g){if(!s)continue;let r="";g[s].forEach(row=>{let v=row.video?`<a href="${row.video}" target="_blank" class="video-btn">▶ 영상</a>`:"";r+=`<div class="detail-row"><div class="detail-cat">${row.category}</div><div class="detail-content">${row.content}${v}</div></div>`});b+=`<div class="section-block"><div class="section-title">${s}</div>${r}</div>`}h+=`<div class="recipe-card"><div class="recipe-header"><span class="recipe-title">${i.name}</span><span class="recipe-type">${i.type}</span></div><div class="recipe-body">${b}</div></div>`});a.innerHTML=h})}
         let currentMode='in'; let workList=[];
         document.addEventListener("DOMContentLoaded", function() {
