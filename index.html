@@ -15,42 +15,55 @@
             --text-main: #222;
             --point-blue: #3498db;
             --point-red: #e74c3c;
+            --point-green: #27ae60;
         }
         body { font-family: 'Noto Sans KR', sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: var(--text-main); padding-bottom: 80px; }
         
-        .app-header {
-            background: url('https://images.unsplash.com/photo-1556910103-1c02745a30bf?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80') center/cover;
-            height: 160px; position: relative; display: flex; align-items: flex-end; padding: 20px;
-        }
+        /* 공통 헤더/레이아웃 (기존과 동일) */
+        .app-header { background: url('https://images.unsplash.com/photo-1556910103-1c02745a30bf?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80') center/cover; height: 160px; position: relative; display: flex; align-items: flex-end; padding: 20px; }
         .header-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8)); }
         .header-content { position: relative; z-index: 1; color: white; }
         .header-title { font-size: 24px; font-weight: 700; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         .header-sub { font-size: 13px; opacity: 0.9; margin-top: 5px; font-weight: 300; }
         .container { max-width: 600px; margin: 0 auto; }
-        .shortcut-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px 5px;
-            background: var(--white); padding: 25px 10px; margin-bottom: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-radius: 0 0 20px 20px;
-        }
+        
+        .shortcut-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px 5px; background: var(--white); padding: 25px 10px; margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-radius: 0 0 20px 20px; }
         .shortcut-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-        .icon-box {
-            width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
-            font-size: 20px; color: white; margin-bottom: 8px; box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-        }
+        .icon-box { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; margin-bottom: 8px; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
         .shortcut-label { font-size: 11px; font-weight: 500; color: #444; }
+
         .workspace { display: none; background: var(--bg); min-height: 100vh; }
-        .page-header {
-            padding: 15px 20px; background: var(--white); border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; position: sticky; top: 0; z-index: 50;
-        }
+        .page-header { padding: 15px 20px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; position: sticky; top: 0; z-index: 50; }
         .back-btn { border: none; background: none; font-size: 20px; margin-right: 15px; cursor: pointer; color: var(--text-main); }
         .page-name { font-size: 18px; font-weight: 700; color: var(--primary); }
         .detail-container { padding: 15px; }
-        
+
         .console-box { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .console-input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
         .console-btn { padding: 0 15px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+
+        /* [NEW] 일정/공지 스타일 */
+        .schedule-item { background: white; padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; }
+        .schedule-date { background: #f0f7ff; color: var(--point-blue); padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 13px; margin-right: 15px; text-align: center; min-width: 40px; }
+        .schedule-content { flex: 1; }
+        .schedule-type { font-size: 11px; color: #888; border: 1px solid #ddd; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
         
+        .notice-item { background: white; border-bottom: 1px solid #eee; }
+        .notice-head { padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .notice-badge { font-size: 11px; font-weight: bold; padding: 3px 6px; border-radius: 4px; margin-right: 8px; }
+        .notice-badge.urgent { background: #ffeaea; color: var(--point-red); }
+        .notice-badge.normal { background: #eee; color: #555; }
+        .notice-body { display: none; padding: 15px; background: #fafafa; border-top: 1px solid #eee; font-size: 14px; line-height: 1.6; white-space: pre-wrap; color: #444; }
+        .notice-item.active .notice-body { display: block; }
+
+        /* 입력 폼 */
+        .input-form { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; display: none; }
+        .form-row { margin-bottom: 10px; }
+        .form-label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+        .form-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; outline: none; }
+        .form-select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; background: white; }
+
+        /* 기존 스타일들 (달력 등) */
         .calendar-wrap { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .cal-header { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; }
         .cal-select { font-size: 18px; font-weight: bold; border: none; background: transparent; padding: 5px; cursor: pointer; outline: none; border-bottom: 2px solid transparent; }
@@ -63,7 +76,6 @@
         .cal-input-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; }
         .modal-content { background: white; padding: 25px; border-radius: 12px; width: 80%; max-width: 300px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .modal-input { width: 100%; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; margin: 15px 0; outline: none; text-align: right; }
-        
         .total-box { background: var(--primary); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; }
         .data-table { width: 100%; border-collapse: collapse; background: white; font-size: 13px; }
         .data-table th { background: #f8f9fa; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; }
@@ -71,7 +83,6 @@
         .mode-tabs { display: flex; background: #f0f0f0; border-radius: 8px; padding: 4px; margin-bottom: 15px; }
         .mode-tab { flex: 1; border: none; background: none; padding: 8px; font-size: 13px; font-weight: bold; color: #777; cursor: pointer; border-radius: 6px; }
         .mode-tab.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        
         .recipe-card { background: white; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #eee; }
         .recipe-head { background: var(--primary); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
         .recipe-name { font-size: 18px; font-weight: bold; }
@@ -105,11 +116,39 @@
                 <div class="shortcut-item" onclick="openModule('020')"><div class="icon-box" style="background:#e74c3c"><i class="fas fa-chart-line"></i></div><span class="shortcut-label">손익관리</span></div>
                 <div class="shortcut-item" onclick="openModule('030')"><div class="icon-box" style="background:#27ae60"><i class="fas fa-graduation-cap"></i></div><span class="shortcut-label">직원교육</span></div>
                 <div class="shortcut-item" onclick="openModule('900')"><div class="icon-box" style="background:#3498db"><i class="fas fa-folder-open"></i></div><span class="shortcut-label">자료실</span></div>
-                <div class="shortcut-item" onclick="alert('준비중')"><div class="icon-box" style="background:#bdc3c7"><i class="fas fa-calendar-alt"></i></div><span class="shortcut-label">일정</span></div>
-                <div class="shortcut-item" onclick="alert('준비중')"><div class="icon-box" style="background:#bdc3c7"><i class="fas fa-bullhorn"></i></div><span class="shortcut-label">공지사항</span></div>
+                <div class="shortcut-item" onclick="openModule('500')"><div class="icon-box" style="background:#e67e22"><i class="fas fa-calendar-alt"></i></div><span class="shortcut-label">일정</span></div>
+                <div class="shortcut-item" onclick="openModule('600')"><div class="icon-box" style="background:#7f8c8d"><i class="fas fa-bullhorn"></i></div><span class="shortcut-label">공지사항</span></div>
             </div>
             <div style="padding: 10px 20px; font-weight: bold; color: #333; display: flex; justify-content: space-between;"><span>최신 연구 기록</span><span style="font-size:12px; color:#888; font-weight:normal;" onclick="openModule('400')">더보기 ></span></div>
             <div id="recent-rnd" style="padding: 0 20px;"></div>
+        </div>
+    </div>
+
+    <div id="workspace-500" class="workspace">
+        <div class="page-header"><button class="back-btn" onclick="goMain()">←</button><span class="page-name">매장 일정</span></div>
+        <div class="detail-container">
+            <button onclick="document.getElementById('schedule-form').style.display='block'" class="console-btn" style="width:100%; margin-bottom:15px;">+ 일정 추가하기</button>
+            <div id="schedule-form" class="input-form">
+                <div class="form-row"><label class="form-label">날짜</label><input type="date" id="sch-date" class="form-input"></div>
+                <div class="form-row"><label class="form-label">구분</label><select id="sch-type" class="form-select"><option>휴무</option><option>예약</option><option>행사</option><option>기타</option></select></div>
+                <div class="form-row"><label class="form-label">내용</label><input type="text" id="sch-content" class="form-input" placeholder="일정 내용"></div>
+                <div style="display:flex; gap:10px;"><button class="console-btn" style="flex:1; background:#ccc;" onclick="document.getElementById('schedule-form').style.display='none'">취소</button><button class="console-btn" style="flex:1;" onclick="saveSchedule()">저장</button></div>
+            </div>
+            <div id="schedule-list"></div>
+        </div>
+    </div>
+
+    <div id="workspace-600" class="workspace">
+        <div class="page-header"><button class="back-btn" onclick="goMain()">←</button><span class="page-name">공지사항</span></div>
+        <div class="detail-container">
+            <button onclick="document.getElementById('notice-form').style.display='block'" class="console-btn" style="width:100%; margin-bottom:15px;">+ 공지 쓰기</button>
+            <div id="notice-form" class="input-form">
+                <div class="form-row"><label class="form-label">중요도</label><select id="not-type" class="form-select"><option value="일반">일반</option><option value="필독">필독</option></select></div>
+                <div class="form-row"><label class="form-label">제목</label><input type="text" id="not-title" class="form-input" placeholder="제목"></div>
+                <div class="form-row"><label class="form-label">내용</label><textarea id="not-content" class="form-input" rows="4" placeholder="내용"></textarea></div>
+                <div style="display:flex; gap:10px;"><button class="console-btn" style="flex:1; background:#ccc;" onclick="document.getElementById('notice-form').style.display='none'">취소</button><button class="console-btn" style="flex:1;" onclick="saveNotice()">저장</button></div>
+            </div>
+            <div id="notice-list"></div>
         </div>
     </div>
 
@@ -135,7 +174,6 @@
             <div id="stock-list-area"></div>
         </div>
     </div>
-
     <div id="workspace-020" class="workspace">
         <div class="page-header"><button class="back-btn" onclick="goMain()">←</button><span class="page-name">손익 및 원가</span></div>
         <div class="detail-container">
@@ -152,19 +190,14 @@
             <div id="menu-cost-area"></div>
         </div>
     </div>
-
     <div id="sales-modal" class="cal-input-modal">
         <div class="modal-content">
             <h3 id="modal-date" style="margin-top:0;">DATE</h3>
             <div style="font-size:12px; color:#888; margin-bottom:5px;">매출액 입력 (엔터 저장)</div>
             <input type="number" id="modal-amount" class="modal-input" placeholder="0">
-            <div style="display:flex; gap:10px;">
-                <button class="console-btn" style="flex:1; background:#ccc;" onclick="closeModal()">취소</button>
-                <button class="console-btn" style="flex:1;" onclick="saveSales()">저장</button>
-            </div>
+            <div style="display:flex; gap:10px;"><button class="console-btn" style="flex:1; background:#ccc;" onclick="closeModal()">취소</button><button class="console-btn" style="flex:1;" onclick="saveSales()">저장</button></div>
         </div>
     </div>
-
     <div id="workspace-100" class="workspace">
         <div class="page-header"><button class="back-btn" onclick="goMain()">←</button><span class="page-name">표준 레시피</span></div>
         <div style="padding:15px; background:white; border-bottom:1px solid #eee; display:flex; gap:10px;"><input type="text" id="recipeInput" class="console-input" style="flex:1;" placeholder="메뉴명"><button class="console-btn" onclick="loadRecipe()">검색</button></div>
@@ -197,94 +230,65 @@
         function openModule(code) {
             document.getElementById('main-view').style.display='none'; document.querySelectorAll('.workspace').forEach(e=>e.style.display='none');
             
-            if(code==='010'){
-                document.getElementById('workspace-010').style.display='block'; 
-                loadAssetValueOnly();
-                setMode('in');
-                updateNav('관리');
-            }
-            else if(code==='020'){document.getElementById('workspace-020').style.display='block'; initCalendar(); updateNav('관리');}
-            else if(code==='100'){document.getElementById('workspace-100').style.display='block'; loadRecipe(); updateNav('레시피');}
-            else if(code==='400'){document.getElementById('workspace-400').style.display='block'; document.getElementById('google-form-frame').src=formUrl; loadRnD(); updateNav('연구');}
-            else if(code==='900'){document.getElementById('workspace-900').style.display='block'; loadArchive(); updateNav('자료실');}
-            else if(code==='030'){document.getElementById('workspace-030').style.display='block'; loadManual(); updateNav('관리');}
+            if(code==='010'){ document.getElementById('workspace-010').style.display='block'; loadAssetValueOnly(); setMode('in'); updateNav('관리'); }
+            else if(code==='020'){ document.getElementById('workspace-020').style.display='block'; initCalendar(); updateNav('관리'); }
+            else if(code==='100'){ document.getElementById('workspace-100').style.display='block'; loadRecipe(); updateNav('레시피'); }
+            else if(code==='400'){ document.getElementById('workspace-400').style.display='block'; document.getElementById('google-form-frame').src=formUrl; loadRnD(); updateNav('연구'); }
+            else if(code==='900'){ document.getElementById('workspace-900').style.display='block'; loadArchive(); updateNav('자료실'); }
+            else if(code==='030'){ document.getElementById('workspace-030').style.display='block'; loadManual(); updateNav('관리'); }
+            else if(code==='500'){ document.getElementById('workspace-500').style.display='block'; loadSchedule(); updateNav('홈'); }
+            else if(code==='600'){ document.getElementById('workspace-600').style.display='block'; loadNotice(); updateNav('홈'); }
         }
         function updateNav(n){ document.querySelectorAll('.nav-btn').forEach(b=>{ b.classList.remove('active'); if(b.querySelector('span').innerText===n) b.classList.add('active'); }); }
 
-        function setMode(m) {
-            currentMode = m;
-            document.querySelectorAll('.mode-tab').forEach(t=>t.classList.remove('active'));
-            document.getElementById('tab-'+m).classList.add('active');
-            
-            if(m === 'stock') { 
-                document.getElementById('input-area').style.display='none'; 
-                loadStockTableSafe();
-            } else {
-                document.getElementById('input-area').style.display='block';
-                loadAssetListSafe();
-            }
-        }
-
-        function loadAssetValueOnly() {
-            fetch(`${gasUrl}?action=asset`).then(r=>r.json()).then(d => {
-                document.getElementById('asset-value').innerText = Number(d.total).toLocaleString() + " 원";
+        // [500] 일정
+        function loadSchedule() {
+            document.getElementById('schedule-list').innerHTML="<div style='text-align:center;padding:20px;'>로딩 중...</div>";
+            fetch(`${gasUrl}?action=get_schedule`).then(r=>r.json()).then(l => {
+                let h=""; l.forEach(i=>{ h+=`<div class="schedule-item"><div class="schedule-date">${i.date.substring(5)}</div><div class="schedule-content"><div>${i.content}</div></div><div class="schedule-type">${i.type}</div></div>`; });
+                document.getElementById('schedule-list').innerHTML = h || "<div style='text-align:center;padding:20px;color:#999;'>등록된 일정이 없습니다.</div>";
             });
         }
-        
-        function loadAssetListSafe() {
-            if(currentMode === 'stock') return;
-            document.getElementById('stock-list-area').innerHTML = "<div style='text-align:center; padding:20px; color:#999;'>자산 목록 로딩 중...</div>";
-            fetch(`${gasUrl}?action=asset`).then(r=>r.json()).then(d => {
-                if(currentMode === 'stock') return;
-                let h = `<table class="data-table"><thead><tr><th>자산 품목</th><th style="text-align:right">금액</th></tr></thead><tbody>`;
-                d.list.forEach(i => h += `<tr><td>${i.name}</td><td style="text-align:right;">${Number(i.value).toLocaleString()}</td></tr>`);
-                document.getElementById('stock-list-area').innerHTML = h+"</tbody></table>";
-            });
+        function saveSchedule() {
+            const d=document.getElementById('sch-date').value, t=document.getElementById('sch-type').value, c=document.getElementById('sch-content').value;
+            if(!d || !c) { alert("날짜와 내용을 입력하세요"); return; }
+            fetch(`${gasUrl}?action=save_schedule&date=${d}&type=${t}&content=${c}`).then(()=>{ alert("저장됨"); document.getElementById('schedule-form').style.display='none'; loadSchedule(); document.getElementById('sch-content').value=""; });
         }
 
-        function loadStockTableSafe() {
-            if(currentMode !== 'stock') return;
-            document.getElementById('stock-list-area').innerHTML = "<div style='text-align:center; padding:20px; color:#999;'>재고 수량 파악 중...</div>";
-            fetch(`${gasUrl}?action=inventory`).then(r=>r.json()).then(d => {
-                if(currentMode !== 'stock') return;
-                let h = `<table class="data-table"><thead><tr><th>품목</th><th style="text-align:right">수량</th></tr></thead><tbody>`;
-                d.forEach(i => h += `<tr><td>${i.name}</td><td style="text-align:right;">${i.qty}</td></tr>`);
-                document.getElementById('stock-list-area').innerHTML = h+"</tbody></table>";
+        // [600] 공지사항
+        function loadNotice() {
+            document.getElementById('notice-list').innerHTML="<div style='text-align:center;padding:20px;'>로딩 중...</div>";
+            fetch(`${gasUrl}?action=get_notice`).then(r=>r.json()).then(l => {
+                let h=""; l.forEach(i=>{ 
+                    let badgeClass = i.type==='필독'?'urgent':'normal';
+                    h+=`<div class="notice-item" onclick="this.classList.toggle('active')"><div class="notice-head"><div><span class="notice-badge ${badgeClass}">${i.type}</span> <span style="font-weight:bold;">${i.title}</span></div><span style="font-size:12px;color:#888;">${i.date}</span></div><div class="notice-body">${i.content}</div></div>`; 
+                });
+                document.getElementById('notice-list').innerHTML = h || "<div style='text-align:center;padding:20px;color:#999;'>공지사항이 없습니다.</div>";
             });
         }
+        function saveNotice() {
+            const t=document.getElementById('not-type').value, ti=document.getElementById('not-title').value, c=document.getElementById('not-content').value;
+            if(!ti || !c) { alert("제목과 내용을 입력하세요"); return; }
+            const date = new Date().toISOString().split('T')[0];
+            fetch(`${gasUrl}?action=save_notice&date=${date}&type=${t}&title=${ti}&content=${c}`).then(()=>{ alert("저장됨"); document.getElementById('notice-form').style.display='none'; loadNotice(); document.getElementById('not-title').value=""; document.getElementById('not-content').value=""; });
+        }
 
+        // [기존 함수들: 자산, 손익, 레시피 등]
+        function setMode(m) { currentMode=m; document.querySelectorAll('.mode-tab').forEach(t=>t.classList.remove('active')); document.getElementById('tab-'+m).classList.add('active'); if(m==='stock'){document.getElementById('input-area').style.display='none';loadStockTableSafe();}else{document.getElementById('input-area').style.display='block';loadAssetListSafe();} }
+        function loadAssetValueOnly(){ fetch(`${gasUrl}?action=asset`).then(r=>r.json()).then(d=>{document.getElementById('asset-value').innerText=Number(d.total).toLocaleString()+" 원"}); }
+        function loadAssetListSafe(){ if(currentMode==='stock')return; document.getElementById('stock-list-area').innerHTML="<div style='text-align:center;padding:20px;color:#999;'>로딩 중...</div>"; fetch(`${gasUrl}?action=asset`).then(r=>r.json()).then(d=>{if(currentMode==='stock')return; let h=`<table class="data-table"><thead><tr><th>자산 품목</th><th style="text-align:right">금액</th></tr></thead><tbody>`; d.list.forEach(i=>h+=`<tr><td>${i.name}</td><td style="text-align:right;">${Number(i.value).toLocaleString()}</td></tr>`); document.getElementById('stock-list-area').innerHTML=h+"</tbody></table>"}); }
+        function loadStockTableSafe(){ if(currentMode!=='stock')return; document.getElementById('stock-list-area').innerHTML="<div style='text-align:center;padding:20px;color:#999;'>로딩 중...</div>"; fetch(`${gasUrl}?action=inventory`).then(r=>r.json()).then(d=>{if(currentMode!=='stock')return; let h=`<table class="data-table"><thead><tr><th>품목</th><th style="text-align:right">수량</th></tr></thead><tbody>`; d.forEach(i=>h+=`<tr><td>${i.name}</td><td style="text-align:right;">${i.qty}</td></tr>`); document.getElementById('stock-list-area').innerHTML=h+"</tbody></table>"}); }
         let salesData={}, viewYear=new Date().getFullYear(), viewMonth=new Date().getMonth();
-        function initCalendar(){
-            const yS=document.getElementById('cal-year'), mS=document.getElementById('cal-month'); yS.innerHTML=""; mS.innerHTML="";
-            for(let y=new Date().getFullYear()-5; y<=2050; y++){let o=document.createElement('option'); o.value=y; o.innerText=y; if(y===viewYear)o.selected=true; yS.appendChild(o);}
-            for(let m=1; m<=12; m++){let o=document.createElement('option'); o.value=m-1; o.innerText=m; if(m-1===viewMonth)o.selected=true; mS.appendChild(o);}
-            loadSalesData();
-        }
+        function initCalendar(){const yS=document.getElementById('cal-year'), mS=document.getElementById('cal-month'); yS.innerHTML=""; mS.innerHTML=""; for(let y=new Date().getFullYear()-5; y<=2050; y++){let o=document.createElement('option'); o.value=y; o.innerText=y; if(y===viewYear)o.selected=true; yS.appendChild(o);} for(let m=1; m<=12; m++){let o=document.createElement('option'); o.value=m-1; o.innerText=m; if(m-1===viewMonth)o.selected=true; mS.appendChild(o);} loadSalesData();}
         function changeCalendarMonth(){ viewYear=parseInt(document.getElementById('cal-year').value); viewMonth=parseInt(document.getElementById('cal-month').value); renderCalendar(); calculateProfit(); }
         function loadSalesData(){ fetch(`${gasUrl}?action=get_sales`).then(r=>r.json()).then(d=>{ salesData={}; d.forEach(i=>{salesData[i.date]=i.amount}); renderCalendar(); calculateProfit(); loadMenuCost(); }); }
-        function renderCalendar(){
-            const g=document.getElementById('calendar-grid'); g.innerHTML="";
-            const f=new Date(viewYear,viewMonth,1).getDay(), l=new Date(viewYear,viewMonth+1,0).getDate();
-            ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div class="cal-day-name">${d}</div>`);
-            for(let i=0;i<f;i++)g.innerHTML+=`<div></div>`;
-            for(let i=1;i<=l;i++){
-                let ds=`${viewYear}-${(viewMonth+1).toString().padStart(2,'0')}-${i.toString().padStart(2,'0')}`;
-                let v=salesData[ds]?Number(salesData[ds]).toLocaleString():"", t=(i===new Date().getDate()&&viewMonth===new Date().getMonth()&&viewYear===new Date().getFullYear())?"today":"";
-                g.innerHTML+=`<div class="cal-day ${t}" onclick="openSalesModal('${ds}')"><span class="cal-num">${i}</span><span class="cal-val">${v}</span></div>`;
-            }
-            document.getElementById('display-month-title').innerText=`${viewMonth+1}월 매출 합계`;
-        }
+        function renderCalendar(){ const g=document.getElementById('calendar-grid'); g.innerHTML=""; const f=new Date(viewYear,viewMonth,1).getDay(), l=new Date(viewYear,viewMonth+1,0).getDate(); ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div class="cal-day-name">${d}</div>`); for(let i=0;i<f;i++)g.innerHTML+=`<div></div>`; for(let i=1;i<=l;i++){ let ds=`${viewYear}-${(viewMonth+1).toString().padStart(2,'0')}-${i.toString().padStart(2,'0')}`; let v=salesData[ds]?Number(salesData[ds]).toLocaleString():"", t=(i===new Date().getDate()&&viewMonth===new Date().getMonth()&&viewYear===new Date().getFullYear())?"today":""; g.innerHTML+=`<div class="cal-day ${t}" onclick="openSalesModal('${ds}')"><span class="cal-num">${i}</span><span class="cal-val">${v}</span></div>`; } document.getElementById('display-month-title').innerText=`${viewMonth+1}월 매출 합계`; }
         const mIn=document.getElementById('modal-amount'); mIn.addEventListener('keypress',e=>{if(e.key==='Enter')saveSales()});
         function openSalesModal(d){document.getElementById('modal-date').innerText=d; document.getElementById('modal-amount').value=salesData[d]||""; document.getElementById('sales-modal').style.display='flex'; setTimeout(()=>mIn.focus(),100);}
         function closeModal(){document.getElementById('sales-modal').style.display='none'; mIn.value="";}
         function saveSales(){const d=document.getElementById('modal-date').innerText, a=mIn.value; salesData[d]=a; renderCalendar(); calculateProfit(); closeModal(); fetch(`${gasUrl}?action=save_sales&date=${d}&amount=${a}`);}
-        function calculateProfit(){
-            const pf=`${viewYear}-${(viewMonth+1).toString().padStart(2,'0')}`; let t=0; for(let d in salesData)if(d.startsWith(pf))t+=Number(salesData[d]);
-            document.getElementById('fin-current').innerText=t.toLocaleString();
-            fetch(`${gasUrl}?action=bep`).then(r=>r.json()).then(b=>{let v=Math.round(t*b.variableRatio), tc=b.fixed+v; document.getElementById('fin-cost').innerText=tc.toLocaleString(); document.getElementById('fin-profit').innerText=(t-tc).toLocaleString();});
-        }
+        function calculateProfit(){ const pf=`${viewYear}-${(viewMonth+1).toString().padStart(2,'0')}`; let t=0; for(let d in salesData)if(d.startsWith(pf))t+=Number(salesData[d]); document.getElementById('fin-current').innerText=t.toLocaleString(); fetch(`${gasUrl}?action=bep`).then(r=>r.json()).then(b=>{let v=Math.round(t*b.variableRatio), tc=b.fixed+v; document.getElementById('fin-cost').innerText=tc.toLocaleString(); document.getElementById('fin-profit').innerText=(t-tc).toLocaleString();}); }
         function loadMenuCost(){fetch(`${gasUrl}?action=menu_cost`).then(r=>r.json()).then(l=>{let h=`<table class="data-table"><thead><tr><th>메뉴</th><th style="text-align:right">원가율(%)</th></tr></thead><tbody>`; l.forEach(i=>{let c=i.ratio>=35?"red":"green"; h+=`<tr><td>${i.name}</td><td style="text-align:right;font-weight:bold;color:${c}">${i.ratio}%</td></tr>`}); document.getElementById('menu-cost-area').innerHTML=h+"</tbody></table>"})}
-
         let workList=[];
         document.getElementById('searchBtn').addEventListener('click',()=>{const v=document.getElementById('searchInput').value; fetch(`${gasUrl}?action=search&item=${v}`).then(r=>r.json()).then(d=>{let h=""; d.forEach(i=>{h+=`<div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;"><span>${i.name}</span><button onclick="addToList('${i.name}','${i.spec}','${i.unit}')" style="font-size:11px; padding:3px 8px; border:1px solid #333; background:white; border-radius:4px;">담기</button></div>`}); document.getElementById('search-result').innerHTML=h})});
         function addToList(n,s,u){workList.push({date:new Date().toISOString().split('T')[0],name:n,spec:s,unit:u,qty:1}); renderList();}
@@ -295,7 +299,6 @@
         function loadRnD(){fetch(`${gasUrl}?action=rnd`).then(r=>r.json()).then(l=>{let p=""; l.slice(0,3).forEach(i=>p+=`<div onclick="openModule('400')" style="padding:10px;border-bottom:1px solid #eee;cursor:pointer;"><b>${i.menu}</b> <span style="float:right;font-size:12px;color:#888;">${i.date}</span></div>`); document.getElementById('recent-rnd').innerHTML=p; let h=""; l.forEach(i=>{let img=`<div class="rnd-thumb" style="background:#eee;"></div>`; if(i.photo&&i.photo.match(/[-\w]{25,}/))img=`<img src="https://drive.google.com/uc?export=view&id=${i.photo.match(/[-\w]{25,}/)[0]}" class="rnd-thumb" onclick="window.open(this.src)">`; h+=`<div class="rnd-card">${img}<div class="rnd-info"><b>${i.menu}</b><div style="font-size:12px;color:#888;">${i.date}</div><div style="font-size:13px;">${i.note}</div></div></div>`}); document.getElementById('rnd-list-area').innerHTML=h})}
         function loadManual(){fetch(`${gasUrl}?action=manual`).then(r=>r.json()).then(l=>{let h=""; l.forEach(i=>{let k=i.link?`<br><a href="${i.link}" target="_blank" style="color:blue;">영상보기</a>`:""; h+=`<div class="manual-item" onclick="this.classList.toggle('active')"><div class="manual-header"><span>${i.title}</span><i class="fas fa-chevron-down"></i></div><div class="manual-body">${i.content}${k}</div></div>`}); document.getElementById('manual-list-area').innerHTML=h})}
         function loadArchive(){fetch(`${gasUrl}?action=archive`).then(r=>r.json()).then(l=>{let h=""; l.forEach(f=>{let i="fa-file",c="#999"; if(f.type.includes("folder")){i="fa-folder";c="#f39c12";}else if(f.type.includes("image")){i="fa-image";c="#27ae60";} h+=`<a href="${f.url}" target="_blank" style="display:flex;padding:15px;border-bottom:1px solid #eee;align-items:center;text-decoration:none;color:#333;"><div style="font-size:24px;color:${c};margin-right:15px;width:30px;text-align:center;"><i class="fas ${i}"></i></div><div style="flex:1;"><div>${f.name}</div><div style="font-size:11px;color:#888;">${f.date}</div></div><i class="fas fa-chevron-right" style="color:#ddd;"></i></a>`}); document.getElementById('archive-list-area').innerHTML=h})}
-        
         document.addEventListener("DOMContentLoaded",()=>loadRnD());
     </script>
 </body>
