@@ -19,7 +19,6 @@
         }
         body { font-family: 'Noto Sans KR', sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: var(--text-main); padding-bottom: 80px; }
         
-        /* 공통 헤더/레이아웃 (기존과 동일) */
         .app-header { background: url('https://images.unsplash.com/photo-1556910103-1c02745a30bf?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80') center/cover; height: 160px; position: relative; display: flex; align-items: flex-end; padding: 20px; }
         .header-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8)); }
         .header-content { position: relative; z-index: 1; color: white; }
@@ -37,17 +36,21 @@
         .back-btn { border: none; background: none; font-size: 20px; margin-right: 15px; cursor: pointer; color: var(--text-main); }
         .page-name { font-size: 18px; font-weight: 700; color: var(--primary); }
         .detail-container { padding: 15px; }
-
+        
         .console-box { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .console-input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
         .console-btn { padding: 0 15px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-        /* [NEW] 일정/공지 스타일 */
-        .schedule-item { background: white; padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; }
+        /* 일정/공지 스타일 (버튼 추가됨) */
+        .schedule-item { background: white; padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; }
+        .schedule-left { display: flex; align-items: center; flex: 1; }
         .schedule-date { background: #f0f7ff; color: var(--point-blue); padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 13px; margin-right: 15px; text-align: center; min-width: 40px; }
-        .schedule-content { flex: 1; }
         .schedule-type { font-size: 11px; color: #888; border: 1px solid #ddd; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
-        
+        .item-actions { display: flex; gap: 10px; margin-left: 10px; }
+        .action-icon { color: #aaa; cursor: pointer; font-size: 14px; }
+        .action-icon:hover { color: var(--primary); }
+        .action-icon.delete:hover { color: var(--point-red); }
+
         .notice-item { background: white; border-bottom: 1px solid #eee; }
         .notice-head { padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .notice-badge { font-size: 11px; font-weight: bold; padding: 3px 6px; border-radius: 4px; margin-right: 8px; }
@@ -55,15 +58,14 @@
         .notice-badge.normal { background: #eee; color: #555; }
         .notice-body { display: none; padding: 15px; background: #fafafa; border-top: 1px solid #eee; font-size: 14px; line-height: 1.6; white-space: pre-wrap; color: #444; }
         .notice-item.active .notice-body { display: block; }
-
-        /* 입력 폼 */
+        
         .input-form { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; display: none; }
         .form-row { margin-bottom: 10px; }
         .form-label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
         .form-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; outline: none; }
         .form-select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; background: white; }
 
-        /* 기존 스타일들 (달력 등) */
+        /* 기존 스타일들 (달력, 레시피 등) */
         .calendar-wrap { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .cal-header { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; }
         .cal-select { font-size: 18px; font-weight: bold; border: none; background: transparent; padding: 5px; cursor: pointer; outline: none; border-bottom: 2px solid transparent; }
@@ -127,12 +129,12 @@
     <div id="workspace-500" class="workspace">
         <div class="page-header"><button class="back-btn" onclick="goMain()">←</button><span class="page-name">매장 일정</span></div>
         <div class="detail-container">
-            <button onclick="document.getElementById('schedule-form').style.display='block'" class="console-btn" style="width:100%; margin-bottom:15px;">+ 일정 추가하기</button>
+            <button onclick="openSchForm()" class="console-btn" style="width:100%; margin-bottom:15px;">+ 일정 추가하기</button>
             <div id="schedule-form" class="input-form">
-                <div class="form-row"><label class="form-label">날짜</label><input type="date" id="sch-date" class="form-input"></div>
+                <input type="hidden" id="sch-row"> <div class="form-row"><label class="form-label">날짜</label><input type="date" id="sch-date" class="form-input"></div>
                 <div class="form-row"><label class="form-label">구분</label><select id="sch-type" class="form-select"><option>휴무</option><option>예약</option><option>행사</option><option>기타</option></select></div>
                 <div class="form-row"><label class="form-label">내용</label><input type="text" id="sch-content" class="form-input" placeholder="일정 내용"></div>
-                <div style="display:flex; gap:10px;"><button class="console-btn" style="flex:1; background:#ccc;" onclick="document.getElementById('schedule-form').style.display='none'">취소</button><button class="console-btn" style="flex:1;" onclick="saveSchedule()">저장</button></div>
+                <div style="display:flex; gap:10px;"><button class="console-btn" style="flex:1; background:#ccc;" onclick="document.getElementById('schedule-form').style.display='none'">취소</button><button id="sch-save-btn" class="console-btn" style="flex:1;" onclick="saveSchedule()">저장</button></div>
             </div>
             <div id="schedule-list"></div>
         </div>
@@ -141,12 +143,12 @@
     <div id="workspace-600" class="workspace">
         <div class="page-header"><button class="back-btn" onclick="goMain()">←</button><span class="page-name">공지사항</span></div>
         <div class="detail-container">
-            <button onclick="document.getElementById('notice-form').style.display='block'" class="console-btn" style="width:100%; margin-bottom:15px;">+ 공지 쓰기</button>
+            <button onclick="openNotForm()" class="console-btn" style="width:100%; margin-bottom:15px;">+ 공지 쓰기</button>
             <div id="notice-form" class="input-form">
-                <div class="form-row"><label class="form-label">중요도</label><select id="not-type" class="form-select"><option value="일반">일반</option><option value="필독">필독</option></select></div>
+                <input type="hidden" id="not-row"> <div class="form-row"><label class="form-label">중요도</label><select id="not-type" class="form-select"><option value="일반">일반</option><option value="필독">필독</option></select></div>
                 <div class="form-row"><label class="form-label">제목</label><input type="text" id="not-title" class="form-input" placeholder="제목"></div>
                 <div class="form-row"><label class="form-label">내용</label><textarea id="not-content" class="form-input" rows="4" placeholder="내용"></textarea></div>
-                <div style="display:flex; gap:10px;"><button class="console-btn" style="flex:1; background:#ccc;" onclick="document.getElementById('notice-form').style.display='none'">취소</button><button class="console-btn" style="flex:1;" onclick="saveNotice()">저장</button></div>
+                <div style="display:flex; gap:10px;"><button class="console-btn" style="flex:1; background:#ccc;" onclick="document.getElementById('notice-form').style.display='none'">취소</button><button id="not-save-btn" class="console-btn" style="flex:1;" onclick="saveNotice()">저장</button></div>
             </div>
             <div id="notice-list"></div>
         </div>
@@ -241,39 +243,73 @@
         }
         function updateNav(n){ document.querySelectorAll('.nav-btn').forEach(b=>{ b.classList.remove('active'); if(b.querySelector('span').innerText===n) b.classList.add('active'); }); }
 
-        // [500] 일정
+        // [500] 일정 (수정/삭제 추가)
         function loadSchedule() {
             document.getElementById('schedule-list').innerHTML="<div style='text-align:center;padding:20px;'>로딩 중...</div>";
             fetch(`${gasUrl}?action=get_schedule`).then(r=>r.json()).then(l => {
-                let h=""; l.forEach(i=>{ h+=`<div class="schedule-item"><div class="schedule-date">${i.date.substring(5)}</div><div class="schedule-content"><div>${i.content}</div></div><div class="schedule-type">${i.type}</div></div>`; });
-                document.getElementById('schedule-list').innerHTML = h || "<div style='text-align:center;padding:20px;color:#999;'>등록된 일정이 없습니다.</div>";
+                let h=""; l.forEach(i=>{ 
+                    h+=`<div class="schedule-item">
+                        <div class="schedule-left"><div class="schedule-date">${i.date.substring(5)}</div><div><div>${i.content}</div></div><div class="schedule-type">${i.type}</div></div>
+                        <div class="item-actions">
+                            <i class="fas fa-edit action-icon" onclick="editSchedule('${i.row}', '${i.date}', '${i.type}', '${i.content}')"></i>
+                            <i class="fas fa-trash-alt action-icon delete" onclick="deleteItem('일정관리', '${i.row}')"></i>
+                        </div>
+                    </div>`; 
+                });
+                document.getElementById('schedule-list').innerHTML = h || "<div style='text-align:center;padding:20px;color:#999;'>일정이 없습니다.</div>";
             });
         }
+        function openSchForm() { document.getElementById('schedule-form').style.display='block'; document.getElementById('sch-row').value=""; document.getElementById('sch-save-btn').innerText="저장"; document.getElementById('sch-content').value=""; }
+        function editSchedule(r,d,t,c) { document.getElementById('schedule-form').style.display='block'; document.getElementById('sch-row').value=r; document.getElementById('sch-date').value=d; document.getElementById('sch-type').value=t; document.getElementById('sch-content').value=c; document.getElementById('sch-save-btn').innerText="수정"; }
         function saveSchedule() {
-            const d=document.getElementById('sch-date').value, t=document.getElementById('sch-type').value, c=document.getElementById('sch-content').value;
+            const r=document.getElementById('sch-row').value, d=document.getElementById('sch-date').value, t=document.getElementById('sch-type').value, c=document.getElementById('sch-content').value;
             if(!d || !c) { alert("날짜와 내용을 입력하세요"); return; }
-            fetch(`${gasUrl}?action=save_schedule&date=${d}&type=${t}&content=${c}`).then(()=>{ alert("저장됨"); document.getElementById('schedule-form').style.display='none'; loadSchedule(); document.getElementById('sch-content').value=""; });
+            fetch(`${gasUrl}?action=save_schedule&row=${r}&date=${d}&type=${t}&content=${c}`).then(()=>{ alert("완료됨"); document.getElementById('schedule-form').style.display='none'; loadSchedule(); });
         }
 
-        // [600] 공지사항
+        // [600] 공지사항 (수정/삭제 추가)
         function loadNotice() {
             document.getElementById('notice-list').innerHTML="<div style='text-align:center;padding:20px;'>로딩 중...</div>";
             fetch(`${gasUrl}?action=get_notice`).then(r=>r.json()).then(l => {
                 let h=""; l.forEach(i=>{ 
-                    let badgeClass = i.type==='필독'?'urgent':'normal';
-                    h+=`<div class="notice-item" onclick="this.classList.toggle('active')"><div class="notice-head"><div><span class="notice-badge ${badgeClass}">${i.type}</span> <span style="font-weight:bold;">${i.title}</span></div><span style="font-size:12px;color:#888;">${i.date}</span></div><div class="notice-body">${i.content}</div></div>`; 
+                    let b = i.type==='필독'?'urgent':'normal';
+                    h+=`<div class="notice-item">
+                        <div class="notice-head" onclick="this.parentNode.classList.toggle('active')">
+                            <div><span class="notice-badge ${b}">${i.type}</span> <b>${i.title}</b></div>
+                            <div style="font-size:12px;color:#888;">${i.date}</div>
+                        </div>
+                        <div class="notice-body">
+                            <div style="white-space:pre-wrap; margin-bottom:15px;">${i.content}</div>
+                            <div style="text-align:right;">
+                                <button class="console-btn" style="padding:5px 10px; font-size:11px;" onclick="editNotice('${i.row}', '${i.date}', '${i.type}', '${i.title}', \`${i.content.replace(/`/g, "\\`")}\`)">수정</button>
+                                <button class="console-btn" style="padding:5px 10px; font-size:11px; background:#e74c3c;" onclick="deleteItem('공지사항', '${i.row}')">삭제</button>
+                            </div>
+                        </div>
+                    </div>`; 
                 });
                 document.getElementById('notice-list').innerHTML = h || "<div style='text-align:center;padding:20px;color:#999;'>공지사항이 없습니다.</div>";
             });
         }
+        function openNotForm() { document.getElementById('notice-form').style.display='block'; document.getElementById('not-row').value=""; document.getElementById('not-save-btn').innerText="저장"; document.getElementById('not-title').value=""; document.getElementById('not-content').value=""; }
+        function editNotice(r,d,t,ti,c) { document.getElementById('notice-form').style.display='block'; document.getElementById('not-row').value=r; document.getElementById('not-type').value=t; document.getElementById('not-title').value=ti; document.getElementById('not-content').value=c; document.getElementById('not-save-btn').innerText="수정"; }
         function saveNotice() {
-            const t=document.getElementById('not-type').value, ti=document.getElementById('not-title').value, c=document.getElementById('not-content').value;
-            if(!ti || !c) { alert("제목과 내용을 입력하세요"); return; }
-            const date = new Date().toISOString().split('T')[0];
-            fetch(`${gasUrl}?action=save_notice&date=${date}&type=${t}&title=${ti}&content=${c}`).then(()=>{ alert("저장됨"); document.getElementById('notice-form').style.display='none'; loadNotice(); document.getElementById('not-title').value=""; document.getElementById('not-content').value=""; });
+            const r=document.getElementById('not-row').value, t=document.getElementById('not-type').value, ti=document.getElementById('not-title').value, c=document.getElementById('not-content').value;
+            if(!ti || !c) { alert("입력하세요"); return; }
+            const d = new Date().toISOString().split('T')[0];
+            fetch(`${gasUrl}?action=save_notice&row=${r}&date=${d}&type=${t}&title=${ti}&content=${encodeURIComponent(c)}`).then(()=>{ alert("완료됨"); document.getElementById('notice-form').style.display='none'; loadNotice(); });
         }
 
-        // [기존 함수들: 자산, 손익, 레시피 등]
+        // 공통 삭제
+        function deleteItem(sheet, row) {
+            if(confirm("정말 삭제하시겠습니까?")) {
+                fetch(`${gasUrl}?action=delete_item&sheetName=${sheet}&row=${row}`).then(()=>{ 
+                    alert("삭제되었습니다."); 
+                    if(sheet==='일정관리') loadSchedule(); else loadNotice(); 
+                });
+            }
+        }
+
+        // [기존 함수들 생략없이 포함]
         function setMode(m) { currentMode=m; document.querySelectorAll('.mode-tab').forEach(t=>t.classList.remove('active')); document.getElementById('tab-'+m).classList.add('active'); if(m==='stock'){document.getElementById('input-area').style.display='none';loadStockTableSafe();}else{document.getElementById('input-area').style.display='block';loadAssetListSafe();} }
         function loadAssetValueOnly(){ fetch(`${gasUrl}?action=asset`).then(r=>r.json()).then(d=>{document.getElementById('asset-value').innerText=Number(d.total).toLocaleString()+" 원"}); }
         function loadAssetListSafe(){ if(currentMode==='stock')return; document.getElementById('stock-list-area').innerHTML="<div style='text-align:center;padding:20px;color:#999;'>로딩 중...</div>"; fetch(`${gasUrl}?action=asset`).then(r=>r.json()).then(d=>{if(currentMode==='stock')return; let h=`<table class="data-table"><thead><tr><th>자산 품목</th><th style="text-align:right">금액</th></tr></thead><tbody>`; d.list.forEach(i=>h+=`<tr><td>${i.name}</td><td style="text-align:right;">${Number(i.value).toLocaleString()}</td></tr>`); document.getElementById('stock-list-area').innerHTML=h+"</tbody></table>"}); }
