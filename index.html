@@ -26,14 +26,22 @@
         .grid-icon { width: 45px; height: 45px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; margin-bottom: 8px; }
         .grid-text { font-size: 11px; font-weight: 500; color: #495057; }
 
-        /* 레시피: 카테고리 버튼 및 아코디언 리스트 */
+        /* 레시피: 가로 스크롤 태그 */
         .search-box { padding: 15px 20px 5px 20px; background: white; display: flex; gap: 10px; }
         .form-input { flex: 1; padding: 10px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 14px; outline: none; }
         .action-btn { padding: 10px 15px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .category-area { padding: 10px 20px 15px 20px; border-bottom: 1px solid var(--border); background: white; }
         .category-title { font-size: 12px; font-weight: bold; color: #888; margin-bottom: 8px; margin-top: 10px; }
-        .tag-group { display: flex; gap: 6px; flex-wrap: wrap; }
-        .tag-btn { padding: 6px 14px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 20px; font-size: 13px; color: #333; cursor: pointer; }
+        
+        .tag-group { 
+            display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; 
+            -webkit-overflow-scrolling: touch; scrollbar-width: none; 
+        }
+        .tag-group::-webkit-scrollbar { display: none; }
+        .tag-btn { 
+            white-space: nowrap; flex-shrink: 0; padding: 6px 14px; background: #f8f9fa; 
+            border: 1px solid #ddd; border-radius: 20px; font-size: 13px; color: #333; cursor: pointer; 
+        }
         .tag-btn:active { background: var(--main); color: white; border-color: var(--main); }
         
         .slim-list { padding: 0; margin: 0; list-style: none; background: white; }
@@ -50,13 +58,13 @@
         .detail-content { flex: 1; }
         .detail-img { width: 100%; border-radius: 8px; margin-bottom: 15px; display: block; border: 1px solid #eee; }
 
-        /* 팝업 모달 & FAB (일정, 공지용) */
+        /* 팝업 모달 & FAB */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; display: none; align-items: center; justify-content: center; }
         .modal-box { background: white; width: 85%; max-width: 350px; padding: 25px; border-radius: 12px; }
         .modal-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; text-align: center; }
         .fab { position: fixed; bottom: 85px; right: 20px; width: 50px; height: 50px; background: var(--point); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; z-index: 90; }
 
-        /* 기타 공통 모듈 (자산, 손익) */
+        /* 공통 모듈 (자산, 손익) */
         .workspace { display: none; min-height: 100vh; background: var(--bg); }
         .console-box { background: white; border-radius: 12px; padding: 15px; margin: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .mode-tabs { display: flex; background: #f8f9fa; padding: 4px; border-radius: 8px; margin-bottom: 15px; }
@@ -106,19 +114,47 @@
         <div class="category-area">
             <div class="category-title">식재료별 분류</div>
             <div class="tag-group">
-                <div class="tag-btn" onclick="loadRecipe('육류')">육류</div>
+                <div class="tag-btn" onclick="loadRecipe('소고기')">소고기</div>
+                <div class="tag-btn" onclick="loadRecipe('돼지고기')">돼지고기</div>
                 <div class="tag-btn" onclick="loadRecipe('가금류')">가금류</div>
-                <div class="tag-btn" onclick="loadRecipe('해산물')">해산물</div>
-                <div class="tag-btn" onclick="loadRecipe('채소')">채소</div>
+                <div class="tag-btn" onclick="loadRecipe('어류')">어류</div>
+                <div class="tag-btn" onclick="loadRecipe('갑각류/두족류')">갑각류/두족류</div>
+                <div class="tag-btn" onclick="loadRecipe('패류')">패류</div>
+                <div class="tag-btn" onclick="loadRecipe('기타해산물')">특수해산물</div>
+                <div class="tag-btn" onclick="loadRecipe('엽채/경채류')">잎/줄기채소</div>
+                <div class="tag-btn" onclick="loadRecipe('근채류')">뿌리채소</div>
+                <div class="tag-btn" onclick="loadRecipe('과채류')">열매채소</div>
+                <div class="tag-btn" onclick="loadRecipe('향신채/허브')">향신/허브</div>
+                <div class="tag-btn" onclick="loadRecipe('버섯류')">버섯</div>
+                <div class="tag-btn" onclick="loadRecipe('과일류')">과일</div>
+                <div class="tag-btn" onclick="loadRecipe('콩/견과류')">콩/견과</div>
+                <div class="tag-btn" onclick="loadRecipe('가공식재료')">가공식재료</div>
             </div>
             <div class="category-title">조리법별 분류</div>
             <div class="tag-group">
+                <div class="tag-btn" onclick="loadRecipe('밥')">밥</div>
+                <div class="tag-btn" onclick="loadRecipe('죽')">죽</div>
+                <div class="tag-btn" onclick="loadRecipe('면/수제비')">면/수제비</div>
+                <div class="tag-btn" onclick="loadRecipe('만두')">만두</div>
+                <div class="tag-btn" onclick="loadRecipe('국')">국</div>
+                <div class="tag-btn" onclick="loadRecipe('찌개/전골')">찌개/전골</div>
+                <div class="tag-btn" onclick="loadRecipe('김치')">김치</div>
+                <div class="tag-btn" onclick="loadRecipe('나물')">나물</div>
                 <div class="tag-btn" onclick="loadRecipe('구이')">구이</div>
-                <div class="tag-btn" onclick="loadRecipe('볶음')">볶음</div>
-                <div class="tag-btn" onclick="loadRecipe('튀김')">튀김</div>
-                <div class="tag-btn" onclick="loadRecipe('찜')">찜</div>
-                <div class="tag-btn" onclick="loadRecipe('탕')">탕/찌개</div>
-                <div class="tag-btn" onclick="loadRecipe('면')">면요리</div>
+                <div class="tag-btn" onclick="loadRecipe('조림/지짐')">조림/지짐</div>
+                <div class="tag-btn" onclick="loadRecipe('볶음/초')">볶음/초</div>
+                <div class="tag-btn" onclick="loadRecipe('전/적')">전/적</div>
+                <div class="tag-btn" onclick="loadRecipe('찜/선')">찜/선</div>
+                <div class="tag-btn" onclick="loadRecipe('회')">회</div>
+                <div class="tag-btn" onclick="loadRecipe('마른반찬')">마른반찬</div>
+                <div class="tag-btn" onclick="loadRecipe('순대/편육/족편/수육')">순대/수육</div>
+                <div class="tag-btn" onclick="loadRecipe('장아찌')">장아찌</div>
+                <div class="tag-btn" onclick="loadRecipe('젓갈/식해')">젓갈/식해</div>
+                <div class="tag-btn" onclick="loadRecipe('장')">장/소스</div>
+                <div class="tag-btn" onclick="loadRecipe('떡류')">떡</div>
+                <div class="tag-btn" onclick="loadRecipe('과정류')">한과/과정</div>
+                <div class="tag-btn" onclick="loadRecipe('음청류')">음청/차</div>
+                <div class="tag-btn" onclick="loadRecipe('기타디저트')">디저트</div>
             </div>
         </div>
         <div id="recipe-list"></div>
