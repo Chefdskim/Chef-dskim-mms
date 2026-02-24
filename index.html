@@ -50,7 +50,7 @@
         .detail-content { flex: 1; }
         .detail-img { width: 100%; border-radius: 8px; margin-bottom: 15px; display: block; border: 1px solid #eee; }
 
-        /* 팝업 모달 & FAB (일정, 공지용) */
+        /* 팝업 모달 & FAB */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; display: none; align-items: center; justify-content: center; }
         .modal-box { background: white; width: 85%; max-width: 350px; padding: 25px; border-radius: 12px; }
         .modal-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; text-align: center; }
@@ -113,7 +113,6 @@
                 <div class="tag-btn" onclick="loadRecipe('SEA')">동남아(SEA)</div>
                 <div class="tag-btn" onclick="loadRecipe('ETC')">기타(ETC)</div>
             </div>
-
             <div class="category-title">식재료별 분류</div>
             <div class="tag-group">
                 <div class="tag-btn" onclick="loadRecipe('육류')">육류</div>
@@ -125,7 +124,6 @@
                 <div class="tag-btn" onclick="loadRecipe('과일')">과일</div>
                 <div class="tag-btn" onclick="loadRecipe('콩/견과')">콩/견과류</div>
             </div>
-
             <div class="category-title">조리법별 분류</div>
             <div class="tag-group">
                 <div class="tag-btn" onclick="loadRecipe('밥')">밥</div>
@@ -151,91 +149,11 @@
         <div id="recipe-list"></div>
     </div>
 
-    <div id="workspace-500" class="workspace">
-        <div class="app-header"><button class="back-btn" onclick="goMain()">←</button><span class="header-title">매장 일정</span></div>
-        <div id="schedule-list"></div>
-        <div class="fab" onclick="openSchForm()">+</div>
-        <div id="schedule-form" class="modal-overlay">
-            <div class="modal-box">
-                <div class="modal-title">일정 등록</div>
-                <input type="hidden" id="sch-row">
-                <input type="date" id="sch-date" class="form-input" style="margin-bottom:10px;">
-                <select id="sch-type" class="form-input" style="margin-bottom:10px;"><option>휴무</option><option>예약</option><option>행사</option><option>기타</option></select>
-                <input type="text" id="sch-content" class="form-input" placeholder="내용" style="margin-bottom:15px;">
-                <div style="display:flex; gap:10px;"><button class="action-btn" style="flex:1; background:#ccc;" onclick="document.getElementById('schedule-form').style.display='none'">취소</button><button class="action-btn" style="flex:1;" onclick="saveSchedule()">저장</button></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="workspace-600" class="workspace">
-        <div class="app-header"><button class="back-btn" onclick="goMain()">←</button><span class="header-title">공지사항</span></div>
-        <div id="notice-list"></div>
-        <div class="fab" onclick="openNotForm()">+</div>
-        <div id="notice-form" class="modal-overlay">
-            <div class="modal-box">
-                <div class="modal-title">공지 작성</div>
-                <input type="hidden" id="not-row">
-                <select id="not-type" class="form-input" style="margin-bottom:10px;"><option value="일반">일반</option><option value="필독">필독</option></select>
-                <input type="text" id="not-title" class="form-input" placeholder="제목" style="margin-bottom:10px;">
-                <textarea id="not-content" class="form-input" rows="4" placeholder="내용" style="margin-bottom:15px;"></textarea>
-                <div style="display:flex; gap:10px;"><button class="action-btn" style="flex:1; background:#ccc;" onclick="document.getElementById('notice-form').style.display='none'">취소</button><button class="action-btn" style="flex:1;" onclick="saveNotice()">저장</button></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="workspace-010" class="workspace">
-        <div class="app-header"><button class="back-btn" onclick="goMain()">←</button><span class="header-title">자산/재고</span></div>
-        <div class="console-box">
-            <div class="mode-tabs">
-                <button id="tab-in" class="mode-tab active" onclick="setMode('in')">매입</button>
-                <button id="tab-out" class="mode-tab" onclick="setMode('out')">출고</button>
-                <button id="tab-stock" class="mode-tab" onclick="setMode('stock')">재고</button>
-            </div>
-            <div id="input-area">
-                <div style="display:flex; gap:10px; margin-bottom:10px;">
-                    <input type="text" id="searchInput" class="form-input" placeholder="품목명 입력">
-                    <button class="action-btn" id="searchBtn">찾기</button>
-                </div>
-                <div id="search-result" style="margin-bottom:10px;"></div>
-                <div id="saved-list" style="padding:10px; text-align:center; color:#adb5bd; background:#f8f9fa; border-radius:8px; margin-bottom:10px;">비어있음</div>
-                <button class="action-btn" style="width:100%;" onclick="saveToSheet()">저장</button>
-            </div>
-        </div>
-        <div class="total-box"><div style="font-size:12px; opacity:0.8;">총 자산 가치</div><div id="asset-value" style="font-size:24px; font-weight:bold;">0 원</div></div>
-        <div id="stock-list-area" style="margin:15px;"></div>
-    </div>
-
-    <div id="workspace-020" class="workspace">
-        <div class="app-header"><button class="back-btn" onclick="goMain()">←</button><span class="header-title">손익 관리</span></div>
-        <div style="text-align:center; padding:15px; background:white; font-weight:bold; font-size:18px;">
-            <span onclick="changeMonth(-1)" style="cursor:pointer;">◀</span> <span id="cal-title" style="margin:0 15px;">2026.02</span> <span onclick="changeMonth(1)" style="cursor:pointer;">▶</span>
-        </div>
-        <div id="calendar-grid" class="cal-grid"></div>
-        <div class="total-box">
-            <div style="font-size:12px;">이번달 예상 순이익</div>
-            <div id="fin-profit" style="font-size:28px; font-weight:bold;">0</div>
-            <div style="font-size:12px; margin-top:5px;">매출: <span id="fin-current">0</span></div>
-        </div>
-        <div id="menu-cost-area" style="background:white; margin:15px; padding:15px; border-radius:12px;"></div>
-        <div id="sales-modal" class="modal-overlay">
-            <div class="modal-box">
-                <div class="modal-title" id="modal-date-title"></div>
-                <input type="number" id="modal-amount" class="form-input" placeholder="매출액 (숫자만)">
-                <div style="display:flex; gap:10px; margin-top:10px;">
-                    <button class="action-btn" style="flex:1; background:#ccc;" onclick="document.getElementById('sales-modal').style.display='none'">취소</button>
-                    <button class="action-btn" style="flex:1;" onclick="saveSales()">저장</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="workspace-400" class="workspace">
-        <div class="app-header"><button class="back-btn" onclick="goMain()">←</button><span class="header-title">연구노트</span></div>
-        <div style="height:400px;"><iframe id="google-form-frame" style="width:100%; height:100%; border:none;"></iframe></div>
-        <div style="padding:10px; text-align:right;"><button class="action-btn" onclick="loadRnD()">새로고침</button></div>
-        <div id="rnd-list-area" style="padding:15px;"></div>
-    </div>
-
+    <div id="workspace-500" class="workspace"><div class="app-header"><button class="back-btn" onclick="goMain()">←</button><span class="header-title">매장 일정</span></div><div id="schedule-list"></div><div class="fab" onclick="openSchForm()">+</div><div id="schedule-form" class="modal-overlay"><div class="modal-box"><div class="modal-title">일정 등록</div><input type="hidden" id="sch-row"><input type="date" id="sch-date" class="form-input" style="margin-bottom:10px;"><select id="sch-type" class="form-input" style="margin-bottom:10px;"><option>휴무</option><option>예약</option><option>행사</option><option>기타</option></select><input type="text" id="sch-content" class="form-input" placeholder="내용" style="margin-bottom:15px;"><div style="display:flex; gap:10px;"><button class="action-btn" style="flex:1; background:#ccc;" onclick="document.getElementById('schedule-form').style.display='none'">취소</button><button class="action-btn" style="flex:1;" onclick="saveSchedule()">저장</button></div></div></div></div>
+    <div id="workspace-600" class="workspace"><div class="app-header"><button class="back-btn" onclick="goMain()">←</button><span class="header-title">공지사항</span></div><div id="notice-list"></div><div class="fab" onclick="openNotForm()">+</div><div id="notice-form" class="modal-overlay"><div class="modal-box"><div class="modal-title">공지 작성</div><input type="hidden" id="not-row"><select id="not-type" class="form-input" style="margin-bottom:10px;"><option value="일반">일반</option><option value="필독">필독</option></select><input type="text" id="not-title" class="form-input" placeholder="제목" style="margin-bottom:10px;"><textarea id="not-content" class="form-input" rows="4" placeholder="내용" style="margin-bottom:15px;"></textarea><div style="display:flex; gap:10px;"><button class="action-btn" style="flex:1; background:#ccc;" onclick="document.getElementById('notice-form').style.display='none'">취소</button><button class="action-btn" style="flex:1;" onclick="saveNotice()">저장</button></div></div></div></div>
+    <div id="workspace-010" class="workspace"><div class="app-header"><button class="back-btn" onclick="goMain()">←</button><span class="header-title">자산/재고</span></div><div class="console-box"><div class="mode-tabs"><button id="tab-in" class="mode-tab active" onclick="setMode('in')">매입</button><button id="tab-out" class="mode-tab" onclick="setMode('out')">출고</button><button id="tab-stock" class="mode-tab" onclick="setMode('stock')">재고</button></div><div id="input-area"><div style="display:flex; gap:10px; margin-bottom:10px;"><input type="text" id="searchInput" class="form-input" placeholder="품목명 입력"><button class="action-btn" id="searchBtn">찾기</button></div><div id="search-result" style="margin-bottom:10px;"></div><div id="saved-list" style="padding:10px; text-align:center; color:#adb5bd; background:#f8f9fa; border-radius:8px; margin-bottom:10px;">비어있음</div><button class="action-btn" style="width:100%;" onclick="saveToSheet()">저장</button></div></div><div class="total-box"><div style="font-size:12px; opacity:0.8;">총 자산 가치</div><div id="asset-value" style="font-size:24px; font-weight:bold;">0 원</div></div><div id="stock-list-area" style="margin:15px;"></div></div>
+    <div id="workspace-020" class="workspace"><div class="app-header"><button class="back-btn" onclick="goMain()">←</button><span class="header-title">손익 관리</span></div><div style="text-align:center; padding:15px; background:white; font-weight:bold; font-size:18px;"><span onclick="changeMonth(-1)" style="cursor:pointer;">◀</span> <span id="cal-title" style="margin:0 15px;">2026.02</span> <span onclick="changeMonth(1)" style="cursor:pointer;">▶</span></div><div id="calendar-grid" class="cal-grid"></div><div class="total-box"><div style="font-size:12px;">이번달 예상 순이익</div><div id="fin-profit" style="font-size:28px; font-weight:bold;">0</div><div style="font-size:12px; margin-top:5px;">매출: <span id="fin-current">0</span></div></div><div id="menu-cost-area" style="background:white; margin:15px; padding:15px; border-radius:12px;"></div><div id="sales-modal" class="modal-overlay"><div class="modal-box"><div class="modal-title" id="modal-date-title"></div><input type="number" id="modal-amount" class="form-input" placeholder="매출액 (숫자만)"><div style="display:flex; gap:10px; margin-top:10px;"><button class="action-btn" style="flex:1; background:#ccc;" onclick="document.getElementById('sales-modal').style.display='none'">취소</button><button class="action-btn" style="flex:1;" onclick="saveSales()">저장</button></div></div></div></div>
+    <div id="workspace-400" class="workspace"><div class="app-header"><button class="back-btn" onclick="goMain()">←</button><span class="header-title">연구노트</span></div><div style="height:400px;"><iframe id="google-form-frame" style="width:100%; height:100%; border:none;"></iframe></div><div style="padding:10px; text-align:right;"><button class="action-btn" onclick="loadRnD()">새로고침</button></div><div id="rnd-list-area" style="padding:15px;"></div></div>
     <div id="workspace-030" class="workspace"><div class="app-header"><button class="back-btn" onclick="goMain()">←</button><span class="header-title">직원 교육</span></div><div id="manual-list-area" style="padding:15px;"></div></div>
     <div id="workspace-900" class="workspace"><div class="app-header"><button class="back-btn" onclick="goMain()">←</button><span class="header-title">자료실</span></div><div id="archive-list-area" style="padding:15px;"></div></div>
 
@@ -253,7 +171,6 @@
         
         let currentMode = 'in';
 
-        /* --- 네비게이션 --- */
         function goMain() { document.querySelectorAll('.workspace').forEach(e=>e.style.display='none'); document.getElementById('main-view').style.display='block'; window.scrollTo(0,0); updateNav('홈'); }
         function openModule(code) {
             document.getElementById('main-view').style.display='none'; document.querySelectorAll('.workspace').forEach(e=>e.style.display='none');
@@ -273,7 +190,7 @@
         }
         function updateNav(n){ document.querySelectorAll('.nav-item').forEach(b=>{ b.classList.remove('active'); if(b.querySelector('span').innerText===n) b.classList.add('active'); }); }
 
-        /* --- [100] 레시피 (이미지 자동 캐치 수정) --- */
+        /* --- [100] 레시피: 엑박 방지 썸네일 로더 및 오류 처리 추가 --- */
         document.getElementById('recipeInput').addEventListener('keypress', e => { if(e.key==='Enter') loadRecipe(document.getElementById('recipeInput').value); });
         function loadRecipe(keywordStr) {
             const area = document.getElementById('recipe-list');
@@ -284,24 +201,33 @@
                     let imgHtml = "";
                     if (i.img && i.img.includes("http")) {
                         let src = i.img;
+                        let link = i.img;
                         if (src.includes("drive.google.com")) { 
                             let m = src.match(/[-\w]{25,}/); 
-                            if(m) src = `https://drive.google.com/uc?export=view&id=${m[0]}`; 
+                            if(m) {
+                                // 썸네일 전용 URL로 우회
+                                src = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`; 
+                                link = `https://drive.google.com/file/d/${m[0]}/view`;
+                            }
                         }
-                        imgHtml = `<img src="${src}" class="detail-img">`;
+                        // 이미지가 깨지면 엑박을 숨기고 에러 메시지 + 링크 버튼 표시
+                        imgHtml = `<a href="${link}" target="_blank">
+                                     <img src="${src}" class="detail-img" alt="레시피 사진" 
+                                          onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<div style=\\'padding:10px; background:#f8f9fa; border:1px solid #ddd; color:#888; border-radius:8px; margin-bottom:15px; font-size:12px; text-align:center;\\'>사진을 바로 불러올 수 없습니다. 권한을 확인해주세요.<br><br><span style=\\'color:#1971c2; font-weight:bold;\\'>[여기를 눌러 원본 사진 열기]</span></div>');">
+                                   </a>`;
                     }
                     
                     let dStr = i.details.map(d => {
                         let txt = d.text;
-                        // 내용 칸에 드라이브 링크가 있으면 알아서 사진으로 변환
                         if (txt.includes("drive.google.com/")) {
                             let m = txt.match(/[-\w]{25,}/);
                             if (m) {
-                                let src = `https://drive.google.com/uc?export=view&id=${m[0]}`;
-                                txt = `<img src="${src}" class="detail-img" style="margin-bottom:0; margin-top:5px;">`;
+                                let src = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`;
+                                let link = `https://drive.google.com/file/d/${m[0]}/view`;
+                                txt = `<a href="${link}" target="_blank"><img src="${src}" class="detail-img" style="margin-bottom:0; margin-top:5px;" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<a href=\\'${link}\\' target=\\'_blank\\' style=\\'color:#1971c2; font-size:12px;\\'>[사진 링크 열기]</a>');"></a>`;
                             }
                         } else if (txt.startsWith("http")) {
-                            txt = `<a href="${txt}" target="_blank" style="color:#1971c2;text-decoration:underline;">[링크 열기]</a>`;
+                            txt = `<a href="${txt}" target="_blank" style="color:#1971c2;text-decoration:underline; font-size:12px;">[링크 열기]</a>`;
                         }
                         return `<div class="detail-row"><span class="detail-label">${d.cat}</span><div class="detail-content">${txt}</div></div>`;
                     }).join("");
