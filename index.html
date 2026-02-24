@@ -273,7 +273,7 @@
         }
         function updateNav(n){ document.querySelectorAll('.nav-item').forEach(b=>{ b.classList.remove('active'); if(b.querySelector('span').innerText===n) b.classList.add('active'); }); }
 
-        /* --- [100] 레시피 (분류형) --- */
+        /* --- [100] 레시피 (이미지 자동 캐치 수정) --- */
         document.getElementById('recipeInput').addEventListener('keypress', e => { if(e.key==='Enter') loadRecipe(document.getElementById('recipeInput').value); });
         function loadRecipe(keywordStr) {
             const area = document.getElementById('recipe-list');
@@ -284,10 +284,28 @@
                     let imgHtml = "";
                     if (i.img && i.img.includes("http")) {
                         let src = i.img;
-                        if (src.includes("drive.google.com")) { let m = src.match(/[-\w]{25,}/); if(m) src = `https://drive.google.com/uc?export=view&id=${m[0]}`; }
+                        if (src.includes("drive.google.com")) { 
+                            let m = src.match(/[-\w]{25,}/); 
+                            if(m) src = `https://drive.google.com/uc?export=view&id=${m[0]}`; 
+                        }
                         imgHtml = `<img src="${src}" class="detail-img">`;
                     }
-                    let dStr = i.details.map(d => `<div class="detail-row"><span class="detail-label">${d.cat}</span><div class="detail-content">${d.text}</div></div>`).join("");
+                    
+                    let dStr = i.details.map(d => {
+                        let txt = d.text;
+                        // 내용 칸에 드라이브 링크가 있으면 알아서 사진으로 변환
+                        if (txt.includes("drive.google.com/")) {
+                            let m = txt.match(/[-\w]{25,}/);
+                            if (m) {
+                                let src = `https://drive.google.com/uc?export=view&id=${m[0]}`;
+                                txt = `<img src="${src}" class="detail-img" style="margin-bottom:0; margin-top:5px;">`;
+                            }
+                        } else if (txt.startsWith("http")) {
+                            txt = `<a href="${txt}" target="_blank" style="color:#1971c2;text-decoration:underline;">[링크 열기]</a>`;
+                        }
+                        return `<div class="detail-row"><span class="detail-label">${d.cat}</span><div class="detail-content">${txt}</div></div>`;
+                    }).join("");
+
                     h += `<li class="slim-item">
                             <div class="slim-head" onclick="this.parentNode.classList.toggle('active')">
                                 <div><span class="slim-title">${i.name}</span> <span class="slim-badge">${i.type}</span></div>
