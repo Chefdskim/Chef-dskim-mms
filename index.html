@@ -59,10 +59,10 @@
         .detail-label { font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
         .detail-content-box { background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 13px; font-weight: 600; color: #334155; white-space: pre-wrap; line-height: 1.6; }
         
-        .recipe-img-box { width: 100px; height: 100px; flex-shrink: 0; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; }
+        .recipe-img-box { width: 100px; height: 100px; flex-shrink: 0; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; background: #f1f5f9; }
         .recipe-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s; }
         .recipe-img:active { transform: scale(1.05); }
-        .recipe-img-empty { width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border: 2px dashed #cbd5e1; border-radius: 12px; font-size: 10px; font-weight: 700; color: #94a3b8; text-align: center; }
+        .recipe-img-empty { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: #4f46e5; text-align: center; text-decoration: underline; background: #eef2ff; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; width: 60px; height: 50px; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
@@ -200,7 +200,7 @@
             }); 
         }
 
-        /* --- [100] 레시피: 텍스트 안의 사진 링크를 가로채는 기능 완벽 복구 --- */
+        /* --- [100] 레시피: uc?export 방식 및 안전 버튼 복구 --- */
         document.getElementById('recipeInput').addEventListener('keypress', e => { 
             if(e.key==='Enter') loadRecipe(document.getElementById('recipeInput').value); 
         });
@@ -217,41 +217,41 @@
             .then(l => {
                 let h = "";
                 l.forEach((i, idx) => {
-                    // 대표 이미지 (좌측 상단 썸네일)
-                    let imgHtml = `<div class="recipe-img-empty">NO<br>IMAGE</div>`;
+                    let imgHtml = `<div class="recipe-img-empty">NO IMAGE</div>`;
                     if (i.img && i.img.includes("http")) {
                         let src = i.img;
                         let link = i.img;
                         if (src.includes("drive.google.com")) { 
                             let m = src.match(/[-\w]{25,}/); 
                             if(m) {
-                                src = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`; 
+                                // 가장 안정적인 uc?export 방식 사용
+                                src = `https://drive.google.com/uc?export=view&id=${m[0]}`; 
                                 link = `https://drive.google.com/file/d/${m[0]}/view`;
                             }
                         }
-                        imgHtml = `<div class="recipe-img-box" onclick="window.open('${link}', '_blank')"><img src="${src}" class="recipe-img" onerror="this.parentElement.innerHTML='<div class=\\'recipe-img-empty\\'>권한<br>오류</div>'"></div>`;
+                        // 이미지가 안 뜨면 엑박이나 권한오류 대신 예쁜 '터치해서 사진보기' 파란색 버튼으로 변신
+                        imgHtml = `<div class="recipe-img-box" onclick="window.open('${link}', '_blank')">
+                                     <img src="${src}" class="recipe-img" onerror="this.parentElement.innerHTML='<div class=\\'recipe-img-empty\\'>사진 차단됨<br>(터치해서 보기)</div>'">
+                                   </div>`;
                     }
                     
-                    // 세부 내용 처리 (텍스트 내 링크를 썸네일로 변환)
                     let dStr = i.details.map(d => {
                         let txt = d.text;
-                        
-                        // 구글 드라이브 링크가 텍스트에 섞여 있으면 사진으로 변환
                         let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
+                        
                         if (driveMatch) {
                             let m = driveMatch[0].match(/[-\w]{25,}/);
                             if (m) {
-                                let thumbSrc = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`;
+                                let viewSrc = `https://drive.google.com/uc?export=view&id=${m[0]}`;
                                 let orgLink = `https://drive.google.com/file/d/${m[0]}/view`;
                                 txt = txt.replace(driveMatch[0], `
                                     <div class="mt-3 cursor-pointer border rounded-xl overflow-hidden shadow-sm" onclick="window.open('${orgLink}', '_blank')">
-                                        <img src="${thumbSrc}" style="width:100%;" onerror="this.style.display='none'">
-                                        <div class="bg-indigo-50 text-indigo-600 text-center text-xs font-bold py-2">🔍 원본 사진 크게 보기</div>
+                                        <img src="${viewSrc}" style="width:100%;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                        <div class="bg-indigo-50 text-indigo-600 text-center text-xs font-bold py-3" style="display:none;">사진이 브라우저에 의해 차단되었습니다.<br>이곳을 눌러 원본을 확인하세요.</div>
                                     </div>
                                 `);
                             }
                         } else if(txt.includes("http")) {
-                            // 일반 링크 처리
                             txt = txt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
                         }
 
