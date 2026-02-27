@@ -59,7 +59,6 @@
         .detail-label { font-size: 11px; font-weight: 900; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; border-left: 3px solid var(--primary); padding-left: 6px; }
         .detail-content-box { background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 13px; font-weight: 600; color: #334155; white-space: pre-wrap; line-height: 1.6; }
         
-        /* 상단 요약 박스의 썸네일 (90px 고정) */
         .recipe-thumb-box { width: 90px; height: 90px; flex-shrink: 0; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; background: #f1f5f9; }
         .recipe-thumb { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s; }
         .recipe-thumb:active { transform: scale(1.05); }
@@ -221,7 +220,6 @@
             .then(l => {
                 let h = "";
                 l.forEach((i, idx) => {
-                    // 1. 썸네일 처리 (상단 요약 박스용)
                     let thumbHtml = `<div class="recipe-img-empty"><i class="fas fa-image text-xl mb-1"></i>NO IMG</div>`;
                     if (i.img && i.img.includes("http")) {
                         let src = i.img;
@@ -239,24 +237,22 @@
                     }
                     
                     let code = "-", date = "-", author = "-", serving = "-";
-                    let materialsStr = ""; // 재료 관련 텍스트를 모아둘 곳 (우측 배치용)
-                    let processStr = "";   // 과정 관련 텍스트를 모아둘 곳 (하단 배치용)
-                    let mainPhotoHtml = ""; // 본문 내 대형 사진
+                    let materialsStr = ""; 
+                    let processStr = "";   
+                    let mainPhotoHtml = ""; 
 
                     i.details.forEach(d => {
                         let txt = d.text;
                         let cleanCat = d.cat.replace(/\s/g, ""); 
                         
-                        // 핵심 정보 변수 저장
                         let isTopInfo = false;
                         if (cleanCat.includes("관리코드")) { code = txt; isTopInfo = true; }
                         else if (cleanCat.includes("수정일") || cleanCat.includes("날짜")) { date = txt; isTopInfo = true; }
                         else if (cleanCat.includes("작성자")) { author = txt; isTopInfo = true; }
                         else if (cleanCat.includes("인분") || cleanCat.includes("수량")) { serving = txt; isTopInfo = true; }
                         
-                        if (isTopInfo) return; // 요약 정보는 리스트에서 제외
+                        if (isTopInfo) return; 
 
-                        // 본문 내 사진 추출 (drive 링크)
                         let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
                         if (driveMatch) {
                             let m = driveMatch[0].match(/[-\w]{25,}/);
@@ -264,7 +260,6 @@
                                 let viewSrc = `https://lh3.googleusercontent.com/d/${m[0]}`;
                                 let orgLink = `https://drive.google.com/file/d/${m[0]}/view`;
                                 
-                                // 대형 사진은 추출해서 mainPhotoHtml 에 저장 (최대 400px 제한)
                                 mainPhotoHtml = `
                                     <div class="w-full max-w-[400px] shrink-0 rounded-xl overflow-hidden border border-slate-200 shadow-sm cursor-pointer" onclick="window.open('${orgLink}', '_blank')">
                                         <img src="${viewSrc}" style="width: 100%; height: auto; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -272,15 +267,13 @@
                                     </div>
                                 `;
                                 
-                                // 텍스트에서는 링크 제거
                                 txt = txt.replace(driveMatch[0], "").trim(); 
-                                if(txt === "") return; // 사진 링크만 있던 칸이면 건너뜀
+                                if(txt === "") return; 
                             }
                         } else if(txt.includes("http")) {
                             txt = txt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
                         }
 
-                        // 재료인지 조리과정인지 분류
                         const sectionHtml = `
                             <div class="detail-section">
                                 <div class="detail-label">${d.cat}</div>
@@ -288,16 +281,31 @@
                             </div>
                         `;
 
-                        // "재료"라는 글자가 포함되거나 "준비" "과정" "만드는" 이라는 글자가 없으면 우측 재료 칸으로
-                        if (cleanCat.includes("재료") || (!cleanCat.includes("과정") && !cleanCat.includes("준비") && !cleanCat.includes("만드는") && !cleanCat.includes("방법"))) {
+                        // 셰프님 지시사항: Step, 과정, 준비, 영양성분, 알레르기 등은 무조건 하단으로 분리
+                        let lowerCat = cleanCat.toLowerCase();
+                        let isBottomArea = lowerCat.includes("과정") || 
+                                           lowerCat.includes("준비") || 
+                                           lowerCat.includes("조리") || 
+                                           lowerCat.includes("만든") || 
+                                           lowerCat.includes("방법") || 
+                                           lowerCat.includes("순서") || 
+                                           lowerCat.includes("step") || 
+                                           lowerCat.includes("스텝") || 
+                                           lowerCat.includes("영양") || 
+                                           lowerCat.includes("알레르") || 
+                                           lowerCat.includes("알러지") || 
+                                           lowerCat.includes("팁") || 
+                                           lowerCat.includes("tip");
+
+                        if (!isBottomArea) {
+                            // 주재료, 부재료, 양념, 드레싱 등 (위의 하단 조건에 안 걸리는 항목들)
                             materialsStr += sectionHtml;
                         } else {
-                            // 과정, 방법 등의 텍스트는 하단 칸으로
+                            // 준비과정, Step1~, 영양성분, 알레르기 정보 등
                             processStr += sectionHtml;
                         }
                     });
 
-                    // 최종 레이아웃 조합
                     h += `
                         <div class="recipe-card" onclick="this.classList.toggle('open')">
                             <div class="recipe-card-head">
