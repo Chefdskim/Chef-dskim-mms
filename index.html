@@ -56,13 +56,17 @@
         .recipe-card.open .recipe-card-body { display: block; border-top: 1px dashed #e2e8f0; padding-top: 16px; }
         
         .detail-section { margin-bottom: 16px; }
-        .detail-label { font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
+        .detail-label { font-size: 11px; font-weight: 900; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; border-left: 3px solid var(--primary); padding-left: 6px; }
         .detail-content-box { background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 13px; font-weight: 600; color: #334155; white-space: pre-wrap; line-height: 1.6; }
         
-        .recipe-img-box { width: 100px; height: 100px; flex-shrink: 0; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; background: #f1f5f9; }
+        .recipe-img-box { width: 120px; height: 120px; flex-shrink: 0; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; background: #f1f5f9; }
         .recipe-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s; }
         .recipe-img:active { transform: scale(1.05); }
         .recipe-img-empty { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: #4f46e5; text-align: center; text-decoration: underline; background: #eef2ff; }
+
+        .info-grid { display: grid; grid-template-columns: 80px 1fr; gap: 4px 8px; font-size: 12px; }
+        .info-label { font-weight: 900; color: #94a3b8; }
+        .info-value { font-weight: 700; color: #334155; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; width: 60px; height: 50px; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
@@ -200,7 +204,7 @@
             }); 
         }
 
-        /* --- [100] 레시피: 모바일 보안 우회 고속 CDN 적용 --- */
+        /* --- [100] 레시피: 새로운 레이아웃 적용 --- */
         document.getElementById('recipeInput').addEventListener('keypress', e => { 
             if(e.key==='Enter') loadRecipe(document.getElementById('recipeInput').value); 
         });
@@ -224,21 +228,30 @@
                         if (src.includes("drive.google.com")) { 
                             let m = src.match(/[-\w]{25,}/); 
                             if(m) {
-                                // 핵심: 쿠키 차단을 우회하는 lh3.googleusercontent.com 주소 사용
                                 src = `https://lh3.googleusercontent.com/d/${m[0]}`; 
                                 link = `https://drive.google.com/file/d/${m[0]}/view`;
                             }
                         }
-                        // 엑박 시 터치 버튼으로 변경
                         imgHtml = `<div class="recipe-img-box" onclick="window.open('${link}', '_blank')">
                                      <img src="${src}" class="recipe-img" onerror="this.parentElement.innerHTML='<div class=\\'recipe-img-empty\\'>사진 차단됨<br>(터치해서 보기)</div>'">
                                    </div>`;
                     }
                     
-                    let dStr = i.details.map(d => {
+                    // 핵심 정보를 추출하기 위한 변수
+                    let code = "-", date = "-", author = "-", serving = "-";
+                    let dStr = "";
+
+                    i.details.forEach(d => {
                         let txt = d.text;
-                        let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
                         
+                        // 핵심 정보 걸러내기
+                        if (d.cat.includes("관리코드")) { code = txt; return; }
+                        if (d.cat.includes("수정일") || d.cat.includes("날짜")) { date = txt; return; }
+                        if (d.cat.includes("작성자")) { author = txt; return; }
+                        if (d.cat.includes("인분") || d.cat.includes("수량")) { serving = txt; return; }
+                        
+                        // 구글 드라이브 링크가 텍스트에 섞여 있으면 사진으로 변환
+                        let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
                         if (driveMatch) {
                             let m = driveMatch[0].match(/[-\w]{25,}/);
                             if (m) {
@@ -255,14 +268,15 @@
                             txt = txt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
                         }
 
-                        return `
+                        dStr += `
                             <div class="detail-section">
                                 <div class="detail-label">${d.cat}</div>
                                 <div class="detail-content-box">${txt}</div>
                             </div>
                         `;
-                    }).join("");
+                    });
 
+                    // 새로운 카드 레이아웃 조합
                     h += `
                         <div class="recipe-card" onclick="this.classList.toggle('open')">
                             <div class="recipe-card-head">
@@ -273,13 +287,23 @@
                                 <i class="fas fa-chevron-down text-slate-300"></i>
                             </div>
                             <div class="recipe-card-body" onclick="event.stopPropagation()">
-                                <div class="flex gap-4 items-start mb-4">
+                                
+                                <div class="flex gap-4 items-start mb-6 pb-6 border-b border-dashed border-slate-200">
                                     ${imgHtml}
-                                    <div class="flex-1">
-                                        <div class="text-xs font-bold text-slate-500 mb-1">상세 레시피 정보</div>
-                                        <div class="text-[10px] text-slate-400 leading-tight">사진이나 텍스트 내부의 이미지를<br>터치하면 원본이 열립니다.</div>
+                                    <div class="flex-1 bg-white border border-slate-100 shadow-sm rounded-xl p-3">
+                                        <div class="info-grid">
+                                            <div class="info-label">📋 관리코드</div>
+                                            <div class="info-value text-indigo-600">${code}</div>
+                                            <div class="info-label">📅 수정일</div>
+                                            <div class="info-value">${date}</div>
+                                            <div class="info-label">👨‍🍳 작성자</div>
+                                            <div class="info-value">${author}</div>
+                                            <div class="info-label">🍽️ 인분수</div>
+                                            <div class="info-value text-orange-600">${serving}</div>
+                                        </div>
                                     </div>
                                 </div>
+                                
                                 ${dStr}
                             </div>
                         </div>
