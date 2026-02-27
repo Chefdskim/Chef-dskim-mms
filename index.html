@@ -204,7 +204,7 @@
             }); 
         }
 
-        /* --- [100] 레시피: 관리코드 중복 정리 완료 --- */
+        /* --- [100] 레시피: 하단 중복 항목(관리코드, 수정일, 작성자, 인분) 삭제 --- */
         document.getElementById('recipeInput').addEventListener('keypress', e => { 
             if(e.key==='Enter') loadRecipe(document.getElementById('recipeInput').value); 
         });
@@ -237,24 +237,23 @@
                                    </div>`;
                     }
                     
-                    // 핵심 정보를 추출하기 위한 변수
                     let code = "-", date = "-", author = "-", serving = "-";
                     let dStr = "";
 
                     i.details.forEach(d => {
                         let txt = d.text;
-                        let isCode = d.cat.includes("관리코드"); // 관리코드인지 확인
-
-                        // 핵심 정보 걸러내기 및 변수 할당
-                        if (isCode) { code = txt; }
-                        if (d.cat.includes("수정일") || d.cat.includes("날짜")) { date = txt; }
-                        if (d.cat.includes("작성자")) { author = txt; }
-                        if (d.cat.includes("인분") || d.cat.includes("수량")) { serving = txt; }
                         
-                        // 관리코드라면 아래 상세 섹션에 추가하지 않음 ( user 요청사항 )
-                        if (isCode) { return; }
+                        // 1. 위로 올릴 항목들 걸러내기 (변수 저장)
+                        let isTopInfo = false;
+                        if (d.cat.includes("관리코드")) { code = txt; isTopInfo = true; }
+                        else if (d.cat.includes("수정일") || d.cat.includes("날짜")) { date = txt; isTopInfo = true; }
+                        else if (d.cat.includes("작성자")) { author = txt; isTopInfo = true; }
+                        else if (d.cat.includes("인분") || d.cat.includes("수량")) { serving = txt; isTopInfo = true; }
+                        
+                        // 2. 이미 위로 올린 항목은 아래 리스트에 추가하지 않고 건너뜀 (핵심 수정!)
+                        if (isTopInfo) { return; }
 
-                        // 구글 드라이브 링크가 텍스트에 섞여 있으면 사진으로 변환
+                        // 나머지 텍스트 처리 (사진 변환 등)
                         let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
                         if (driveMatch) {
                             let m = driveMatch[0].match(/[-\w]{25,}/);
@@ -272,6 +271,7 @@
                             txt = txt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
                         }
 
+                        // 아래 리스트에 쌓기
                         dStr += `
                             <div class="detail-section">
                                 <div class="detail-label">${d.cat}</div>
@@ -280,7 +280,6 @@
                         `;
                     });
 
-                    // 카드 레이아웃 조합
                     h += `
                         <div class="recipe-card" onclick="this.classList.toggle('open')">
                             <div class="recipe-card-head">
