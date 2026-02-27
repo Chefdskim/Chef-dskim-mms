@@ -47,7 +47,6 @@
         .tag-btn:active, .tag-btn.active { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; font-weight: 900; }
 
         .recipe-list-area { padding: 10px 15px 30px 15px; }
-        /* 핵심 수정 1: 테두리 모양을 원형(캡슐)에서 깔끔한 둥근 사각형으로 변경 */
         .recipe-card { background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s; }
         .recipe-card-head { padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .recipe-card-head:active { background: #f8fafc; }
@@ -60,11 +59,11 @@
         .detail-label { font-size: 11px; font-weight: 900; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; border-left: 3px solid var(--primary); padding-left: 6px; }
         .detail-content-box { background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 13px; font-weight: 600; color: #334155; white-space: pre-wrap; line-height: 1.6; }
         
-        /* 핵심 수정 2: 대표 사진 크기를 기존 90px에서 반(45px, 면적기준 1/4)으로 축소 */
-        .recipe-img-box { width: 45px; height: 45px; flex-shrink: 0; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; background: #f1f5f9; }
+        /* 상단 요약 박스의 썸네일: 잘 보이도록 90px로 복구 */
+        .recipe-img-box { width: 90px; height: 90px; flex-shrink: 0; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; background: #f1f5f9; }
         .recipe-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s; }
         .recipe-img:active { transform: scale(1.05); }
-        .recipe-img-empty { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; color: #4f46e5; text-align: center; text-decoration: underline; background: #eef2ff; }
+        .recipe-img-empty { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 10px; font-weight: 900; color: #94a3b8; text-align: center; }
 
         .info-grid { display: grid; grid-template-columns: 80px 1fr; gap: 4px 8px; font-size: 11px; }
         .info-label { font-weight: 900; color: #94a3b8; }
@@ -206,7 +205,6 @@
             }); 
         }
 
-        /* --- [100] 레시피: 띄어쓰기 완벽 대응 --- */
         document.getElementById('recipeInput').addEventListener('keypress', e => { 
             if(e.key==='Enter') loadRecipe(document.getElementById('recipeInput').value); 
         });
@@ -223,8 +221,7 @@
             .then(l => {
                 let h = "";
                 l.forEach((i, idx) => {
-                    // 핵심 수정 3: 사진 크기가 줄어듦에 따라 로딩 실패 아이콘 및 텍스트 간소화
-                    let imgHtml = `<div class="recipe-img-empty"><i class="fas fa-image text-xl text-slate-300"></i></div>`;
+                    let imgHtml = `<div class="recipe-img-empty"><i class="fas fa-image text-xl mb-1"></i>NO IMG</div>`;
                     if (i.img && i.img.includes("http")) {
                         let src = i.img;
                         let link = i.img;
@@ -235,9 +232,8 @@
                                 link = `https://drive.google.com/file/d/${m[0]}/view`;
                             }
                         }
-                        // 엑박 시 터치 버튼으로 변경 (크기가 작으므로 아이콘 위주로 변경)
                         imgHtml = `<div class="recipe-img-box" onclick="window.open('${link}', '_blank')">
-                                     <img src="${src}" class="recipe-img" onerror="this.parentElement.innerHTML='<div class=\\'recipe-img-empty\\'><i class=\\'fas fa-image-slash text-xl\\'></i></div>'">
+                                     <img src="${src}" class="recipe-img" onerror="this.parentElement.innerHTML='<div class=\\'recipe-img-empty\\'><i class=\\'fas fa-ban text-red-400 text-xl mb-1\\'></i>권한오류</div>'">
                                    </div>`;
                     }
                     
@@ -248,27 +244,26 @@
                         let txt = d.text;
                         let cleanCat = d.cat.replace(/\s/g, ""); 
                         
-                        // 1. 위로 올릴 항목들 걸러내기 (변수 저장)
                         let isTopInfo = false;
                         if (cleanCat.includes("관리코드")) { code = txt; isTopInfo = true; }
                         else if (cleanCat.includes("수정일") || cleanCat.includes("날짜")) { date = txt; isTopInfo = true; }
                         else if (cleanCat.includes("작성자")) { author = txt; isTopInfo = true; }
                         else if (cleanCat.includes("인분") || cleanCat.includes("수량")) { serving = txt; isTopInfo = true; }
                         
-                        // 2. 이미 위로 올린 항목은 아래 리스트에 추가하지 않고 건너뜀
                         if (isTopInfo) { return; }
 
-                        // 나머지 텍스트 처리 (사진 변환 등)
                         let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
                         if (driveMatch) {
                             let m = driveMatch[0].match(/[-\w]{25,}/);
                             if (m) {
                                 let viewSrc = `https://lh3.googleusercontent.com/d/${m[0]}`;
                                 let orgLink = `https://drive.google.com/file/d/${m[0]}/view`;
+                                
+                                // 핵심 수정: 본문 내 상세 사진 크기를 대폭 축소 (width: 40%) 및 둥근 테두리 적용
                                 txt = txt.replace(driveMatch[0], `
-                                    <div class="mt-3 cursor-pointer border rounded-xl overflow-hidden shadow-sm" onclick="window.open('${orgLink}', '_blank')">
-                                        <img src="${viewSrc}" style="width:100%;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                                        <div class="bg-indigo-50 text-indigo-600 text-center text-xs font-bold py-3" style="display:none;">사진 차단됨 (클릭하여 원본 열기)</div>
+                                    <div class="mt-3 mb-1 cursor-pointer overflow-hidden" onclick="window.open('${orgLink}', '_blank')">
+                                        <img src="${viewSrc}" style="width:40%; max-width:200px; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 2px 4px rgba(0,0,0,0.05);" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                                        <span class="bg-slate-100 text-slate-500 px-3 py-1 rounded text-xs font-bold" style="display:none;">사진이 차단되었습니다. (클릭하여 열기)</span>
                                     </div>
                                 `);
                             }
@@ -276,7 +271,6 @@
                             txt = txt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
                         }
 
-                        // 아래 리스트에 쌓기
                         dStr += `
                             <div class="detail-section">
                                 <div class="detail-label">${d.cat}</div>
@@ -296,7 +290,7 @@
                             </div>
                             <div class="recipe-card-body" onclick="event.stopPropagation()">
                                 
-                                <div class="flex gap-2 items-start mb-6 pb-6 border-b border-dashed border-slate-200">
+                                <div class="flex gap-4 items-start mb-6 pb-6 border-b border-dashed border-slate-200">
                                     ${imgHtml}
                                     <div class="flex-1 bg-white border border-slate-100 shadow-sm rounded-xl p-3">
                                         <div class="info-grid">
