@@ -204,7 +204,7 @@
             }); 
         }
 
-        /* --- [100] 레시피: 새로운 레이아웃 적용 --- */
+        /* --- [100] 레시피: 관리코드 중복 정리 완료 --- */
         document.getElementById('recipeInput').addEventListener('keypress', e => { 
             if(e.key==='Enter') loadRecipe(document.getElementById('recipeInput').value); 
         });
@@ -243,13 +243,17 @@
 
                     i.details.forEach(d => {
                         let txt = d.text;
+                        let isCode = d.cat.includes("관리코드"); // 관리코드인지 확인
+
+                        // 핵심 정보 걸러내기 및 변수 할당
+                        if (isCode) { code = txt; }
+                        if (d.cat.includes("수정일") || d.cat.includes("날짜")) { date = txt; }
+                        if (d.cat.includes("작성자")) { author = txt; }
+                        if (d.cat.includes("인분") || d.cat.includes("수량")) { serving = txt; }
                         
-                        // 핵심 정보 걸러내기
-                        if (d.cat.includes("관리코드")) { code = txt; return; }
-                        if (d.cat.includes("수정일") || d.cat.includes("날짜")) { date = txt; return; }
-                        if (d.cat.includes("작성자")) { author = txt; return; }
-                        if (d.cat.includes("인분") || d.cat.includes("수량")) { serving = txt; return; }
-                        
+                        // 관리코드라면 아래 상세 섹션에 추가하지 않음 ( user 요청사항 )
+                        if (isCode) { return; }
+
                         // 구글 드라이브 링크가 텍스트에 섞여 있으면 사진으로 변환
                         let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
                         if (driveMatch) {
@@ -276,7 +280,7 @@
                         `;
                     });
 
-                    // 새로운 카드 레이아웃 조합
+                    // 카드 레이아웃 조합
                     h += `
                         <div class="recipe-card" onclick="this.classList.toggle('open')">
                             <div class="recipe-card-head">
