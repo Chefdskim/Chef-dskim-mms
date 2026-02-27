@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -47,7 +47,7 @@
         .tag-btn:active, .tag-btn.active { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; font-weight: 900; }
 
         .recipe-list-area { padding: 10px 15px 30px 15px; }
-        .recipe-card { background: white; border: 1px solid var(--border); border-radius: 16px; margin-bottom: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s; }
+        .recipe-card { background: white; border: 1px solid var(--border); border-radius: 166px; margin-bottom: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s; }
         .recipe-card-head { padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .recipe-card-head:active { background: #f8fafc; }
         .recipe-title { font-size: 16px; font-weight: 900; color: #1e293b; }
@@ -59,12 +59,13 @@
         .detail-label { font-size: 11px; font-weight: 900; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; border-left: 3px solid var(--primary); padding-left: 6px; }
         .detail-content-box { background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 13px; font-weight: 600; color: #334155; white-space: pre-wrap; line-height: 1.6; }
         
-        .recipe-img-box { width: 120px; height: 120px; flex-shrink: 0; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; background: #f1f5f9; }
+        /* 핵심 수정: 대표 사진 크기를 90px로 축소 */
+        .recipe-img-box { width: 90px; height: 90px; flex-shrink: 0; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; background: #f1f5f9; }
         .recipe-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s; }
         .recipe-img:active { transform: scale(1.05); }
-        .recipe-img-empty { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: #4f46e5; text-align: center; text-decoration: underline; background: #eef2ff; }
+        .recipe-img-empty { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; color: #4f46e5; text-align: center; text-decoration: underline; background: #eef2ff; }
 
-        .info-grid { display: grid; grid-template-columns: 80px 1fr; gap: 4px 8px; font-size: 12px; }
+        .info-grid { display: grid; grid-template-columns: 80px 1fr; gap: 4px 8px; font-size: 11px; }
         .info-label { font-weight: 900; color: #94a3b8; }
         .info-value { font-weight: 700; color: #334155; }
 
@@ -242,20 +243,16 @@
 
                     i.details.forEach(d => {
                         let txt = d.text;
-                        // 핵심 수정: 시트에 '관리 코드' 처럼 띄어쓰기가 있어도 무시하고 인식하도록 처리
                         let cleanCat = d.cat.replace(/\s/g, ""); 
                         
-                        // 1. 위로 올릴 항목들 걸러내기 (변수 저장)
                         let isTopInfo = false;
                         if (cleanCat.includes("관리코드")) { code = txt; isTopInfo = true; }
                         else if (cleanCat.includes("수정일") || cleanCat.includes("날짜")) { date = txt; isTopInfo = true; }
                         else if (cleanCat.includes("작성자")) { author = txt; isTopInfo = true; }
                         else if (cleanCat.includes("인분") || cleanCat.includes("수량")) { serving = txt; isTopInfo = true; }
                         
-                        // 2. 이미 위로 올린 항목은 아래 리스트에 추가하지 않고 건너뜀
                         if (isTopInfo) { return; }
 
-                        // 나머지 텍스트 처리 (사진 변환 등)
                         let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
                         if (driveMatch) {
                             let m = driveMatch[0].match(/[-\w]{25,}/);
@@ -273,7 +270,6 @@
                             txt = txt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
                         }
 
-                        // 아래 리스트에 쌓기
                         dStr += `
                             <div class="detail-section">
                                 <div class="detail-label">${d.cat}</div>
