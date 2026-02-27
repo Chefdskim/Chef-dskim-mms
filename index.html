@@ -200,7 +200,7 @@
             }); 
         }
 
-        /* --- [100] 레시피: uc?export 방식 및 안전 버튼 복구 --- */
+        /* --- [100] 레시피: 모바일 보안 우회 고속 CDN 적용 --- */
         document.getElementById('recipeInput').addEventListener('keypress', e => { 
             if(e.key==='Enter') loadRecipe(document.getElementById('recipeInput').value); 
         });
@@ -224,12 +224,12 @@
                         if (src.includes("drive.google.com")) { 
                             let m = src.match(/[-\w]{25,}/); 
                             if(m) {
-                                // 가장 안정적인 uc?export 방식 사용
-                                src = `https://drive.google.com/uc?export=view&id=${m[0]}`; 
+                                // 핵심: 쿠키 차단을 우회하는 lh3.googleusercontent.com 주소 사용
+                                src = `https://lh3.googleusercontent.com/d/${m[0]}`; 
                                 link = `https://drive.google.com/file/d/${m[0]}/view`;
                             }
                         }
-                        // 이미지가 안 뜨면 엑박이나 권한오류 대신 예쁜 '터치해서 사진보기' 파란색 버튼으로 변신
+                        // 엑박 시 터치 버튼으로 변경
                         imgHtml = `<div class="recipe-img-box" onclick="window.open('${link}', '_blank')">
                                      <img src="${src}" class="recipe-img" onerror="this.parentElement.innerHTML='<div class=\\'recipe-img-empty\\'>사진 차단됨<br>(터치해서 보기)</div>'">
                                    </div>`;
@@ -242,12 +242,12 @@
                         if (driveMatch) {
                             let m = driveMatch[0].match(/[-\w]{25,}/);
                             if (m) {
-                                let viewSrc = `https://drive.google.com/uc?export=view&id=${m[0]}`;
+                                let viewSrc = `https://lh3.googleusercontent.com/d/${m[0]}`;
                                 let orgLink = `https://drive.google.com/file/d/${m[0]}/view`;
                                 txt = txt.replace(driveMatch[0], `
                                     <div class="mt-3 cursor-pointer border rounded-xl overflow-hidden shadow-sm" onclick="window.open('${orgLink}', '_blank')">
                                         <img src="${viewSrc}" style="width:100%;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                                        <div class="bg-indigo-50 text-indigo-600 text-center text-xs font-bold py-3" style="display:none;">사진이 브라우저에 의해 차단되었습니다.<br>이곳을 눌러 원본을 확인하세요.</div>
+                                        <div class="bg-indigo-50 text-indigo-600 text-center text-xs font-bold py-3" style="display:none;">사진 차단됨 (클릭하여 원본 열기)</div>
                                     </div>
                                 `);
                             }
