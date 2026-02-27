@@ -55,13 +55,14 @@
         .recipe-card-body { display: none; padding: 0 16px 16px 16px; background: white; }
         .recipe-card.open .recipe-card-body { display: block; border-top: 1px dashed #e2e8f0; padding-top: 16px; }
         
-        .detail-section { margin-bottom: 16px; }
+        .detail-section { margin-bottom: 12px; }
         .detail-label { font-size: 11px; font-weight: 900; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; border-left: 3px solid var(--primary); padding-left: 6px; }
         .detail-content-box { background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 13px; font-weight: 600; color: #334155; white-space: pre-wrap; line-height: 1.6; }
         
-        .recipe-img-box { width: 90px; height: 90px; flex-shrink: 0; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; background: #f1f5f9; }
-        .recipe-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s; }
-        .recipe-img:active { transform: scale(1.05); }
+        /* 상단 요약 박스의 썸네일 (90px 고정) */
+        .recipe-thumb-box { width: 90px; height: 90px; flex-shrink: 0; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; background: #f1f5f9; }
+        .recipe-thumb { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s; }
+        .recipe-thumb:active { transform: scale(1.05); }
         .recipe-img-empty { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 10px; font-weight: 900; color: #94a3b8; text-align: center; }
 
         .info-grid { display: grid; grid-template-columns: 80px 1fr; gap: 4px 8px; font-size: 11px; }
@@ -220,7 +221,8 @@
             .then(l => {
                 let h = "";
                 l.forEach((i, idx) => {
-                    let imgHtml = `<div class="recipe-img-empty"><i class="fas fa-image text-xl mb-1"></i>NO IMG</div>`;
+                    // 1. 썸네일 처리 (상단 요약 박스용)
+                    let thumbHtml = `<div class="recipe-img-empty"><i class="fas fa-image text-xl mb-1"></i>NO IMG</div>`;
                     if (i.img && i.img.includes("http")) {
                         let src = i.img;
                         let link = i.img;
@@ -231,26 +233,30 @@
                                 link = `https://drive.google.com/file/d/${m[0]}/view`;
                             }
                         }
-                        imgHtml = `<div class="recipe-img-box" onclick="window.open('${link}', '_blank')">
-                                     <img src="${src}" class="recipe-img" onerror="this.parentElement.innerHTML='<div class=\\'recipe-img-empty\\'><i class=\\'fas fa-ban text-red-400 text-xl mb-1\\'></i>권한오류</div>'">
+                        thumbHtml = `<div class="recipe-thumb-box" onclick="window.open('${link}', '_blank')">
+                                     <img src="${src}" class="recipe-thumb" onerror="this.parentElement.innerHTML='<div class=\\'recipe-img-empty\\'><i class=\\'fas fa-ban text-red-400 text-xl mb-1\\'></i>권한오류</div>'">
                                    </div>`;
                     }
                     
                     let code = "-", date = "-", author = "-", serving = "-";
-                    let dStr = "";
+                    let materialsStr = ""; // 재료 관련 텍스트를 모아둘 곳 (우측 배치용)
+                    let processStr = "";   // 과정 관련 텍스트를 모아둘 곳 (하단 배치용)
+                    let mainPhotoHtml = ""; // 본문 내 대형 사진
 
                     i.details.forEach(d => {
                         let txt = d.text;
                         let cleanCat = d.cat.replace(/\s/g, ""); 
                         
+                        // 핵심 정보 변수 저장
                         let isTopInfo = false;
                         if (cleanCat.includes("관리코드")) { code = txt; isTopInfo = true; }
                         else if (cleanCat.includes("수정일") || cleanCat.includes("날짜")) { date = txt; isTopInfo = true; }
                         else if (cleanCat.includes("작성자")) { author = txt; isTopInfo = true; }
                         else if (cleanCat.includes("인분") || cleanCat.includes("수량")) { serving = txt; isTopInfo = true; }
                         
-                        if (isTopInfo) { return; }
+                        if (isTopInfo) return; // 요약 정보는 리스트에서 제외
 
+                        // 본문 내 사진 추출 (drive 링크)
                         let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
                         if (driveMatch) {
                             let m = driveMatch[0].match(/[-\w]{25,}/);
@@ -258,26 +264,40 @@
                                 let viewSrc = `https://lh3.googleusercontent.com/d/${m[0]}`;
                                 let orgLink = `https://drive.google.com/file/d/${m[0]}/view`;
                                 
-                                // 핵심 수정: 본문 사진을 모바일 100%, PC 기준 최대 400px (가이드라인 크기)로 맞춤
-                                txt = txt.replace(driveMatch[0], `
-                                    <div class="mt-3 mb-1 cursor-pointer overflow-hidden" onclick="window.open('${orgLink}', '_blank')">
-                                        <img src="${viewSrc}" style="width: 100%; max-width: 400px; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 2px 4px rgba(0,0,0,0.05);" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
-                                        <span class="bg-slate-100 text-slate-500 px-3 py-1 rounded text-xs font-bold" style="display:none;">사진이 차단되었습니다. (클릭하여 열기)</span>
+                                // 대형 사진은 추출해서 mainPhotoHtml 에 저장 (최대 400px 제한)
+                                mainPhotoHtml = `
+                                    <div class="w-full max-w-[400px] shrink-0 rounded-xl overflow-hidden border border-slate-200 shadow-sm cursor-pointer" onclick="window.open('${orgLink}', '_blank')">
+                                        <img src="${viewSrc}" style="width: 100%; height: auto; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                        <div class="bg-indigo-50 text-indigo-600 text-center text-xs font-bold py-6" style="display:none;">사진이 차단되었습니다.<br>클릭하여 원본을 열어주세요.</div>
                                     </div>
-                                `);
+                                `;
+                                
+                                // 텍스트에서는 링크 제거
+                                txt = txt.replace(driveMatch[0], "").trim(); 
+                                if(txt === "") return; // 사진 링크만 있던 칸이면 건너뜀
                             }
                         } else if(txt.includes("http")) {
                             txt = txt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
                         }
 
-                        dStr += `
+                        // 재료인지 조리과정인지 분류
+                        const sectionHtml = `
                             <div class="detail-section">
                                 <div class="detail-label">${d.cat}</div>
                                 <div class="detail-content-box">${txt}</div>
                             </div>
                         `;
+
+                        // "재료"라는 글자가 포함되거나 "준비" "과정" "만드는" 이라는 글자가 없으면 우측 재료 칸으로
+                        if (cleanCat.includes("재료") || (!cleanCat.includes("과정") && !cleanCat.includes("준비") && !cleanCat.includes("만드는") && !cleanCat.includes("방법"))) {
+                            materialsStr += sectionHtml;
+                        } else {
+                            // 과정, 방법 등의 텍스트는 하단 칸으로
+                            processStr += sectionHtml;
+                        }
                     });
 
+                    // 최종 레이아웃 조합
                     h += `
                         <div class="recipe-card" onclick="this.classList.toggle('open')">
                             <div class="recipe-card-head">
@@ -287,10 +307,11 @@
                                 </div>
                                 <i class="fas fa-chevron-down text-slate-300"></i>
                             </div>
+                            
                             <div class="recipe-card-body" onclick="event.stopPropagation()">
                                 
                                 <div class="flex gap-4 items-start mb-6 pb-6 border-b border-dashed border-slate-200">
-                                    ${imgHtml}
+                                    ${thumbHtml}
                                     <div class="flex-1 bg-white border border-slate-100 shadow-sm rounded-xl p-3">
                                         <div class="info-grid">
                                             <div class="info-label">📋 관리코드</div>
@@ -305,7 +326,17 @@
                                     </div>
                                 </div>
                                 
-                                ${dStr}
+                                <div class="flex flex-col md:flex-row gap-6 mb-6">
+                                    ${mainPhotoHtml}
+                                    <div class="flex-1 min-w-0">
+                                        ${materialsStr}
+                                    </div>
+                                </div>
+                                
+                                <div class="w-full">
+                                    ${processStr}
+                                </div>
+
                             </div>
                         </div>
                     `;
