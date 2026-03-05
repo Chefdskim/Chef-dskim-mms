@@ -212,45 +212,39 @@
             const area = document.getElementById('recipe-list');
             area.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl mb-2 text-indigo-500'></i><br>데이터를 불러오는 중입니다...</div>";
             
+            // 버튼 활성화 처리 (안전망 추가)
             document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
-            if(event && event.target && event.target.classList) event.target.classList.add('active');
+            try {
+                if(window.event && window.event.target && window.event.target.classList.contains('tag-btn')) {
+                    window.event.target.classList.add('active');
+                }
+            } catch(e) {}
 
-            fetch(`${gasUrl}?action=recipe&keyword=${encodeURIComponent(keywordStr)}`)
+            let safeKeyword = (keywordStr || "").trim();
+
+            fetch(`${gasUrl}?action=recipe&keyword=${encodeURIComponent(safeKeyword)}`)
             .then(r=>r.json())
             .then(l => {
-                // 1. KOR 등 국가코드 엄격 필터링 적용
-                const countryCodes = ['KOR', 'JAP', 'WST', 'CHN', 'SEA', 'ETC'];
-                let displayList = l;
-                if (countryCodes.includes(keywordStr.toUpperCase())) {
-                    displayList = l.filter(i => i.type && i.type.toUpperCase().includes(keywordStr.toUpperCase()));
-                }
-
                 let h = "";
-                displayList.forEach((i, idx) => {
-                    let thumbHtml = `<div class="recipe-img-empty"><i class="fas fa-image text-xl mb-1"></i>NO IMG</div>`;
-                    if (i.img && i.img.includes("http")) {
-                        let src = i.img;
-                        let link = i.img;
-                        if (src.includes("drive.google.com")) { 
-                            let m = src.match(/[-\w]{25,}/); 
-                            if(m) {
-                                src = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`; 
-                                link = `https://drive.google.com/file/d/${m[0]}/view`;
-                            }
-                        }
-                        thumbHtml = `<div class="recipe-thumb-box" onclick="window.open('${link}', '_blank')">
-                                     <img src="${src}" class="recipe-thumb" onerror="this.parentElement.innerHTML='<div class=\\'recipe-img-empty\\'><i class=\\'fas fa-ban text-red-400 text-xl mb-1\\'></i>권한오류</div>'">
-                                   </div>`;
-                    }
-                    
+                let count = 0;
+                
+                // 국가/대륙 검색인지 확인
+                const countryCodes = ['KOR', 'JAP', 'WST', 'CHN', 'SEA', 'ETC'];
+                const isCountrySearch = countryCodes.includes(safeKeyword.toUpperCase());
+
+                l.forEach((i) => {
+                    // 기본 변수 초기화
                     let code = "-", date = "-", author = "-", serving = "-";
                     let materialsStr = ""; 
                     let processStr = "";   
                     let mainPhotoHtml = ""; 
 
-                    i.details.forEach(d => {
-                        let txt = d.text;
-                        let cleanCat = d.cat.replace(/\s/g, ""); 
+                    // 데이터 안전 파싱 (null, undefined 대비)
+                    const safeDetails = i.details || [];
+                    
+                    safeDetails.forEach(d => {
+                        let txt = d.text || "";
+                        let cleanCat = (d.cat || "").replace(/\s/g, ""); 
                         
                         let isTopInfo = false;
                         if (cleanCat.includes("관리코드")) { code = txt; isTopInfo = true; }
@@ -258,8 +252,9 @@
                         else if (cleanCat.includes("작성자")) { author = txt; isTopInfo = true; }
                         else if (cleanCat.includes("인분") || cleanCat.includes("수량")) { serving = txt; isTopInfo = true; }
                         
-                        if (isTopInfo) return;
+                        if (isTopInfo) return; // 상단 박스로 올라간 건 본문 제외
 
+                        // 구글 드라이브 사진 변환
                         let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
                         if (driveMatch) {
                             let m = driveMatch[0].match(/[-\w]{25,}/);
@@ -280,30 +275,58 @@
                             txt = txt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
                         }
 
+                        // 레이아웃 분리: "재료, 양념, 드레싱"은 우측으로 / 나머지는 하단으로
                         const sectionHtml = `
                             <div class="detail-section">
-                                <div class="detail-label">${d.cat}</div>
+                                <div class="detail-label">${d.cat || "-"}</div>
                                 <div class="detail-content-box">${txt}</div>
                             </div>
                         `;
 
-                        // 2. 우측/하단 레이아웃 분리 조건 완벽 적용
                         let isMaterial = cleanCat.includes("재료") || cleanCat.includes("양념") || cleanCat.includes("드레싱");
                         
                         if (isMaterial) {
                             materialsStr += sectionHtml;
                         } else {
-                            // Step, 준비과정, 영양성분, 알레르기 등 기타 모든 항목은 하단으로 이동
                             processStr += sectionHtml;
                         }
                     });
 
+                    // ★ 핵심 오류 수정: KOR 검색 시 엄격한 필터링 (엉뚱한 구글 사진 주소 매칭 차단)
+                    if (isCountrySearch) {
+                        const typeMatch = (i.type || "").toUpperCase().includes(safeKeyword.toUpperCase());
+                        const codeMatch = code.toUpperCase().includes(safeKeyword.toUpperCase());
+                        
+                        // 관리코드나 분류(배지)에 KOR이 명확히 들어있지 않다면 화면에 그리지 않고 건너뜀
+                        if (!typeMatch && !codeMatch) {
+                            return; 
+                        }
+                    }
+
+                    // 썸네일 처리
+                    let thumbHtml = `<div class="recipe-img-empty"><i class="fas fa-image text-xl mb-1"></i>NO IMG</div>`;
+                    if (i.img && i.img.includes("http")) {
+                        let src = i.img;
+                        let link = i.img;
+                        if (src.includes("drive.google.com")) { 
+                            let m = src.match(/[-\w]{25,}/); 
+                            if(m) {
+                                src = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`; 
+                                link = `https://drive.google.com/file/d/${m[0]}/view`;
+                            }
+                        }
+                        thumbHtml = `<div class="recipe-thumb-box" onclick="window.open('${link}', '_blank')">
+                                     <img src="${src}" class="recipe-thumb" onerror="this.parentElement.innerHTML='<div class=\\'recipe-img-empty\\'><i class=\\'fas fa-ban text-red-400 text-xl mb-1\\'></i>권한오류</div>'">
+                                   </div>`;
+                    }
+
+                    // HTML 생성
                     h += `
                         <div class="recipe-card" onclick="this.classList.toggle('open')">
                             <div class="recipe-card-head">
                                 <div>
-                                    <span class="recipe-title">${i.name}</span> 
-                                    <span class="recipe-badge">${i.type}</span>
+                                    <span class="recipe-title">${i.name || "이름없음"}</span> 
+                                    <span class="recipe-badge">${i.type || "-"}</span>
                                 </div>
                                 <i class="fas fa-chevron-down text-slate-300"></i>
                             </div>
@@ -340,9 +363,12 @@
                             </div>
                         </div>
                     `;
+                    count++;
                 });
-                area.innerHTML = displayList.length ? h : "<div class='loading-text'>검색 결과가 없습니다.</div>";
+                
+                area.innerHTML = count > 0 ? h : "<div class='loading-text'>검색 결과가 없습니다.</div>";
             }).catch(e => {
+                console.error(e);
                 area.innerHTML = "<div class='loading-text text-red-500'>데이터를 불러오는 중 오류가 발생했습니다.</div>";
             });
         }
