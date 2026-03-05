@@ -109,43 +109,44 @@
             
             <div class="search-container shadow-sm">
                 <div class="search-box">
-                    <input type="text" id="recipeInput" class="search-input" placeholder="메뉴 검색 (예: 닭갈비, KOR)">
+                    <input type="text" id="recipeInput" class="search-input" placeholder="메뉴 검색 (예: 닭갈비, JAP-Seafood)">
                     <button class="search-btn" onclick="loadRecipe(document.getElementById('recipeInput').value)">GO</button>
                 </div>
             </div>
 
             <div class="category-wrapper border-b">
-                <div class="cat-title">국가/대륙별</div>
+                <div class="cat-title">국가별 (Country)</div>
                 <div class="tag-group">
-                    <div class="tag-btn" onclick="loadRecipe('KOR')">KOR</div>
-                    <div class="tag-btn" onclick="loadRecipe('JAP')">JAP</div>
-                    <div class="tag-btn" onclick="loadRecipe('WST')">WST</div>
-                    <div class="tag-btn" onclick="loadRecipe('CHN')">CHN</div>
-                    <div class="tag-btn" onclick="loadRecipe('SEA')">SEA</div>
-                    <div class="tag-btn" onclick="loadRecipe('ETC')">ETC</div>
+                    <div class="tag-btn" onclick="loadRecipe('KOR')">한식(KOR)</div>
+                    <div class="tag-btn" onclick="loadRecipe('JAP')">일식(JAP)</div>
+                    <div class="tag-btn" onclick="loadRecipe('WST')">양식(WST)</div>
+                    <div class="tag-btn" onclick="loadRecipe('CHN')">중식(CHN)</div>
+                    <div class="tag-btn" onclick="loadRecipe('SEA')">동남아(SEA)</div>
+                    <div class="tag-btn" onclick="loadRecipe('ETC')">기타(ETC)</div>
                 </div>
-                <div class="cat-title">식재료별</div>
+                <div class="cat-title">식재료별 (Ingredient)</div>
                 <div class="tag-group">
-                    <div class="tag-btn" onclick="loadRecipe('육류')">육류</div>
-                    <div class="tag-btn" onclick="loadRecipe('가금류')">가금류</div>
-                    <div class="tag-btn" onclick="loadRecipe('해산물')">해산물</div>
-                    <div class="tag-btn" onclick="loadRecipe('채소')">채소</div>
-                    <div class="tag-btn" onclick="loadRecipe('버섯')">버섯류</div>
-                    <div class="tag-btn" onclick="loadRecipe('해조류')">해조류</div>
-                    <div class="tag-btn" onclick="loadRecipe('과일')">과일</div>
-                    <div class="tag-btn" onclick="loadRecipe('콩/견과')">콩/견과</div>
+                    <div class="tag-btn" onclick="loadRecipe('Meat')">육류(Meat)</div>
+                    <div class="tag-btn" onclick="loadRecipe('Poultry')">가금류(Poultry)</div>
+                    <div class="tag-btn" onclick="loadRecipe('Seafood')">해산물(Seafood)</div>
+                    <div class="tag-btn" onclick="loadRecipe('Veg')">채소(Veg)</div>
+                    <div class="tag-btn" onclick="loadRecipe('Etc')">기타(Etc)</div>
                 </div>
-                <div class="cat-title">조리법별</div>
+                <div class="cat-title">요리분류 (Category)</div>
                 <div class="tag-group">
-                    <div class="tag-btn" onclick="loadRecipe('밥')">밥</div><div class="tag-btn" onclick="loadRecipe('죽')">죽</div>
-                    <div class="tag-btn" onclick="loadRecipe('면')">면/수제비</div><div class="tag-btn" onclick="loadRecipe('만두')">만두</div>
-                    <div class="tag-btn" onclick="loadRecipe('국')">국</div><div class="tag-btn" onclick="loadRecipe('찌개')">찌개/전골</div>
-                    <div class="tag-btn" onclick="loadRecipe('김치')">김치/나물</div><div class="tag-btn" onclick="loadRecipe('구이')">구이</div>
-                    <div class="tag-btn" onclick="loadRecipe('조림')">조림/지짐</div><div class="tag-btn" onclick="loadRecipe('볶음')">볶음/초</div>
-                    <div class="tag-btn" onclick="loadRecipe('전')">전/적</div><div class="tag-btn" onclick="loadRecipe('찜')">찜/선</div>
-                    <div class="tag-btn" onclick="loadRecipe('회')">회</div><div class="tag-btn" onclick="loadRecipe('마른반찬')">마른반찬</div>
-                    <div class="tag-btn" onclick="loadRecipe('수육')">수육/편육</div><div class="tag-btn" onclick="loadRecipe('장아찌')">장아찌/젓갈</div>
-                    <div class="tag-btn" onclick="loadRecipe('장')">장</div><div class="tag-btn" onclick="loadRecipe('디저트')">떡/디저트</div>
+                    <div class="tag-btn" onclick="loadRecipe('Main')">메인(Main)</div>
+                    <div class="tag-btn" onclick="loadRecipe('App')">전채(App)</div>
+                    <div class="tag-btn" onclick="loadRecipe('Side')">사이드(Side)</div>
+                    <div class="tag-btn" onclick="loadRecipe('Sauce')">소스(Sauce)</div>
+                </div>
+                <div class="cat-title">조리법별 (Method)</div>
+                <div class="tag-group">
+                    <div class="tag-btn" onclick="loadRecipe('Steam')">찜(Steam)</div>
+                    <div class="tag-btn" onclick="loadRecipe('Boil')">데침/끓임(Boil)</div>
+                    <div class="tag-btn" onclick="loadRecipe('Smoke')">훈연(Smoke)</div>
+                    <div class="tag-btn" onclick="loadRecipe('Grill')">구이(Grill)</div>
+                    <div class="tag-btn" onclick="loadRecipe('Cold')">무침/절임(Cold)</div>
+                    <div class="tag-btn" onclick="loadRecipe('Fry')">튀김(Fry)</div>
                 </div>
             </div>
 
@@ -212,7 +213,7 @@
             const area = document.getElementById('recipe-list');
             area.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl mb-2 text-indigo-500'></i><br>데이터를 불러오는 중입니다...</div>";
             
-            // 버튼 활성화 처리 (안전망 추가)
+            // 버튼 활성화 처리
             document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
             try {
                 if(window.event && window.event.target && window.event.target.classList.contains('tag-btn')) {
@@ -228,18 +229,21 @@
                 let h = "";
                 let count = 0;
                 
-                // 국가/대륙 검색인지 확인
-                const countryCodes = ['KOR', 'JAP', 'WST', 'CHN', 'SEA', 'ETC'];
-                const isCountrySearch = countryCodes.includes(safeKeyword.toUpperCase());
+                // 신규 분류코드 기반 엄격 검색 리스트 (대소문자 무관)
+                const codeSegments = [
+                    'KOR', 'JAP', 'WST', 'CHN', 'SEA', 'ETC', 
+                    'MEAT', 'POULTRY', 'SEAFOOD', 'VEG',
+                    'MAIN', 'APP', 'SIDE', 'SAUCE',
+                    'STEAM', 'BOIL', 'SMOKE', 'GRILL', 'COLD', 'FRY'
+                ];
+                const isCodeSearch = codeSegments.includes(safeKeyword.toUpperCase());
 
                 l.forEach((i) => {
-                    // 기본 변수 초기화
                     let code = "-", date = "-", author = "-", serving = "-";
                     let materialsStr = ""; 
                     let processStr = "";   
                     let mainPhotoHtml = ""; 
 
-                    // 데이터 안전 파싱 (null, undefined 대비)
                     const safeDetails = i.details || [];
                     
                     safeDetails.forEach(d => {
@@ -252,9 +256,8 @@
                         else if (cleanCat.includes("작성자")) { author = txt; isTopInfo = true; }
                         else if (cleanCat.includes("인분") || cleanCat.includes("수량")) { serving = txt; isTopInfo = true; }
                         
-                        if (isTopInfo) return; // 상단 박스로 올라간 건 본문 제외
+                        if (isTopInfo) return; 
 
-                        // 구글 드라이브 사진 변환
                         let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
                         if (driveMatch) {
                             let m = driveMatch[0].match(/[-\w]{25,}/);
@@ -275,7 +278,6 @@
                             txt = txt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
                         }
 
-                        // 레이아웃 분리: "재료, 양념, 드레싱"은 우측으로 / 나머지는 하단으로
                         const sectionHtml = `
                             <div class="detail-section">
                                 <div class="detail-label">${d.cat || "-"}</div>
@@ -292,18 +294,18 @@
                         }
                     });
 
-                    // ★ 핵심 오류 수정: KOR 검색 시 엄격한 필터링 (엉뚱한 구글 사진 주소 매칭 차단)
-                    if (isCountrySearch) {
-                        const typeMatch = (i.type || "").toUpperCase().includes(safeKeyword.toUpperCase());
-                        const codeMatch = code.toUpperCase().includes(safeKeyword.toUpperCase());
+                    // ★ 신규 관리코드 필터링 로직 ★
+                    if (isCodeSearch) {
+                        const codeUpper = code.toUpperCase();
+                        const typeUpper = (i.type || "").toUpperCase();
+                        const kwUpper = safeKeyword.toUpperCase();
                         
-                        // 관리코드나 분류(배지)에 KOR이 명확히 들어있지 않다면 화면에 그리지 않고 건너뜀
-                        if (!typeMatch && !codeMatch) {
+                        // 관리코드나 분류 뱃지에 해당 영문 키워드가 정확히 포함되지 않으면 화면에 출력 안 함
+                        if (!codeUpper.includes(kwUpper) && !typeUpper.includes(kwUpper)) {
                             return; 
                         }
                     }
 
-                    // 썸네일 처리
                     let thumbHtml = `<div class="recipe-img-empty"><i class="fas fa-image text-xl mb-1"></i>NO IMG</div>`;
                     if (i.img && i.img.includes("http")) {
                         let src = i.img;
@@ -320,7 +322,6 @@
                                    </div>`;
                     }
 
-                    // HTML 생성
                     h += `
                         <div class="recipe-card" onclick="this.classList.toggle('open')">
                             <div class="recipe-card-head">
@@ -366,7 +367,7 @@
                     count++;
                 });
                 
-                area.innerHTML = count > 0 ? h : "<div class='loading-text'>검색 결과가 없습니다.</div>";
+                area.innerHTML = count > 0 ? h : "<div class='loading-text'>검색 결과가 없습니다.<br><span class='text-xs mt-2 text-slate-400'>(해당 분류의 관리코드가 부여된 레시피가 없습니다)</span></div>";
             }).catch(e => {
                 console.error(e);
                 area.innerHTML = "<div class='loading-text text-red-500'>데이터를 불러오는 중 오류가 발생했습니다.</div>";
