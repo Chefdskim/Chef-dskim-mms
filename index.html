@@ -218,8 +218,15 @@
             fetch(`${gasUrl}?action=recipe&keyword=${encodeURIComponent(keywordStr)}`)
             .then(r=>r.json())
             .then(l => {
+                // 1. KOR 등 국가코드 엄격 필터링 적용
+                const countryCodes = ['KOR', 'JAP', 'WST', 'CHN', 'SEA', 'ETC'];
+                let displayList = l;
+                if (countryCodes.includes(keywordStr.toUpperCase())) {
+                    displayList = l.filter(i => i.type && i.type.toUpperCase().includes(keywordStr.toUpperCase()));
+                }
+
                 let h = "";
-                l.forEach((i, idx) => {
+                displayList.forEach((i, idx) => {
                     let thumbHtml = `<div class="recipe-img-empty"><i class="fas fa-image text-xl mb-1"></i>NO IMG</div>`;
                     if (i.img && i.img.includes("http")) {
                         let src = i.img;
@@ -227,7 +234,7 @@
                         if (src.includes("drive.google.com")) { 
                             let m = src.match(/[-\w]{25,}/); 
                             if(m) {
-                                src = `https://lh3.googleusercontent.com/d/${m[0]}`; 
+                                src = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`; 
                                 link = `https://drive.google.com/file/d/${m[0]}/view`;
                             }
                         }
@@ -251,13 +258,13 @@
                         else if (cleanCat.includes("작성자")) { author = txt; isTopInfo = true; }
                         else if (cleanCat.includes("인분") || cleanCat.includes("수량")) { serving = txt; isTopInfo = true; }
                         
-                        if (isTopInfo) return; 
+                        if (isTopInfo) return;
 
                         let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
                         if (driveMatch) {
                             let m = driveMatch[0].match(/[-\w]{25,}/);
                             if (m) {
-                                let viewSrc = `https://lh3.googleusercontent.com/d/${m[0]}`;
+                                let viewSrc = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`;
                                 let orgLink = `https://drive.google.com/file/d/${m[0]}/view`;
                                 
                                 mainPhotoHtml = `
@@ -266,7 +273,6 @@
                                         <div class="bg-indigo-50 text-indigo-600 text-center text-xs font-bold py-6" style="display:none;">사진이 차단되었습니다.<br>클릭하여 원본을 열어주세요.</div>
                                     </div>
                                 `;
-                                
                                 txt = txt.replace(driveMatch[0], "").trim(); 
                                 if(txt === "") return; 
                             }
@@ -281,27 +287,13 @@
                             </div>
                         `;
 
-                        // 셰프님 지시사항: Step, 과정, 준비, 영양성분, 알레르기 등은 무조건 하단으로 분리
-                        let lowerCat = cleanCat.toLowerCase();
-                        let isBottomArea = lowerCat.includes("과정") || 
-                                           lowerCat.includes("준비") || 
-                                           lowerCat.includes("조리") || 
-                                           lowerCat.includes("만든") || 
-                                           lowerCat.includes("방법") || 
-                                           lowerCat.includes("순서") || 
-                                           lowerCat.includes("step") || 
-                                           lowerCat.includes("스텝") || 
-                                           lowerCat.includes("영양") || 
-                                           lowerCat.includes("알레르") || 
-                                           lowerCat.includes("알러지") || 
-                                           lowerCat.includes("팁") || 
-                                           lowerCat.includes("tip");
-
-                        if (!isBottomArea) {
-                            // 주재료, 부재료, 양념, 드레싱 등 (위의 하단 조건에 안 걸리는 항목들)
+                        // 2. 우측/하단 레이아웃 분리 조건 완벽 적용
+                        let isMaterial = cleanCat.includes("재료") || cleanCat.includes("양념") || cleanCat.includes("드레싱");
+                        
+                        if (isMaterial) {
                             materialsStr += sectionHtml;
                         } else {
-                            // 준비과정, Step1~, 영양성분, 알레르기 정보 등
+                            // Step, 준비과정, 영양성분, 알레르기 등 기타 모든 항목은 하단으로 이동
                             processStr += sectionHtml;
                         }
                     });
@@ -349,7 +341,7 @@
                         </div>
                     `;
                 });
-                area.innerHTML = l.length ? h : "<div class='loading-text'>검색 결과가 없습니다.</div>";
+                area.innerHTML = displayList.length ? h : "<div class='loading-text'>검색 결과가 없습니다.</div>";
             }).catch(e => {
                 area.innerHTML = "<div class='loading-text text-red-500'>데이터를 불러오는 중 오류가 발생했습니다.</div>";
             });
