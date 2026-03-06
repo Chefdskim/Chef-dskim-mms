@@ -53,7 +53,7 @@
         .recipe-title { font-size: 16px; font-weight: 900; color: #1e293b; }
         .recipe-badge { display: inline-block; background: #eff6ff; color: #2563eb; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; border: 1px solid #bfdbfe; margin-left: 10px; vertical-align: middle; }
         .recipe-card-body { display: none; padding: 0 16px 16px 16px; background: white; }
-        .recipe-card.open .recipe-card-body { display: block; border-top: 1px dashed #e2e8f0; padding-top: 16px; }
+        .recipe-card.open .recipe-card-body { display: block; border-top: 1px dashed #e2e8f0; padding-top: 16px; position: relative; }
         
         .detail-section { margin-bottom: 12px; }
         .detail-label { font-size: 11px; font-weight: 900; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; border-left: 3px solid var(--primary); padding-left: 6px; }
@@ -205,6 +205,15 @@
             }); 
         }
 
+        /* 이메일 공유 기능 추가 */
+        function shareEmail(encName, encCode) {
+            const name = decodeURIComponent(encName);
+            const code = decodeURIComponent(encCode);
+            const subject = encodeURIComponent(`[레시피 공유] ${name}`);
+            const body = encodeURIComponent(`셰프님, 아래 레시피 정보를 공유합니다.\n\n▶ 요리명: ${name}\n▶ 관리코드: ${code}\n\n* Chef D.S. Kim 통합 관리 시스템에서 상세 내용을 확인해 주십시오.`);
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        }
+
         document.getElementById('recipeInput').addEventListener('keypress', e => { 
             if(e.key==='Enter') loadRecipe(document.getElementById('recipeInput').value); 
         });
@@ -300,7 +309,6 @@
                         const typeUpper = (i.type || "").toUpperCase();
                         const kwUpper = safeKeyword.toUpperCase();
                         
-                        // 관리코드나 분류 뱃지에 해당 영문 키워드가 정확히 포함되지 않으면 화면에 출력 안 함
                         if (!codeUpper.includes(kwUpper) && !typeUpper.includes(kwUpper)) {
                             return; 
                         }
@@ -322,6 +330,10 @@
                                    </div>`;
                     }
 
+                    // 공유 버튼 추가 (요약 정보 상자 우측 상단)
+                    let safeName = encodeURIComponent(i.name || "이름없음");
+                    let safeCode = encodeURIComponent(code);
+
                     h += `
                         <div class="recipe-card" onclick="this.classList.toggle('open')">
                             <div class="recipe-card-head">
@@ -336,8 +348,12 @@
                                 
                                 <div class="flex gap-4 items-start mb-6 pb-6 border-b border-dashed border-slate-200">
                                     ${thumbHtml}
-                                    <div class="flex-1 bg-white border border-slate-100 shadow-sm rounded-xl p-3">
-                                        <div class="info-grid">
+                                    <div class="flex-1 bg-white border border-slate-100 shadow-sm rounded-xl p-3 relative">
+                                        <button onclick="shareEmail('${safeName}', '${safeCode}'); event.stopPropagation();" class="absolute top-3 right-3 text-indigo-500 bg-indigo-50 px-2 py-1 rounded text-xs font-bold border border-indigo-100 active:bg-indigo-100">
+                                            <i class="fas fa-envelope mr-1"></i>메일
+                                        </button>
+                                        
+                                        <div class="info-grid pr-12">
                                             <div class="info-label">📋 관리코드</div>
                                             <div class="info-value text-indigo-600">${code}</div>
                                             <div class="info-label">📅 수정일</div>
