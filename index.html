@@ -247,14 +247,12 @@
                     let processStr = "";   
                     let mainPhotoHtml = ""; 
                     
-                    // 메일 본문용 텍스트 변수
                     let emailContentRaw = `[레시피 상세 정보]\n\n`;
                     emailContentRaw += `▶ 요리명: ${i.name || "이름없음"}\n`;
                     emailContentRaw += `▶ 분류: ${i.type || "-"}\n`;
 
                     const safeDetails = i.details || [];
                     
-                    // 1차 순회: 관리코드, 인분수 등 기본 정보 먼저 추출
                     safeDetails.forEach(d => {
                         let txt = d.text || "";
                         let cleanCat = (d.cat || "").replace(/\s/g, ""); 
@@ -264,11 +262,9 @@
                         else if (cleanCat.includes("인분") || cleanCat.includes("수량")) { serving = txt; }
                     });
 
-                    // 메일 본문에 기본 정보 이어 붙이기
                     emailContentRaw += `▶ 관리코드: ${code}\n▶ 수정일: ${date}\n▶ 작성자: ${author}\n▶ 인분수: ${serving}\n\n`;
                     emailContentRaw += `============================\n\n`;
 
-                    // 2차 순회: 화면용 HTML 생성 및 메일용 상세 텍스트 생성
                     safeDetails.forEach(d => {
                         let txt = d.text || "";
                         let cleanCat = (d.cat || "").replace(/\s/g, ""); 
@@ -280,9 +276,12 @@
                         
                         if (isTopInfo) return; 
 
-                        // 화면 출력용 HTML 변환 (이미지 링크)
                         let htmlTxt = txt;
                         let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
+                        
+                        // ★ 핵심 수정: 메일 본문에 구글 드라이브 링크 주소를 그대로 살려둠 (수신자가 클릭해서 볼 수 있도록)
+                        let emailTxt = txt;
+                        
                         if (driveMatch) {
                             let m = driveMatch[0].match(/[-\w]{25,}/);
                             if (m) {
@@ -296,18 +295,19 @@
                                     </div>
                                 `;
                                 htmlTxt = htmlTxt.replace(driveMatch[0], "").trim(); 
+                                
+                                // 이메일용 텍스트에는 클릭할 수 있는 원본 링크 안내 문구 추가
+                                emailTxt = txt.replace(driveMatch[0], `\n▶ 원본 사진 보기: ${orgLink}\n`).trim();
                             }
                         } else if(htmlTxt.includes("http")) {
                             htmlTxt = htmlTxt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
                         }
 
-                        // 메일 본문용 텍스트 변환 (지저분한 링크는 지우기)
-                        let emailTxt = txt.replace(/https:\/\/drive\.google\.com[^\s"']+/g, "[사진 첨부됨]").trim();
                         if(emailTxt) {
                             emailContentRaw += `[ ${d.cat || "-"} ]\n${emailTxt}\n\n`;
                         }
 
-                        if(htmlTxt === "") return; // 화면에서 보여줄 텍스트가 없으면 건너뜀
+                        if(htmlTxt === "") return; 
 
                         const sectionHtml = `
                             <div class="detail-section">
@@ -325,7 +325,6 @@
                         }
                     });
 
-                    // 신규 관리코드 필터링
                     if (isCodeSearch) {
                         const codeUpper = code.toUpperCase();
                         const typeUpper = (i.type || "").toUpperCase();
@@ -335,7 +334,6 @@
                         }
                     }
 
-                    // 썸네일
                     let thumbHtml = `<div class="recipe-img-empty"><i class="fas fa-image text-xl mb-1"></i>NO IMG</div>`;
                     if (i.img && i.img.includes("http")) {
                         let src = i.img;
@@ -352,7 +350,6 @@
                                    </div>`;
                     }
 
-                    // 이메일 공유 버튼용 데이터 인코딩
                     let safeSubject = encodeURIComponent(`[레시피 공유] ${i.name || "이름없음"}`).replace(/'/g, "%27");
                     let safeBody = encodeURIComponent(emailContentRaw).replace(/'/g, "%27");
 
