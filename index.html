@@ -205,13 +205,9 @@
             }); 
         }
 
-        /* 이메일 공유 기능 추가 */
-        function shareEmail(encName, encCode) {
-            const name = decodeURIComponent(encName);
-            const code = decodeURIComponent(encCode);
-            const subject = encodeURIComponent(`[레시피 공유] ${name}`);
-            const body = encodeURIComponent(`셰프님, 아래 레시피 정보를 공유합니다.\n\n▶ 요리명: ${name}\n▶ 관리코드: ${code}\n\n* Chef D.S. Kim 통합 관리 시스템에서 상세 내용을 확인해 주십시오.`);
-            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        /* 메일 전송 함수 */
+        function shareEmail(encSubject, encBody) {
+            window.location.href = `mailto:?subject=${encSubject}&body=${encBody}`;
         }
 
         document.getElementById('recipeInput').addEventListener('keypress', e => { 
@@ -222,7 +218,6 @@
             const area = document.getElementById('recipe-list');
             area.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl mb-2 text-indigo-500'></i><br>데이터를 불러오는 중입니다...</div>";
             
-            // 버튼 활성화 처리
             document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
             try {
                 if(window.event && window.event.target && window.event.target.classList.contains('tag-btn')) {
@@ -238,7 +233,6 @@
                 let h = "";
                 let count = 0;
                 
-                // 신규 분류코드 기반 엄격 검색 리스트 (대소문자 무관)
                 const codeSegments = [
                     'KOR', 'JAP', 'WST', 'CHN', 'SEA', 'ETC', 
                     'MEAT', 'POULTRY', 'SEAFOOD', 'VEG',
@@ -252,21 +246,42 @@
                     let materialsStr = ""; 
                     let processStr = "";   
                     let mainPhotoHtml = ""; 
+                    
+                    // 메일 본문용 텍스트 변수
+                    let emailContentRaw = `[레시피 상세 정보]\n\n`;
+                    emailContentRaw += `▶ 요리명: ${i.name || "이름없음"}\n`;
+                    emailContentRaw += `▶ 분류: ${i.type || "-"}\n`;
 
                     const safeDetails = i.details || [];
                     
+                    // 1차 순회: 관리코드, 인분수 등 기본 정보 먼저 추출
+                    safeDetails.forEach(d => {
+                        let txt = d.text || "";
+                        let cleanCat = (d.cat || "").replace(/\s/g, ""); 
+                        if (cleanCat.includes("관리코드")) { code = txt; }
+                        else if (cleanCat.includes("수정일") || cleanCat.includes("날짜")) { date = txt; }
+                        else if (cleanCat.includes("작성자")) { author = txt; }
+                        else if (cleanCat.includes("인분") || cleanCat.includes("수량")) { serving = txt; }
+                    });
+
+                    // 메일 본문에 기본 정보 이어 붙이기
+                    emailContentRaw += `▶ 관리코드: ${code}\n▶ 수정일: ${date}\n▶ 작성자: ${author}\n▶ 인분수: ${serving}\n\n`;
+                    emailContentRaw += `============================\n\n`;
+
+                    // 2차 순회: 화면용 HTML 생성 및 메일용 상세 텍스트 생성
                     safeDetails.forEach(d => {
                         let txt = d.text || "";
                         let cleanCat = (d.cat || "").replace(/\s/g, ""); 
                         
                         let isTopInfo = false;
-                        if (cleanCat.includes("관리코드")) { code = txt; isTopInfo = true; }
-                        else if (cleanCat.includes("수정일") || cleanCat.includes("날짜")) { date = txt; isTopInfo = true; }
-                        else if (cleanCat.includes("작성자")) { author = txt; isTopInfo = true; }
-                        else if (cleanCat.includes("인분") || cleanCat.includes("수량")) { serving = txt; isTopInfo = true; }
+                        if (cleanCat.includes("관리코드") || cleanCat.includes("수정일") || cleanCat.includes("날짜") || cleanCat.includes("작성자") || cleanCat.includes("인분") || cleanCat.includes("수량")) {
+                            isTopInfo = true;
+                        }
                         
                         if (isTopInfo) return; 
 
+                        // 화면 출력용 HTML 변환 (이미지 링크)
+                        let htmlTxt = txt;
                         let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
                         if (driveMatch) {
                             let m = driveMatch[0].match(/[-\w]{25,}/);
@@ -280,17 +295,24 @@
                                         <div class="bg-indigo-50 text-indigo-600 text-center text-xs font-bold py-6" style="display:none;">사진이 차단되었습니다.<br>클릭하여 원본을 열어주세요.</div>
                                     </div>
                                 `;
-                                txt = txt.replace(driveMatch[0], "").trim(); 
-                                if(txt === "") return; 
+                                htmlTxt = htmlTxt.replace(driveMatch[0], "").trim(); 
                             }
-                        } else if(txt.includes("http")) {
-                            txt = txt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
+                        } else if(htmlTxt.includes("http")) {
+                            htmlTxt = htmlTxt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
                         }
+
+                        // 메일 본문용 텍스트 변환 (지저분한 링크는 지우기)
+                        let emailTxt = txt.replace(/https:\/\/drive\.google\.com[^\s"']+/g, "[사진 첨부됨]").trim();
+                        if(emailTxt) {
+                            emailContentRaw += `[ ${d.cat || "-"} ]\n${emailTxt}\n\n`;
+                        }
+
+                        if(htmlTxt === "") return; // 화면에서 보여줄 텍스트가 없으면 건너뜀
 
                         const sectionHtml = `
                             <div class="detail-section">
                                 <div class="detail-label">${d.cat || "-"}</div>
-                                <div class="detail-content-box">${txt}</div>
+                                <div class="detail-content-box">${htmlTxt}</div>
                             </div>
                         `;
 
@@ -303,17 +325,17 @@
                         }
                     });
 
-                    // ★ 신규 관리코드 필터링 로직 ★
+                    // 신규 관리코드 필터링
                     if (isCodeSearch) {
                         const codeUpper = code.toUpperCase();
                         const typeUpper = (i.type || "").toUpperCase();
                         const kwUpper = safeKeyword.toUpperCase();
-                        
                         if (!codeUpper.includes(kwUpper) && !typeUpper.includes(kwUpper)) {
                             return; 
                         }
                     }
 
+                    // 썸네일
                     let thumbHtml = `<div class="recipe-img-empty"><i class="fas fa-image text-xl mb-1"></i>NO IMG</div>`;
                     if (i.img && i.img.includes("http")) {
                         let src = i.img;
@@ -330,9 +352,9 @@
                                    </div>`;
                     }
 
-                    // 공유 버튼 추가 (요약 정보 상자 우측 상단)
-                    let safeName = encodeURIComponent(i.name || "이름없음");
-                    let safeCode = encodeURIComponent(code);
+                    // 이메일 공유 버튼용 데이터 인코딩
+                    let safeSubject = encodeURIComponent(`[레시피 공유] ${i.name || "이름없음"}`).replace(/'/g, "%27");
+                    let safeBody = encodeURIComponent(emailContentRaw).replace(/'/g, "%27");
 
                     h += `
                         <div class="recipe-card" onclick="this.classList.toggle('open')">
@@ -349,7 +371,7 @@
                                 <div class="flex gap-4 items-start mb-6 pb-6 border-b border-dashed border-slate-200">
                                     ${thumbHtml}
                                     <div class="flex-1 bg-white border border-slate-100 shadow-sm rounded-xl p-3 relative">
-                                        <button onclick="shareEmail('${safeName}', '${safeCode}'); event.stopPropagation();" class="absolute top-3 right-3 text-indigo-500 bg-indigo-50 px-2 py-1 rounded text-xs font-bold border border-indigo-100 active:bg-indigo-100">
+                                        <button onclick="shareEmail('${safeSubject}', '${safeBody}'); event.stopPropagation();" class="absolute top-3 right-3 text-indigo-500 bg-indigo-50 px-2 py-1 rounded text-xs font-bold border border-indigo-100 active:bg-indigo-100">
                                             <i class="fas fa-envelope mr-1"></i>메일
                                         </button>
                                         
