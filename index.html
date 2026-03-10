@@ -115,14 +115,29 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 <div class="tag-btn" onclick="loadRecipe('App')">전채(App)</div>
 <div class="tag-btn" onclick="loadRecipe('Side')">사이드(Side)</div>
 <div class="tag-btn" onclick="loadRecipe('Sauce')">소스(Sauce)</div>
+<div class="tag-btn" onclick="loadRecipe('Dessert')">디저트(Dessert)</div>
+<div class="tag-btn" onclick="loadRecipe('Beverage')">음료(Beverage)</div>
 </div><div class="cat-title">조리법별 (Method)</div>
 <div class="tag-group">
-<div class="tag-btn" onclick="loadRecipe('Steam')">찜(Steam)</div>
-<div class="tag-btn" onclick="loadRecipe('Boil')">데침/끓임(Boil)</div>
-<div class="tag-btn" onclick="loadRecipe('Smoke')">훈연(Smoke)</div>
-<div class="tag-btn" onclick="loadRecipe('Grill')">구이(Grill)</div>
-<div class="tag-btn" onclick="loadRecipe('Cold')">무침/절임(Cold)</div>
-<div class="tag-btn" onclick="loadRecipe('Fry')">튀김(Fry)</div>
+<div class="tag-btn" onclick="loadRecipe('밥')">밥</div>
+<div class="tag-btn" onclick="loadRecipe('죽')">죽</div>
+<div class="tag-btn" onclick="loadRecipe('면')">국수/수제비</div>
+<div class="tag-btn" onclick="loadRecipe('만두')">만두/떡</div>
+<div class="tag-btn" onclick="loadRecipe('국')">국/탕</div>
+<div class="tag-btn" onclick="loadRecipe('찌개')">찌개/전골</div>
+<div class="tag-btn" onclick="loadRecipe('김치')">김치</div>
+<div class="tag-btn" onclick="loadRecipe('나물')">나물</div>
+<div class="tag-btn" onclick="loadRecipe('구이')">구이</div>
+<div class="tag-btn" onclick="loadRecipe('조림')">조림/지짐</div>
+<div class="tag-btn" onclick="loadRecipe('볶음')">볶음/초</div>
+<div class="tag-btn" onclick="loadRecipe('전')">전/적</div>
+<div class="tag-btn" onclick="loadRecipe('찜')">찜/선</div>
+<div class="tag-btn" onclick="loadRecipe('회')">회</div>
+<div class="tag-btn" onclick="loadRecipe('건조')">건조/훈연</div>
+<div class="tag-btn" onclick="loadRecipe('수육')">순대/편육/족편/수육</div>
+<div class="tag-btn" onclick="loadRecipe('장아찌')">장아찌</div>
+<div class="tag-btn" onclick="loadRecipe('젓갈')">젓갈/식해</div>
+<div class="tag-btn" onclick="loadRecipe('장')">장</div>
 </div></div><div id="recipe-list" class="recipe-list-area flex-1 bg-slate-50">
 <div class="loading-text">위에서 카테고리를 선택하거나<br>검색어를 입력하세요.</div>
 </div></div><div id="workspace-010" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>자산재고</span></div></div><div id="content-010" class="module-content-area"></div></div>
@@ -271,7 +286,7 @@ currentRecipesForEmail = [];
 const codeSegments = [
 'KOR', 'JAP', 'WST', 'CHN', 'SEA', 'ETC',
 'MEAT', 'POULTRY', 'SEAFOOD', 'VEG',
-'MAIN', 'APP', 'SIDE', 'SAUCE',
+'MAIN', 'APP', 'SIDE', 'SAUCE', 'DESSERT', 'BEVERAGE',
 'STEAM', 'BOIL', 'SMOKE', 'GRILL', 'COLD', 'FRY'
 ];const isCodeSearch = codeSegments.includes(safeKeyword.toUpperCase());
 l.forEach((i) => {let code = "-", date = "-", author = "-", serving = "-";
