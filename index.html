@@ -70,6 +70,8 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 .btn-send { background: var(--primary); color: white; border: none; }
 /* 공통 데이터 리스트 렌더링 영역 */
 .module-content-area { padding: 15px; flex: 1; overflow-y: auto; background: var(--bg); }
+/* 공통 모달 사진 스타일 추가 */
+.generic-card-img { max-height: 400px; object-fit: contain; margin-top: 10px; border-radius: 12px; border: 1px solid var(--border); box-shadow: inner 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; }
 </style>
 </head>
 <body>
@@ -215,6 +217,7 @@ b.classList.remove('active');
 if(b.querySelector('.nav-text').innerText === txt) b.classList.add('active');
 });}
 
+/* --- 공통 모듈 렌더링 로직 (사진 바로보기 기능 강화) --- */
 function loadOtherModules(code) {
 let action = ""; let contentDiv = document.getElementById("content-" + code);
 contentDiv.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2'></i><br>데이터를 불러오는 중입니다...</div>";
@@ -232,23 +235,60 @@ fetch(`${gasUrl}?action=${action}`)
 let h = "";
 if(!data || data.length === 0) { contentDiv.innerHTML = "<div class='loading-text'>등록된 데이터가 없습니다.</div>"; return; }
 data.forEach(item => {
-h += `<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-3">`;
+h += `<div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-4 card-item">`;
 for(let key in item) {
-if(key === 'row') continue;
+if(key === 'row' || key.toLowerCase().includes('hidden')) continue; // 불필요 및 숨김 항목 제외
 let val = item[key] || "-";
-if(typeof val === 'string' && val.startsWith('http')) {
-val = `<a href="${val}" target="_blank" class="text-blue-500 underline font-bold truncate block max-w-full">링크 열기</a>`;
+let formattedVal = val;
+let isImage = false;
+
+// ★ 셰프님 지시사항: 링크가 사진이면 화면에 바로 띄움 (구글 드라이브 포함) ★
+if(typeof val === 'string' && val.trim().startsWith('http')) {
+let trimmedUrl = val.trim();
+let driveIdMatch = trimmedUrl.match(/https:\/\/drive\.google\.com[^\s"']+[/-]([-\w]{25,})/);
+const imgRegex = /\.(jpeg|jpg|gif|png|webp|svg)($|\?)/i;
+let isDirectImage = imgRegex.test(trimmedUrl);
+
+if (driveIdMatch) {
+// 구글 드라이브 사진 링크 처리
+let id = driveIdMatch[1];
+let src = `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
+let orgLink = `https://drive.google.com/file/d/${id}/view`;
+formattedVal = `<img src="${src}" class="generic-card-img" onclick="window.open('${orgLink}', '_blank')" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+<div class="bg-indigo-50 text-indigo-600 text-center text-xs font-bold py-4 mt-2 rounded-lg" style="display:none;">사진 로딩 실패.<br>클릭하여 원본을 열어주세요.</div>`;
+isImage = true;
+} else if (isDirectImage) {
+// 일반 사진 링크 처리
+formattedVal = `<img src="${trimmedUrl}" class="generic-card-img" onclick="window.open('${trimmedUrl}', '_blank')" onerror="this.parentElement.innerHTML='<div class=\\'text-xs text-red-500 font-bold p-2\\'>이미지 로딩 실패</div>'">`;
+isImage = true;
+} else {
+// 사진이 아닌 일반 링크 처리
+formattedVal = `<a href="${trimmedUrl}" target="_blank" class="text-blue-500 underline font-bold truncate block max-w-full">링크 열기</a>`;
 }
-h += `<div class="flex justify-between items-start border-b border-slate-100 py-2 last:border-0">
+}
+
+// 레이아웃 조건부 처리: 사진인 경우 텍스트 박스 형태를 다르게 가져감
+if(isImage) {
+h += `<div class="border-b border-slate-100 py-3 last:border-0">
+<div class="text-xs font-bold text-indigo-400 uppercase mb-2">${key}</div>
+<div class="text-sm font-bold text-slate-700 break-words flex-1">${formattedVal}</div>
+</div>`;
+} else {
+// 기존 텍스트 레이아웃
+h += `<div class="flex justify-between items-start border-b border-slate-100 py-3 last:border-0">
 <span class="text-xs font-bold text-indigo-400 uppercase w-20 shrink-0">${key}</span>
-<span class="text-sm font-bold text-slate-700 text-right break-words flex-1 ml-4">${val}</span>
-</div>`;}
+<span class="text-sm font-bold text-slate-700 text-right break-words flex-1 ml-4">${formattedVal}</span>
+</div>`;
+}
+}
 h += `</div>`;});
 contentDiv.innerHTML = h;
 }).catch(e => {
+console.error(e);
 contentDiv.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.<br>구글 스크립트 연결을 확인하세요.</div>";
 });}
 
+/* --- 이메일 모달 기능 --- */
 function openEmailModal(index) {
 selectedEmailRecipe = currentRecipesForEmail[index];
 document.getElementById('modal-recipe-name').innerText = "요리명: " + selectedEmailRecipe.name;
@@ -312,6 +352,7 @@ btn.innerHTML = '전송하기'; btn.disabled = false;
 alert('오류가 발생했습니다.');
 });}
 
+/* --- 레시피 검색 기능 (기존 유지) --- */
 document.getElementById('recipeInput').addEventListener('keypress', e => {
 if(e.key==='Enter') loadRecipe(document.getElementById('recipeInput').value);
 });
@@ -349,21 +390,18 @@ safeDetails.forEach(d => {
 let txt = d.text || ""; let cleanCat = (d.cat || "").replace(/\s/g, "");
 let isTopInfo = false;
 
-// 1. 기본 상단 정보 제외
 if (cleanCat.includes("관리코드") || cleanCat.includes("수정일") || cleanCat.includes("날짜") || cleanCat.includes("작성자") || cleanCat.includes("인분") || cleanCat.includes("수량")) { 
 isTopInfo = true; 
 }
 
-// 2. 이 항목이 '완성사진'인지 확인 (화면 출력은 안 할 거지만, 링크 추출은 해야 함)
 let isMainPhotoRow = cleanCat.includes("완성사진") || cleanCat.includes("완성 사진") || cleanCat.includes("이미지");
 
 if (!isTopInfo && !isMainPhotoRow) { recipeDataForEmail.details.push({ cat: d.cat || "-", text: txt }); }
-if (isTopInfo) return; // 상단 정보면 스킵
+if (isTopInfo) return;
 
 let htmlTxt = txt;
 let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
 
-// 3. 사진 추출 (완성사진 행이든 다른 곳이든 구글 드라이브 링크가 있으면 큰 사진으로 뺌)
 if (driveMatch) {
 let m = driveMatch[0].match(/[-\w]{25,}/);
 if (m) {
@@ -375,12 +413,10 @@ htmlTxt = htmlTxt.replace(driveMatch[0], "").trim();
 htmlTxt = htmlTxt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
 }
 
-// 4. 추출 후 텍스트가 없거나, '완성사진' 행인 경우 빈 텍스트 박스를 그리지 않고 즉시 종료!
 if(htmlTxt === "" || isMainPhotoRow) return;
 
 const sectionHtml = `<div class="detail-section"><div class="detail-label">${d.cat || "-"}</div><div class="detail-content-box">${htmlTxt}</div></div>`;
 
-// 5. 육수, 조미료를 주재료 옆으로 이동 배치
 let isMaterial = cleanCat.includes("재료") || cleanCat.includes("양념") || cleanCat.includes("드레싱") || cleanCat.includes("육수") || cleanCat.includes("조미료");
 
 if (isMaterial) { materialsStr += sectionHtml; } else { processStr += sectionHtml; }
