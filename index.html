@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -160,7 +160,7 @@ textarea.modal-input { resize: none; }
 <div class="app-header">
 <div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>연구노트</span></div>
 <button onclick="openRndModal()" class="text-indigo-600 font-bold text-sm bg-indigo-50 px-4 py-2 rounded-lg border border-indigo-100"><i class="fas fa-pen mr-1"></i>작성</button>
-</div><div id="content-400" class="module-content-area"></div>
+</div><div id="content-400" class="module-content-area bg-slate-50"></div>
 </div>
 
 <div id="workspace-010" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>자산재고</span></div></div><div id="content-010" class="module-content-area"></div></div>
@@ -200,6 +200,8 @@ textarea.modal-input { resize: none; }
 <textarea id="rnd-details" class="modal-input" style="height: 70px;" placeholder="과정 설명 및 구글 드라이브 사진 링크 입력 (여러 장 가능)"></textarea>
 <div class="text-xs font-bold text-indigo-400 mb-1 ml-1">결과 및 보완점 (D열)</div>
 <textarea id="rnd-results" class="modal-input" style="height: 70px;" placeholder="테스트 결과 내용 입력"></textarea>
+<div class="text-xs font-bold text-indigo-400 mb-1 ml-1">비고 (E열)</div>
+<input type="text" id="rnd-note" class="modal-input" placeholder="기타 참고사항 입력">
 <div class="text-xs font-bold text-indigo-400 mb-1 ml-1">완성 사진 (F열)</div>
 <input type="text" id="rnd-photo" class="modal-input mb-4" placeholder="완성 사진 구글 드라이브 링크 입력">
 <div class="modal-btn-group">
@@ -241,7 +243,43 @@ b.classList.remove('active');
 if(b.querySelector('.nav-text').innerText === txt) b.classList.add('active');
 });}
 
-/* --- 공통 데이터 렌더링 (다중 사진 추출 및 1/3 그리드 적용) --- */
+/* --- 이미지 링크 자동 추출 및 정제 엔진 --- */
+function extractImages(text) {
+  let extracted = [];
+  let txt = (text || "").toString().trim();
+  if (txt === "-") txt = "";
+  
+  // 구글 드라이브 일괄 추출
+  const driveRegex = /https:\/\/drive\.google\.com[^\s"']+/g;
+  let driveMatches = txt.match(driveRegex);
+  if (driveMatches) {
+    driveMatches.forEach(url => {
+      let m = url.match(/[-\w]{25,}/);
+      if (m) {
+        extracted.push({src: `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`, link: `https://drive.google.com/file/d/${m[0]}/view`});
+        txt = txt.replace(url, "").trim();
+      }
+    });
+  }
+  
+  // 일반 사진 일괄 추출
+  const imgRegex = /(https?:\/\/[^\s"']+\.(?:jpeg|jpg|gif|png|webp|svg)(?:\?[^\s"']*)?)/gi;
+  let directMatches = txt.match(imgRegex);
+  if (directMatches) {
+    directMatches.forEach(url => {
+      extracted.push({src: url, link: url});
+      txt = txt.replace(url, "").trim();
+    });
+  }
+  
+  // 일반 인터넷 링크 변환
+  if(txt && txt.includes("http") && !txt.includes("<a href")) {
+     txt = txt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
+  }
+  return { text: txt || "-", images: extracted };
+}
+
+/* --- 공통 데이터 렌더링 (연구노트는 아코디언 리스트로 특별 처리) --- */
 function loadOtherModules(code) {
 let action = ""; let contentDiv = document.getElementById("content-" + code);
 contentDiv.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2'></i><br>데이터를 불러오는 중입니다...</div>";
@@ -258,87 +296,88 @@ fetch(`${gasUrl}?action=${action}`)
 .then(data => {
 let h = "";
 if(!data || data.length === 0) { contentDiv.innerHTML = "<div class='loading-text'>등록된 데이터가 없습니다.</div>"; return; }
-data.forEach(item => {
-h += `<div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-4 card-item">`;
-for(let key in item) {
-if(key === 'row' || key.toLowerCase().includes('hidden')) continue;
-let val = item[key] || "";
-let formattedVal = val.toString().trim();
-if(formattedVal === "-") formattedVal = "";
-let imgHtml = "";
-let extractedImages = [];
 
-// 1. 구글 드라이브 링크 전체 추출 (여러 개가 있어도 다 뽑아냄)
-const driveRegex = /https:\/\/drive\.google\.com[^\s"']+/g;
-let driveMatches = formattedVal.match(driveRegex);
-if (driveMatches) {
-  driveMatches.forEach(url => {
-    let m = url.match(/[-\w]{25,}/);
-    if (m) {
-      let viewSrc = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`;
-      let orgLink = `https://drive.google.com/file/d/${m[0]}/view`;
-      extractedImages.push({src: viewSrc, link: orgLink});
-      // 뽑아낸 링크는 글씨에서 삭제
-      formattedVal = formattedVal.replace(url, "").trim();
+// ★ 연구노트(400) 전용 리스트 아코디언 렌더러 ★
+if(code === '400') {
+  data.forEach((item) => {
+    let topic = item["연구 주제"] || "제목 없음";
+    let dateCount = item["테스트 날짜/횟수"] || "-";
+    
+    let detailsData = extractImages(item["상세내용 및 과정 사진"]);
+    let resultsData = extractImages(item["결과 및 보완점"]);
+    let noteData = extractImages(item["비고"]);
+    let finalPhotoData = extractImages(item["완성 사진"]);
+
+    // 상세 내용 및 과정 사진 (1/4 크기로 여러 장 그리드 나열)
+    let detailsHtml = `<div class="detail-section"><div class="detail-label">상세내용 및 과정 사진</div><div class="detail-content-box whitespace-pre-wrap">${detailsData.text !== "-" ? detailsData.text : ""}`;
+    if(detailsData.images.length > 0) {
+        detailsHtml += `<div class="grid grid-cols-4 gap-2 mt-3">`;
+        detailsData.images.forEach(img => {
+            detailsHtml += `<div class="w-full aspect-square rounded-lg overflow-hidden border border-slate-200 shadow-sm cursor-pointer" onclick="window.open('${img.link}', '_blank')"><img src="${img.src}" class="w-full h-full object-cover" onerror="this.style.display='none';"></div>`;
+        });
+        detailsHtml += `</div>`;
     }
+    detailsHtml += `</div></div>`;
+
+    // 결과 및 보완점
+    let resultsHtml = `<div class="detail-section"><div class="detail-label">결과 및 보완점</div><div class="detail-content-box whitespace-pre-wrap">${resultsData.text}</div></div>`;
+    
+    // 비고
+    let noteHtml = "";
+    if(noteData.text !== "-" || noteData.images.length > 0) {
+        noteHtml = `<div class="detail-section"><div class="detail-label">비고</div><div class="detail-content-box whitespace-pre-wrap">${noteData.text}</div></div>`;
+    }
+
+    // 완성 사진 (크게 1장 출력)
+    let finalPhotoHtml = "";
+    if(finalPhotoData.images.length > 0) {
+        finalPhotoHtml = `<div class="detail-section"><div class="detail-label">완성 사진</div>`;
+        finalPhotoData.images.forEach(img => {
+            finalPhotoHtml += `<img src="${img.src}" class="generic-card-img w-full mt-2" onclick="window.open('${img.link}', '_blank')" onerror="this.style.display='none';">`;
+        });
+        finalPhotoHtml += `</div>`;
+    }
+
+    h += `<div class="recipe-card" onclick="this.classList.toggle('open')">
+            <div class="recipe-card-head">
+                <div class="flex-1 pr-4">
+                  <div class="recipe-title mb-1">${topic}</div>
+                  <div class="text-xs font-bold text-slate-400"><i class="fas fa-clock mr-1"></i>${dateCount}</div>
+                </div>
+                <i class="fas fa-chevron-down text-slate-300"></i>
+            </div>
+            <div class="recipe-card-body" onclick="event.stopPropagation()">
+                ${detailsHtml}
+                ${resultsHtml}
+                ${noteHtml}
+                ${finalPhotoHtml}
+            </div>
+          </div>`;
+  });
+} 
+// 기타 공통 모듈 렌더러
+else {
+  data.forEach(item => {
+    h += `<div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-4 card-item">`;
+    for(let key in item) {
+      if(key === 'row' || key.toLowerCase().includes('hidden')) continue;
+      let fieldData = extractImages(item[key]);
+      
+      let imgHtml = "";
+      if (fieldData.images.length > 0) {
+        imgHtml = `<img src="${fieldData.images[0].src}" class="generic-card-img w-full mt-3" onclick="window.open('${fieldData.images[0].link}', '_blank')" onerror="this.style.display='none';">`;
+      }
+      
+      let isLongText = fieldData.text.length > 25 || fieldData.text.includes('\n');
+      if (fieldData.images.length > 0 || isLongText) {
+        h += `<div class="border-b border-slate-100 py-3 last:border-0"><div class="text-xs font-bold text-indigo-400 uppercase mb-2">${key}</div>${fieldData.text !== "-" ? `<div class="text-sm font-bold text-slate-700 whitespace-pre-wrap">${fieldData.text}</div>` : ""}${imgHtml}</div>`;
+      } else {
+        h += `<div class="flex justify-between items-start border-b border-slate-100 py-3 last:border-0"><span class="text-xs font-bold text-indigo-400 uppercase w-20 shrink-0">${key}</span><span class="text-sm font-bold text-slate-700 text-right break-words flex-1 ml-4 whitespace-pre-wrap">${fieldData.text}</span></div>`;
+      }
+    }
+    h += `</div>`;
   });
 }
-
-// 2. 일반 이미지 링크 전체 추출
-const imgRegex = /(https?:\/\/[^\s"']+\.(?:jpeg|jpg|gif|png|webp|svg)(?:\?[^\s"']*)?)/gi;
-let directMatches = formattedVal.match(imgRegex);
-if (directMatches) {
-  directMatches.forEach(url => {
-    extractedImages.push({src: url, link: url});
-    formattedVal = formattedVal.replace(url, "").trim();
-  });
-}
-
-// 3. 추출된 사진 렌더링 로직 (과정 사진 vs 완성 사진 레이아웃 분기)
-if (extractedImages.length > 0) {
-  let isProcess = key.includes("과정") || key.includes("상세");
-  
-  if (isProcess) {
-    // 과정 사진: 1/3 사이즈로 최대 3개 출력 (그리드 배열)
-    let imagesToRender = extractedImages.slice(0, 3);
-    imgHtml = `<div class="grid grid-cols-3 gap-2 mt-3">`;
-    imagesToRender.forEach(img => {
-      imgHtml += `<div class="w-full aspect-square rounded-xl overflow-hidden border border-slate-200 shadow-sm cursor-pointer" onclick="window.open('${img.link}', '_blank')">
-                    <img src="${img.src}" class="w-full h-full object-cover" onerror="this.style.display='none';">
-                  </div>`;
-    });
-    imgHtml += `</div>`;
-  } else {
-    // 완성 사진 등: 기존처럼 크게 1개 출력
-    let img = extractedImages[0];
-    imgHtml = `<img src="${img.src}" class="generic-card-img w-full mt-3" onclick="window.open('${img.link}', '_blank')" onerror="this.style.display='none';">`;
-  }
-}
-
-// 4. 나머지 텍스트 내 일반 링크 처리
-if(formattedVal && formattedVal.includes("http") && !formattedVal.includes("<a href")) {
-   formattedVal = formattedVal.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
-}
-if(!formattedVal && !imgHtml) formattedVal = "-";
-
-// 5. 최종 화면 출력 배치
-let hasImage = extractedImages.length > 0;
-let isLongText = formattedVal.length > 25 || formattedVal.includes('\n');
-
-if (hasImage || isLongText) {
-  h += `<div class="border-b border-slate-100 py-3 last:border-0">
-          <div class="text-xs font-bold text-indigo-400 uppercase mb-2">${key}</div>
-          ${formattedVal ? `<div class="text-sm font-bold text-slate-700 whitespace-pre-wrap">${formattedVal}</div>` : ""}
-          ${imgHtml}
-        </div>`;
-} else {
-  h += `<div class="flex justify-between items-start border-b border-slate-100 py-3 last:border-0">
-          <span class="text-xs font-bold text-indigo-400 uppercase w-20 shrink-0">${key}</span>
-          <span class="text-sm font-bold text-slate-700 text-right break-words flex-1 ml-4 whitespace-pre-wrap">${formattedVal}</span>
-        </div>`;
-}
-}
-h += `</div>`;});
 contentDiv.innerHTML = h;
 }).catch(e => {
 console.error(e);
@@ -351,6 +390,7 @@ document.getElementById('rnd-topic').value = "";
 document.getElementById('rnd-date').value = "";
 document.getElementById('rnd-details').value = "";
 document.getElementById('rnd-results').value = "";
+document.getElementById('rnd-note').value = "";
 document.getElementById('rnd-photo').value = "";
 document.getElementById('rnd-modal').style.display = "flex";
 }
@@ -370,6 +410,7 @@ topic: topic,
 dateCount: document.getElementById('rnd-date').value.trim(),
 details: document.getElementById('rnd-details').value.trim(),
 results: document.getElementById('rnd-results').value.trim(),
+note: document.getElementById('rnd-note').value.trim(),
 finalPhoto: document.getElementById('rnd-photo').value.trim()
 }
 };
