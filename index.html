@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head><meta charset="UTF-8">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>CHEF DSKIM SYSTEM</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.tailwindcss.com"></script>
-<style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-:root {--primary: #4f46e5;
---bg: #f8fafc;--white: #ffffff;--border: #e2e8f0;
---text: #1e293b;}* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+:root {--primary: #4f46e5; --bg: #f8fafc; --white: #ffffff; --border: #e2e8f0; --text: #1e293b;}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; }
 body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); }
 #root-container { display: flex; flex-direction: column; height: 100vh; padding-bottom: 70px; }
 .workspace { display: none; flex-direction: column; height: 100%; overflow-y: auto; background: var(--bg); }
-.app-header { background: var(--white); px-4; py-3; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
-.header-title { font-size: 20px; font-weight: 900; font-style: italic; tracking-tighter; display: flex; align-items: center; gap: 10px; }
+.app-header { background: var(--white); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+.header-title { font-size: 20px; font-weight: 900; font-style: italic; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
 .back-btn { font-size: 24px; cursor: pointer; color: #94a3b8; }
 .main-hero { height: 160px; background: linear-gradient(rgba(79, 70, 229, 0.85), rgba(79, 70, 229, 0.85)), url('https://images.unsplash.com/photo-1556910103-1c02745a30bf') center/cover; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
 .hero-title { font-size: 26px; font-weight: 900; font-style: italic; margin: 0; }
@@ -69,7 +70,10 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 .btn-send { background: var(--primary); color: white; border: none; }
 /* 공통 데이터 리스트 렌더링 영역 */
 .module-content-area { padding: 15px; flex: 1; overflow-y: auto; background: var(--bg); }
-</style></head><body><div id="root-container">
+</style>
+</head>
+<body>
+<div id="root-container">
 <div id="main-view" class="workspace" style="display: flex;">
 <div class="main-hero">
 <h1 class="hero-title">CHEF DSKIM</h1>
@@ -84,16 +88,19 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 <div class="grid-item" onclick="openModule('900')"><div class="grid-icon" style="background:#3b82f6"><i class="fas fa-cloud"></i></div><span class="grid-text">자료실</span></div>
 <div class="grid-item" onclick="openModule('500')"><div class="grid-icon" style="background:#f97316"><i class="fas fa-calendar-check"></i></div><span class="grid-text">일정</span></div>
 <div class="grid-item" onclick="openModule('600')"><div class="grid-icon" style="background:#64748b"><i class="fas fa-bullhorn"></i></div><span class="grid-text">공지</span></div>
-</div></div></div><div id="workspace-100" class="workspace">
+</div></div></div>
+
+<div id="workspace-100" class="workspace">
 <header class="app-header">
-<div class="header-title">
-<i class="fas fa-chevron-left back-btn" onclick="goMain()"></i>
-<span>Recipe Master</span>
-</div></header><div class="search-container shadow-sm">
+<div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>Recipe Master</span></div>
+</header>
+<div class="search-container shadow-sm">
 <div class="search-box">
 <input type="text" id="recipeInput" class="search-input" placeholder="메뉴 검색 (예: 닭갈비, JAP-Seafood)">
 <button class="search-btn" onclick="loadRecipe(document.getElementById('recipeInput').value)">GO</button>
-</div></div><div class="category-wrapper border-b">
+</div>
+</div>
+<div class="category-wrapper border-b">
 <div class="cat-title">국가별 (Country)</div>
 <div class="tag-group">
 <div class="tag-btn" onclick="loadRecipe('KOR')">한식(KOR)</div>
@@ -102,58 +109,69 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 <div class="tag-btn" onclick="loadRecipe('CHN')">중식(CHN)</div>
 <div class="tag-btn" onclick="loadRecipe('SEA')">동남아(SEA)</div>
 <div class="tag-btn" onclick="loadRecipe('ETC')">기타(ETC)</div>
-</div><div class="cat-title">식재료별 (Ingredient)</div>
+</div>
+<div class="cat-title">식재료별 (Ingredient)</div>
 <div class="tag-group">
 <div class="tag-btn" onclick="loadRecipe('Meat')">육류(Meat)</div>
 <div class="tag-btn" onclick="loadRecipe('Poultry')">가금류(Poultry)</div>
 <div class="tag-btn" onclick="loadRecipe('Seafood')">해산물(Seafood)</div>
 <div class="tag-btn" onclick="loadRecipe('Veg')">채소(Veg)</div>
 <div class="tag-btn" onclick="loadRecipe('Etc')">기타(Etc)</div>
-</div><div class="cat-title">요리분류 (Category)</div>
+</div>
+<div class="cat-title">요리분류 (Category)</div>
 <div class="tag-group">
-<div class="tag-btn" onclick="loadRecipe('Main')">메인(Main)</div>
-<div class="tag-btn" onclick="loadRecipe('App')">전채(App)</div>
-<div class="tag-btn" onclick="loadRecipe('Side')">사이드(Side)</div>
-<div class="tag-btn" onclick="loadRecipe('Sauce')">소스(Sauce)</div>
-<div class="tag-btn" onclick="loadRecipe('Dessert')">디저트(Dessert)</div>
-<div class="tag-btn" onclick="loadRecipe('Beverage')">음료(Beverage)</div>
-</div><div class="cat-title">조리법별 (Method)</div>
+<div class="tag-btn" onclick="loadRecipe('메인')">메인(Main)</div>
+<div class="tag-btn" onclick="loadRecipe('전채')">전채(App)</div>
+<div class="tag-btn" onclick="loadRecipe('사이드')">사이드(Side)</div>
+<div class="tag-btn" onclick="loadRecipe('소스')">소스(Sauce)</div>
+<div class="tag-btn" onclick="loadRecipe('디저트')">디저트(Dessert)</div>
+<div class="tag-btn" onclick="loadRecipe('음료')">음료(Beverage)</div>
+</div>
+<div class="cat-title">조리법별 (Method)</div>
 <div class="tag-group">
 <div class="tag-btn" onclick="loadRecipe('밥')">밥</div>
 <div class="tag-btn" onclick="loadRecipe('죽')">죽</div>
-<div class="tag-btn" onclick="loadRecipe('면')">국수/수제비</div>
-<div class="tag-btn" onclick="loadRecipe('만두')">만두/떡</div>
-<div class="tag-btn" onclick="loadRecipe('국')">국/탕</div>
-<div class="tag-btn" onclick="loadRecipe('찌개')">찌개/전골</div>
+<div class="tag-btn" onclick="loadRecipe('국수/수제비')">국수/수제비</div>
+<div class="tag-btn" onclick="loadRecipe('만두/떡')">만두/떡</div>
+<div class="tag-btn" onclick="loadRecipe('국/탕')">국/탕</div>
+<div class="tag-btn" onclick="loadRecipe('찌개/전골')">찌개/전골</div>
 <div class="tag-btn" onclick="loadRecipe('김치')">김치</div>
 <div class="tag-btn" onclick="loadRecipe('나물')">나물</div>
 <div class="tag-btn" onclick="loadRecipe('구이')">구이</div>
-<div class="tag-btn" onclick="loadRecipe('조림')">조림/지짐</div>
-<div class="tag-btn" onclick="loadRecipe('볶음')">볶음/초</div>
-<div class="tag-btn" onclick="loadRecipe('전')">전/적</div>
-<div class="tag-btn" onclick="loadRecipe('찜')">찜/선</div>
+<div class="tag-btn" onclick="loadRecipe('조림/지짐')">조림/지짐</div>
+<div class="tag-btn" onclick="loadRecipe('볶음/초')">볶음/초</div>
+<div class="tag-btn" onclick="loadRecipe('전/적')">전/적</div>
+<div class="tag-btn" onclick="loadRecipe('찜/선')">찜/선</div>
 <div class="tag-btn" onclick="loadRecipe('회')">회</div>
-<div class="tag-btn" onclick="loadRecipe('건조')">건조/훈연</div>
-<div class="tag-btn" onclick="loadRecipe('수육')">순대/편육/족편/수육</div>
+<div class="tag-btn" onclick="loadRecipe('건조/훈연')">건조/훈연</div>
+<div class="tag-btn" onclick="loadRecipe('순대/편육/족편/수육')">순대/편육/족편/수육</div>
 <div class="tag-btn" onclick="loadRecipe('장아찌')">장아찌</div>
-<div class="tag-btn" onclick="loadRecipe('젓갈')">젓갈/식해</div>
+<div class="tag-btn" onclick="loadRecipe('젓갈/식해')">젓갈/식해</div>
 <div class="tag-btn" onclick="loadRecipe('장')">장</div>
-</div></div><div id="recipe-list" class="recipe-list-area flex-1 bg-slate-50">
+</div>
+</div>
+<div id="recipe-list" class="recipe-list-area flex-1 bg-slate-50">
 <div class="loading-text">위에서 카테고리를 선택하거나<br>검색어를 입력하세요.</div>
-</div></div><div id="workspace-010" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>자산재고</span></div></div><div id="content-010" class="module-content-area"></div></div>
+</div>
+</div>
+
+<div id="workspace-010" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>자산재고</span></div></div><div id="content-010" class="module-content-area"></div></div>
 <div id="workspace-020" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>손익관리</span></div></div><div id="content-020" class="module-content-area"></div></div>
 <div id="workspace-400" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>연구노트</span></div></div><div id="content-400" class="module-content-area"></div></div>
 <div id="workspace-030" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>직원교육</span></div></div><div id="content-030" class="module-content-area"></div></div>
 <div id="workspace-900" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>자료실</span></div></div><div id="content-900" class="module-content-area"></div></div>
 <div id="workspace-500" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>일정관리</span></div></div><div id="content-500" class="module-content-area"></div></div>
 <div id="workspace-600" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>공지사항</span></div></div><div id="content-600" class="module-content-area"></div></div>
+
 <nav class="bottom-nav">
 <div class="nav-item active" onclick="goMain()"><i class="fas fa-home nav-icon"></i><span class="nav-text">HOME</span></div>
 <div class="nav-item" onclick="openModule('100')"><i class="fas fa-book nav-icon"></i><span class="nav-text">RECIPE</span></div>
 <div class="nav-item" onclick="openModule('400')"><i class="fas fa-flask nav-icon"></i><span class="nav-text">R&D</span></div>
 <div class="nav-item" onclick="openModule('900')"><i class="fas fa-folder nav-icon"></i><span class="nav-text">FILE</span></div>
 <div class="nav-item" onclick="openModule('010')"><i class="fas fa-chart-pie nav-icon"></i><span class="nav-text">MNG</span></div>
-</nav></div><div id="email-modal" class="modal-overlay">
+</nav></div>
+
+<div id="email-modal" class="modal-overlay">
 <div class="modal-box">
 <div class="modal-title"><i class="fas fa-envelope text-indigo-500 mr-2"></i>레시피 공유</div>
 <div class="modal-desc" id="modal-recipe-name">요리명: -</div>
@@ -161,16 +179,21 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 <div class="modal-btn-group">
 <button class="modal-btn btn-cancel" onclick="closeEmailModal()">취소</button>
 <button class="modal-btn btn-send" id="btn-send-email" onclick="sendEmailRequest()">전송하기</button>
-</div></div></div><script>
+</div></div></div>
+
+<script>
 const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
 let currentRecipesForEmail = [];
 let selectedEmailRecipe = null;
+
 function goMain() {
 document.querySelectorAll('.workspace').forEach(e=>e.style.display='none');
 document.getElementById('main-view').style.display='flex';
 window.scrollTo(0,0);
 updateNav('HOME');
-}function openModule(code) {
+}
+
+function openModule(code) {
 document.querySelectorAll('.workspace').forEach(e=>e.style.display='none');
 const ws = document.getElementById('workspace-'+code);
 if(ws) ws.style.display='flex';
@@ -184,13 +207,16 @@ else if(code==='900') updateNav('FILE');
 else if(code==='010' || code==='020') updateNav('MNG');
 else updateNav('HOME');
 loadOtherModules(code);
-}}function updateNav(txt){
+}}
+
+function updateNav(txt){
 document.querySelectorAll('.nav-item').forEach(b=>{
 b.classList.remove('active');
 if(b.querySelector('.nav-text').innerText === txt) b.classList.add('active');
 });}
+
 function loadOtherModules(code) {
-let action = "";let contentDiv = document.getElementById("content-" + code);
+let action = ""; let contentDiv = document.getElementById("content-" + code);
 contentDiv.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2'></i><br>데이터를 불러오는 중입니다...</div>";
 if(code === '010') action = "inventory";
 else if(code === '020') action = "get_sales";
@@ -199,11 +225,12 @@ else if(code === '400') action = "rnd";
 else if(code === '500') action = "get_schedule";
 else if(code === '600') action = "get_notice";
 else if(code === '900') action = "archive";
+
 fetch(`${gasUrl}?action=${action}`)
 .then(r=>r.json())
-.then(data => {let h = "";if(!data || data.length === 0) {
-contentDiv.innerHTML = "<div class='loading-text'>등록된 데이터가 없습니다.</div>";
-return;}
+.then(data => {
+let h = "";
+if(!data || data.length === 0) { contentDiv.innerHTML = "<div class='loading-text'>등록된 데이터가 없습니다.</div>"; return; }
 data.forEach(item => {
 h += `<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-3">`;
 for(let key in item) {
@@ -211,25 +238,33 @@ if(key === 'row') continue;
 let val = item[key] || "-";
 if(typeof val === 'string' && val.startsWith('http')) {
 val = `<a href="${val}" target="_blank" class="text-blue-500 underline font-bold truncate block max-w-full">링크 열기</a>`;
-}h += `<div class="flex justify-between items-start border-b border-slate-100 py-2 last:border-0">
+}
+h += `<div class="flex justify-between items-start border-b border-slate-100 py-2 last:border-0">
 <span class="text-xs font-bold text-indigo-400 uppercase w-20 shrink-0">${key}</span>
 <span class="text-sm font-bold text-slate-700 text-right break-words flex-1 ml-4">${val}</span>
-</div>`;}h += `</div>`;});contentDiv.innerHTML = h;
-}).catch(e => {contentDiv.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.<br>구글 스크립트 연결을 확인하세요.</div>";
+</div>`;}
+h += `</div>`;});
+contentDiv.innerHTML = h;
+}).catch(e => {
+contentDiv.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.<br>구글 스크립트 연결을 확인하세요.</div>";
 });}
+
 function openEmailModal(index) {
 selectedEmailRecipe = currentRecipesForEmail[index];
 document.getElementById('modal-recipe-name').innerText = "요리명: " + selectedEmailRecipe.name;
 document.getElementById('email-input').value = "";
 document.getElementById('email-modal').style.display = "flex";
-}function closeEmailModal() {
+}
+
+function closeEmailModal() {
 document.getElementById('email-modal').style.display = "none";
 selectedEmailRecipe = null;
-}function sendEmailRequest() {
+}
+
+function sendEmailRequest() {
 const emailInput = document.getElementById('email-input').value.trim();
-if (!emailInput || !emailInput.includes('@')) {
-alert("정확한 이메일 주소를 입력해주세요.");
-return;}const btn = document.getElementById('btn-send-email');
+if (!emailInput || !emailInput.includes('@')) { alert("정확한 이메일 주소를 입력해주세요."); return; }
+const btn = document.getElementById('btn-send-email');
 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 전송중...';
 btn.disabled = true;
 const r = selectedEmailRecipe;
@@ -247,122 +282,106 @@ htmlBody += `</table>`;
 r.details.forEach(d => {
 htmlBody += `<div style="margin-bottom: 20px;">`;
 htmlBody += `<div style="font-size: 12px; font-weight: 900; color: #4f46e5; margin-bottom: 6px; border-left: 3px solid #4f46e5; padding-left: 8px;">${d.cat}</div>`;
-let txt = d.text;let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
-if (driveMatch) {let m = driveMatch[0].match(/[-\w]{25,}/);
-if (m) {let viewSrc = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`;
+let txt = d.text;
+let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
+if (driveMatch) {
+let m = driveMatch[0].match(/[-\w]{25,}/);
+if (m) {
+let viewSrc = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`;
 let orgLink = `https://drive.google.com/file/d/${m[0]}/view`;
 let imgTag = `<div style="margin-top: 10px; margin-bottom: 10px;"><a href="${orgLink}" target="_blank"><img src="${viewSrc}" style="width: 100%; max-width: 400px; border-radius: 8px; border: 1px solid #e2e8f0;" alt="사진"></a></div>`;
 txt = txt.replace(driveMatch[0], imgTag);
 }} else if(txt.includes("http")) {
 txt = txt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" style="color: #3b82f6;">[링크 열기]</a>`);
-}let cleanTxt = txt.replace(/<[^>]*>?/gm, '').trim();
+}
+let cleanTxt = txt.replace(/<[^>]*>?/gm, '').trim();
 if(cleanTxt !== "" || txt.includes("<img")) {
 htmlBody += `<div style="background: #f8fafc; padding: 16px; border-radius: 12px; font-size: 13px; color: #334155; white-space: pre-wrap; border: 1px solid #e2e8f0; line-height: 1.6;">${txt}</div>`;
-}htmlBody += `</div>`;
-});htmlBody += `</div></div>`;
+}
+htmlBody += `</div>`;
+});
+htmlBody += `</div></div>`;
 fetch(gasUrl, {method: 'POST',headers: { "Content-Type": "text/plain;charset=utf-8" },
 body: JSON.stringify({ action: 'sendEmail', toEmail: emailInput, subject: subject, htmlBody: htmlBody })
 }).then(res => res.json()).then(data => {
 btn.innerHTML = '전송하기'; btn.disabled = false;
 if(data.result === 'success') { alert('성공적으로 메일을 발송했습니다!'); closeEmailModal(); }
 else { alert('발송 실패: ' + data.message); }
-}).catch(err => {btn.innerHTML = '전송하기'; btn.disabled = false;
+}).catch(err => {
+btn.innerHTML = '전송하기'; btn.disabled = false;
 alert('오류가 발생했습니다.');
 });}
+
 document.getElementById('recipeInput').addEventListener('keypress', e => {
 if(e.key==='Enter') loadRecipe(document.getElementById('recipeInput').value);
 });
+
 function loadRecipe(keywordStr) {
 const area = document.getElementById('recipe-list');
 area.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl mb-2 text-indigo-500'></i><br>데이터를 불러오는 중입니다...</div>";
 document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
 try {if(window.event && window.event.target && window.event.target.classList.contains('tag-btn')) {
 window.event.target.classList.add('active');
-}} catch(e) {}let safeKeyword = (keywordStr || "").trim();
+}} catch(e) {}
+let safeKeyword = (keywordStr || "").trim();
+
 fetch(`${gasUrl}?action=recipe&keyword=${encodeURIComponent(safeKeyword)}`)
 .then(r=>r.json())
-.then(l => {let h = ""; let count = 0;
+.then(l => {
+let h = ""; let count = 0;
 currentRecipesForEmail = [];
-const codeSegments = [
-'KOR', 'JAP', 'WST', 'CHN', 'SEA', 'ETC',
-'MEAT', 'POULTRY', 'SEAFOOD', 'VEG',
-'MAIN', 'APP', 'SIDE', 'SAUCE', 'DESSERT', 'BEVERAGE',
-'STEAM', 'BOIL', 'SMOKE', 'GRILL', 'COLD', 'FRY'
-];const isCodeSearch = codeSegments.includes(safeKeyword.toUpperCase());
-l.forEach((i) => {let code = "-", date = "-", author = "-", serving = "-";
+
+l.forEach((i) => {
+let code = "-", date = "-", author = "-", serving = "-";
 let materialsStr = ""; let processStr = ""; let mainPhotoHtml = "";
 let recipeDataForEmail = { name: i.name || "이름없음", type: i.type || "-", code: "-", date: "-", author: "-", serving: "-", details: [] };
 const safeDetails = i.details || [];
+
 safeDetails.forEach(d => {
 let txt = d.text || ""; let cleanCat = (d.cat || "").replace(/\s/g, "");
 if (cleanCat.includes("관리코드")) { code = txt; recipeDataForEmail.code = txt; }
 else if (cleanCat.includes("수정일") || cleanCat.includes("날짜")) { date = txt; recipeDataForEmail.date = txt; }
 else if (cleanCat.includes("작성자")) { author = txt; recipeDataForEmail.author = txt; }
 else if (cleanCat.includes("인분") || cleanCat.includes("수량")) { serving = txt; recipeDataForEmail.serving = txt; }
-});safeDetails.forEach(d => {
-let txt = d.text || ""; let note = d.note || ""; let ref = d.ref || ""; let cleanCat = (d.cat || "").replace(/\s/g, "");
-let isTopInfo = cleanCat.includes("관리코드") || cleanCat.includes("수정일") || cleanCat.includes("날짜") || cleanCat.includes("작성자") || cleanCat.includes("인분") || cleanCat.includes("수량");
+});
+
+safeDetails.forEach(d => {
+let txt = d.text || ""; let cleanCat = (d.cat || "").replace(/\s/g, "");
+let isTopInfo = false;
+
+if (cleanCat.includes("관리코드") || cleanCat.includes("수정일") || cleanCat.includes("날짜") || cleanCat.includes("작성자") || cleanCat.includes("인분") || cleanCat.includes("수량")) { 
+isTopInfo = true; 
+}
+
+if (cleanCat.includes("완성사진") || cleanCat.includes("완성 사진") || cleanCat.includes("이미지")) {
+isTopInfo = true; 
+}
+
+if (!isTopInfo) { recipeDataForEmail.details.push({ cat: d.cat || "-", text: txt }); }
 if (isTopInfo) return;
 
-function parseDriveLink(str) {
-  let match = str.match(/https:\/\/drive\.google\.com[^\s"']+/);
-  if (match) {
-    let m = match[0].match(/[-\w]{25,}/);
-    if (m) {
-      return {
-        html: `<div class="w-full max-w-[400px] mt-3 shrink-0 rounded-xl overflow-hidden border border-slate-200 shadow-sm cursor-pointer" onclick="window.open('https://drive.google.com/file/d/${m[0]}/view', '_blank')"><img src="https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000" style="width: 100%; height: auto; display: block;"></div>`,
-        text: str.replace(match[0], "").trim(),
-        driveUrl: match[0]
-      };
-    }
-  }
-  return { html: "", text: str.trim(), driveUrl: "" };
+let htmlTxt = txt;
+let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
+if (driveMatch) {
+let m = driveMatch[0].match(/[-\w]{25,}/);
+if (m) {
+let viewSrc = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`;
+let orgLink = `https://drive.google.com/file/d/${m[0]}/view`;
+mainPhotoHtml = `<div class="w-full max-w-[400px] shrink-0 rounded-xl overflow-hidden border border-slate-200 shadow-sm cursor-pointer" onclick="window.open('${orgLink}', '_blank')"><img src="${viewSrc}" style="width: 100%; height: auto; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"></div>`;
+htmlTxt = htmlTxt.replace(driveMatch[0], "").trim();
+}} else if(htmlTxt.includes("http")) {
+htmlTxt = htmlTxt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
 }
+if(htmlTxt === "") return;
 
-let txtData = parseDriveLink(txt);
-let noteData = parseDriveLink(note);
-let refData = parseDriveLink(ref);
+const sectionHtml = `<div class="detail-section"><div class="detail-label">${d.cat || "-"}</div><div class="detail-content-box">${htmlTxt}</div></div>`;
 
-if (cleanCat.includes("사진") && mainPhotoHtml === "") {
-  if (txtData.html) { mainPhotoHtml = txtData.html; txtData.html = ""; }
-}
+let isMaterial = cleanCat.includes("재료") || cleanCat.includes("양념") || cleanCat.includes("드레싱") || cleanCat.includes("육수") || cleanCat.includes("조미료");
 
-let combinedHtml = txtData.text;
-let emailText = txtData.text;
-if(txtData.driveUrl) emailText += `\n${txtData.driveUrl}`;
-
-if (noteData.text) {
-  combinedHtml += `<br><span class="text-xs text-indigo-600 font-bold mt-1 inline-block">[비고]</span> <span class="text-[13px] text-slate-600">${noteData.text}</span>`;
-  emailText += `\n[비고] ${noteData.text}`;
-}
-if (refData.text) {
-   if (refData.text.indexOf('http') !== -1) {
-       let urlMatch = refData.text.match(/(https?:\/\/[^\s]+)/);
-       if(urlMatch) {
-           combinedHtml += `<br><span class="text-xs text-orange-600 font-bold mt-1 inline-block">[참고자료]</span> <a href="${urlMatch[0]}" target="_blank" class="text-blue-500 underline text-[13px]">[링크 열기]</a>`;
-           emailText += `\n[참고자료] ${urlMatch[0]}`;
-       }
-   } else {
-       combinedHtml += `<br><span class="text-xs text-orange-600 font-bold mt-1 inline-block">[참고자료]</span> <span class="text-[13px] text-slate-600">${refData.text}</span>`;
-       emailText += `\n[참고자료] ${refData.text}`;
-   }
-}
-
-if (txtData.html) combinedHtml += txtData.html;
-if (noteData.html) combinedHtml += noteData.html;
-if (refData.html) combinedHtml += refData.html;
-
-recipeDataForEmail.details.push({ cat: d.cat || "-", text: emailText });
-
-if (combinedHtml === "") return;
-
-const sectionHtml = `<div class="detail-section"><div class="detail-label">${d.cat || "-"}</div><div class="detail-content-box">${combinedHtml}</div></div>`;
-let isMaterial = cleanCat.includes("재료") || cleanCat.includes("양념") || cleanCat.includes("드레싱");
 if (isMaterial) { materialsStr += sectionHtml; } else { processStr += sectionHtml; }
-});if (isCodeSearch) {
-const codeUpper = code.toUpperCase(); const typeUpper = (i.type || "").toUpperCase(); const kwUpper = safeKeyword.toUpperCase();
-if (!codeUpper.includes(kwUpper) && !typeUpper.includes(kwUpper)) return;
-}const currentIndex = currentRecipesForEmail.length;
+});
+
+const currentIndex = currentRecipesForEmail.length;
 currentRecipesForEmail.push(recipeDataForEmail);
 let thumbHtml = `<div class="recipe-img-empty"><i class="fas fa-image text-xl mb-1"></i>NO IMG</div>`;
 if (i.img && i.img.includes("http")) {
@@ -370,8 +389,11 @@ let src = i.img; let link = i.img;
 if (src.includes("drive.google.com")) {
 let m = src.match(/[-\w]{25,}/);
 if(m) { src = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`; link = `https://drive.google.com/file/d/${m[0]}/view`; }
-}thumbHtml = `<div class="recipe-thumb-box" onclick="window.open('${link}', '_blank')"><img src="${src}" class="recipe-thumb" onerror="this.parentElement.innerHTML='<div class=\\'recipe-img-empty\\'><i class=\\'fas fa-ban text-red-400 text-xl mb-1\\'></i>권한오류</div>'"></div>`;
-}h += `<div class="recipe-card" onclick="this.classList.toggle('open')">
+}
+thumbHtml = `<div class="recipe-thumb-box" onclick="window.open('${link}', '_blank')"><img src="${src}" class="recipe-thumb" onerror="this.parentElement.innerHTML='<div class=\\'recipe-img-empty\\'><i class=\\'fas fa-ban text-red-400 text-xl mb-1\\'></i>권한오류</div>'"></div>`;
+}
+
+h += `<div class="recipe-card" onclick="this.classList.toggle('open')">
 <div class="recipe-card-head">
 <div><span class="recipe-title">${i.name || "이름없음"}</span><span class="recipe-badge">${i.type || "-"}</span></div>
 <i class="fas fa-chevron-down text-slate-300"></i>
@@ -389,6 +411,14 @@ ${thumbHtml}<div class="flex-1 bg-white border border-slate-100 shadow-sm rounde
 ${mainPhotoHtml}
 <div class="flex-1 min-w-0">${materialsStr}</div>
 </div><div class="w-full">${processStr}</div>
-</div></div>`;count++;});area.innerHTML = count > 0 ? h : "<div class='loading-text'>검색 결과가 없습니다.</div>";
-}).catch(e => {console.error(e);area.innerHTML = "<div class='loading-text text-red-500'>오류가 발생했습니다.</div>";
-});}</script></body></html>
+</div></div>`;
+count++;
+});
+area.innerHTML = count > 0 ? h : "<div class='loading-text'>검색 결과가 없습니다.</div>";
+}).catch(e => {
+console.error(e);
+area.innerHTML = "<div class='loading-text text-red-500'>오류가 발생했습니다.</div>";
+});}
+</script>
+</body>
+</html>
