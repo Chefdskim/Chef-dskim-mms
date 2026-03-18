@@ -197,7 +197,7 @@ textarea.modal-input { resize: none; }
 <div class="text-xs font-bold text-indigo-400 mb-1 ml-1">테스트 날짜 / 횟수 (B열)</div>
 <input type="text" id="rnd-date" class="modal-input" placeholder="예: 2026-03-18 / 3차">
 <div class="text-xs font-bold text-indigo-400 mb-1 ml-1">상세내용 및 과정 사진 (C열)</div>
-<textarea id="rnd-details" class="modal-input" style="height: 70px;" placeholder="과정 설명 및 구글 드라이브 사진 링크 입력"></textarea>
+<textarea id="rnd-details" class="modal-input" style="height: 70px;" placeholder="과정 설명 및 구글 드라이브 사진 링크 입력 (여러 장 가능)"></textarea>
 <div class="text-xs font-bold text-indigo-400 mb-1 ml-1">결과 및 보완점 (D열)</div>
 <textarea id="rnd-results" class="modal-input" style="height: 70px;" placeholder="테스트 결과 내용 입력"></textarea>
 <div class="text-xs font-bold text-indigo-400 mb-1 ml-1">완성 사진 (F열)</div>
@@ -241,7 +241,7 @@ b.classList.remove('active');
 if(b.querySelector('.nav-text').innerText === txt) b.classList.add('active');
 });}
 
-/* --- 공통 데이터 렌더링 (혼합 텍스트 사진 추출 로직 적용) --- */
+/* --- 공통 데이터 렌더링 (다중 사진 추출 및 1/3 그리드 적용) --- */
 function loadOtherModules(code) {
 let action = ""; let contentDiv = document.getElementById("content-" + code);
 contentDiv.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2'></i><br>데이터를 불러오는 중입니다...</div>";
@@ -266,43 +266,69 @@ let val = item[key] || "";
 let formattedVal = val.toString().trim();
 if(formattedVal === "-") formattedVal = "";
 let imgHtml = "";
+let extractedImages = [];
 
-// 1. 구글 드라이브 링크 추출 (텍스트와 섞여 있어도 뽑아냄)
-let driveMatch = formattedVal.match(/https:\/\/drive\.google\.com[^\s"']+/);
-if (driveMatch) {
-  let m = driveMatch[0].match(/[-\w]{25,}/);
-  if (m) {
-    let viewSrc = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`;
-    let orgLink = `https://drive.google.com/file/d/${m[0]}/view`;
-    imgHtml = `<img src="${viewSrc}" class="generic-card-img w-full mt-2" onclick="window.open('${orgLink}', '_blank')" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><div class="text-red-500 text-xs mt-1" style="display:none;">사진 로딩 오류</div>`;
-    // 링크 텍스트는 화면에서 지우고 순수 설명 글씨만 남김
-    formattedVal = formattedVal.replace(driveMatch[0], "").trim();
-  }
-} else if (formattedVal.startsWith('http')) {
-  // 2. 구글 드라이브가 아닌 일반 이미지 링크 처리
-  const imgRegex = /\.(jpeg|jpg|gif|png|webp|svg)($|\?)/i;
-  if (imgRegex.test(formattedVal)) {
-    imgHtml = `<img src="${formattedVal}" class="generic-card-img w-full mt-2" onclick="window.open('${formattedVal}', '_blank')">`;
-    formattedVal = "";
+// 1. 구글 드라이브 링크 전체 추출 (여러 개가 있어도 다 뽑아냄)
+const driveRegex = /https:\/\/drive\.google\.com[^\s"']+/g;
+let driveMatches = formattedVal.match(driveRegex);
+if (driveMatches) {
+  driveMatches.forEach(url => {
+    let m = url.match(/[-\w]{25,}/);
+    if (m) {
+      let viewSrc = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`;
+      let orgLink = `https://drive.google.com/file/d/${m[0]}/view`;
+      extractedImages.push({src: viewSrc, link: orgLink});
+      // 뽑아낸 링크는 글씨에서 삭제
+      formattedVal = formattedVal.replace(url, "").trim();
+    }
+  });
+}
+
+// 2. 일반 이미지 링크 전체 추출
+const imgRegex = /(https?:\/\/[^\s"']+\.(?:jpeg|jpg|gif|png|webp|svg)(?:\?[^\s"']*)?)/gi;
+let directMatches = formattedVal.match(imgRegex);
+if (directMatches) {
+  directMatches.forEach(url => {
+    extractedImages.push({src: url, link: url});
+    formattedVal = formattedVal.replace(url, "").trim();
+  });
+}
+
+// 3. 추출된 사진 렌더링 로직 (과정 사진 vs 완성 사진 레이아웃 분기)
+if (extractedImages.length > 0) {
+  let isProcess = key.includes("과정") || key.includes("상세");
+  
+  if (isProcess) {
+    // 과정 사진: 1/3 사이즈로 최대 3개 출력 (그리드 배열)
+    let imagesToRender = extractedImages.slice(0, 3);
+    imgHtml = `<div class="grid grid-cols-3 gap-2 mt-3">`;
+    imagesToRender.forEach(img => {
+      imgHtml += `<div class="w-full aspect-square rounded-xl overflow-hidden border border-slate-200 shadow-sm cursor-pointer" onclick="window.open('${img.link}', '_blank')">
+                    <img src="${img.src}" class="w-full h-full object-cover" onerror="this.style.display='none';">
+                  </div>`;
+    });
+    imgHtml += `</div>`;
   } else {
-    formattedVal = `<a href="${formattedVal}" target="_blank" class="text-blue-500 underline font-bold break-all">링크 열기</a>`;
+    // 완성 사진 등: 기존처럼 크게 1개 출력
+    let img = extractedImages[0];
+    imgHtml = `<img src="${img.src}" class="generic-card-img w-full mt-3" onclick="window.open('${img.link}', '_blank')" onerror="this.style.display='none';">`;
   }
 }
 
-// 3. 사진을 빼고 남은 일반 텍스트 내에 다른 인터넷 링크가 있으면 클릭 가능하게 변환
+// 4. 나머지 텍스트 내 일반 링크 처리
 if(formattedVal && formattedVal.includes("http") && !formattedVal.includes("<a href")) {
    formattedVal = formattedVal.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
 }
 if(!formattedVal && !imgHtml) formattedVal = "-";
 
-// 4. 화면 레이아웃 결정 (사진이 있거나 글씨가 길면 위아래 배치, 짧으면 좌우 배치)
-let hasImage = imgHtml !== "";
+// 5. 최종 화면 출력 배치
+let hasImage = extractedImages.length > 0;
 let isLongText = formattedVal.length > 25 || formattedVal.includes('\n');
 
 if (hasImage || isLongText) {
   h += `<div class="border-b border-slate-100 py-3 last:border-0">
           <div class="text-xs font-bold text-indigo-400 uppercase mb-2">${key}</div>
-          ${formattedVal ? `<div class="text-sm font-bold text-slate-700 whitespace-pre-wrap mb-2">${formattedVal}</div>` : ""}
+          ${formattedVal ? `<div class="text-sm font-bold text-slate-700 whitespace-pre-wrap">${formattedVal}</div>` : ""}
           ${imgHtml}
         </div>`;
 } else {
