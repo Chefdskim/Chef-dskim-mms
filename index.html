@@ -349,19 +349,21 @@ safeDetails.forEach(d => {
 let txt = d.text || ""; let cleanCat = (d.cat || "").replace(/\s/g, "");
 let isTopInfo = false;
 
+// 1. 기본 상단 정보 제외
 if (cleanCat.includes("관리코드") || cleanCat.includes("수정일") || cleanCat.includes("날짜") || cleanCat.includes("작성자") || cleanCat.includes("인분") || cleanCat.includes("수량")) { 
 isTopInfo = true; 
 }
 
-if (cleanCat.includes("완성사진") || cleanCat.includes("완성 사진") || cleanCat.includes("이미지")) {
-isTopInfo = true; 
-}
+// 2. 이 항목이 '완성사진'인지 확인 (화면 출력은 안 할 거지만, 링크 추출은 해야 함)
+let isMainPhotoRow = cleanCat.includes("완성사진") || cleanCat.includes("완성 사진") || cleanCat.includes("이미지");
 
-if (!isTopInfo) { recipeDataForEmail.details.push({ cat: d.cat || "-", text: txt }); }
-if (isTopInfo) return;
+if (!isTopInfo && !isMainPhotoRow) { recipeDataForEmail.details.push({ cat: d.cat || "-", text: txt }); }
+if (isTopInfo) return; // 상단 정보면 스킵
 
 let htmlTxt = txt;
 let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
+
+// 3. 사진 추출 (완성사진 행이든 다른 곳이든 구글 드라이브 링크가 있으면 큰 사진으로 뺌)
 if (driveMatch) {
 let m = driveMatch[0].match(/[-\w]{25,}/);
 if (m) {
@@ -372,10 +374,13 @@ htmlTxt = htmlTxt.replace(driveMatch[0], "").trim();
 }} else if(htmlTxt.includes("http")) {
 htmlTxt = htmlTxt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
 }
-if(htmlTxt === "") return;
+
+// 4. 추출 후 텍스트가 없거나, '완성사진' 행인 경우 빈 텍스트 박스를 그리지 않고 즉시 종료!
+if(htmlTxt === "" || isMainPhotoRow) return;
 
 const sectionHtml = `<div class="detail-section"><div class="detail-label">${d.cat || "-"}</div><div class="detail-content-box">${htmlTxt}</div></div>`;
 
+// 5. 육수, 조미료를 주재료 옆으로 이동 배치
 let isMaterial = cleanCat.includes("재료") || cleanCat.includes("양념") || cleanCat.includes("드레싱") || cleanCat.includes("육수") || cleanCat.includes("조미료");
 
 if (isMaterial) { materialsStr += sectionHtml; } else { processStr += sectionHtml; }
