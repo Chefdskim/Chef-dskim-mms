@@ -70,7 +70,7 @@ textarea.modal-input { resize: none; }
 .btn-cancel { background: #f1f5f9; color: #64748b; border: none; }
 .btn-send { background: var(--primary); color: white; border: none; }
 .module-content-area { padding: 15px; flex: 1; overflow-y: auto; background: var(--bg); }
-.generic-card-img { max-height: 400px; object-fit: contain; margin-top: 10px; border-radius: 12px; border: 1px solid var(--border); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; }
+.generic-card-img { max-height: 400px; object-fit: contain; border-radius: 12px; border: 1px solid var(--border); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; }
 </style>
 </head>
 <body>
@@ -241,7 +241,7 @@ b.classList.remove('active');
 if(b.querySelector('.nav-text').innerText === txt) b.classList.add('active');
 });}
 
-/* --- 공통 데이터 렌더링 (사진 바로보기 기능 포함) --- */
+/* --- 공통 데이터 렌더링 (혼합 텍스트 사진 추출 로직 적용) --- */
 function loadOtherModules(code) {
 let action = ""; let contentDiv = document.getElementById("content-" + code);
 contentDiv.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2'></i><br>데이터를 불러오는 중입니다...</div>";
@@ -262,34 +262,54 @@ data.forEach(item => {
 h += `<div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-4 card-item">`;
 for(let key in item) {
 if(key === 'row' || key.toLowerCase().includes('hidden')) continue;
-let val = item[key] || "-";
-let formattedVal = val;
-let isImage = false;
+let val = item[key] || "";
+let formattedVal = val.toString().trim();
+if(formattedVal === "-") formattedVal = "";
+let imgHtml = "";
 
-if(typeof val === 'string' && val.trim().startsWith('http')) {
-let trimmedUrl = val.trim();
-let driveIdMatch = trimmedUrl.match(/https:\/\/drive\.google\.com[^\s"']+[/-]([-\w]{25,})/);
-const imgRegex = /\.(jpeg|jpg|gif|png|webp|svg)($|\?)/i;
-let isDirectImage = imgRegex.test(trimmedUrl);
+// 1. 구글 드라이브 링크 추출 (텍스트와 섞여 있어도 뽑아냄)
+let driveMatch = formattedVal.match(/https:\/\/drive\.google\.com[^\s"']+/);
+if (driveMatch) {
+  let m = driveMatch[0].match(/[-\w]{25,}/);
+  if (m) {
+    let viewSrc = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`;
+    let orgLink = `https://drive.google.com/file/d/${m[0]}/view`;
+    imgHtml = `<img src="${viewSrc}" class="generic-card-img w-full mt-2" onclick="window.open('${orgLink}', '_blank')" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><div class="text-red-500 text-xs mt-1" style="display:none;">사진 로딩 오류</div>`;
+    // 링크 텍스트는 화면에서 지우고 순수 설명 글씨만 남김
+    formattedVal = formattedVal.replace(driveMatch[0], "").trim();
+  }
+} else if (formattedVal.startsWith('http')) {
+  // 2. 구글 드라이브가 아닌 일반 이미지 링크 처리
+  const imgRegex = /\.(jpeg|jpg|gif|png|webp|svg)($|\?)/i;
+  if (imgRegex.test(formattedVal)) {
+    imgHtml = `<img src="${formattedVal}" class="generic-card-img w-full mt-2" onclick="window.open('${formattedVal}', '_blank')">`;
+    formattedVal = "";
+  } else {
+    formattedVal = `<a href="${formattedVal}" target="_blank" class="text-blue-500 underline font-bold break-all">링크 열기</a>`;
+  }
+}
 
-if (driveIdMatch) {
-let id = driveIdMatch[1];
-let src = `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
-let orgLink = `https://drive.google.com/file/d/${id}/view`;
-formattedVal = `<img src="${src}" class="generic-card-img w-full" onclick="window.open('${orgLink}', '_blank')" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-<div class="bg-indigo-50 text-indigo-600 text-center text-xs font-bold py-4 mt-2 rounded-lg" style="display:none;">사진 링크 오류. 클릭하여 확인하세요.</div>`;
-isImage = true;
-} else if (isDirectImage) {
-formattedVal = `<img src="${trimmedUrl}" class="generic-card-img w-full" onclick="window.open('${trimmedUrl}', '_blank')">`;
-isImage = true;
-} else {
-formattedVal = `<a href="${trimmedUrl}" target="_blank" class="text-blue-500 underline font-bold truncate block max-w-full">링크 열기</a>`;
+// 3. 사진을 빼고 남은 일반 텍스트 내에 다른 인터넷 링크가 있으면 클릭 가능하게 변환
+if(formattedVal && formattedVal.includes("http") && !formattedVal.includes("<a href")) {
+   formattedVal = formattedVal.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
 }
-}
-if(isImage) {
-h += `<div class="border-b border-slate-100 py-3 last:border-0"><div class="text-xs font-bold text-indigo-400 uppercase mb-2">${key}</div><div class="text-sm font-bold text-slate-700 break-words flex-1">${formattedVal}</div></div>`;
+if(!formattedVal && !imgHtml) formattedVal = "-";
+
+// 4. 화면 레이아웃 결정 (사진이 있거나 글씨가 길면 위아래 배치, 짧으면 좌우 배치)
+let hasImage = imgHtml !== "";
+let isLongText = formattedVal.length > 25 || formattedVal.includes('\n');
+
+if (hasImage || isLongText) {
+  h += `<div class="border-b border-slate-100 py-3 last:border-0">
+          <div class="text-xs font-bold text-indigo-400 uppercase mb-2">${key}</div>
+          ${formattedVal ? `<div class="text-sm font-bold text-slate-700 whitespace-pre-wrap mb-2">${formattedVal}</div>` : ""}
+          ${imgHtml}
+        </div>`;
 } else {
-h += `<div class="flex justify-between items-start border-b border-slate-100 py-3 last:border-0"><span class="text-xs font-bold text-indigo-400 uppercase w-20 shrink-0">${key}</span><span class="text-sm font-bold text-slate-700 text-right break-words flex-1 ml-4 whitespace-pre-wrap">${formattedVal}</span></div>`;
+  h += `<div class="flex justify-between items-start border-b border-slate-100 py-3 last:border-0">
+          <span class="text-xs font-bold text-indigo-400 uppercase w-20 shrink-0">${key}</span>
+          <span class="text-sm font-bold text-slate-700 text-right break-words flex-1 ml-4 whitespace-pre-wrap">${formattedVal}</span>
+        </div>`;
 }
 }
 h += `</div>`;});
@@ -351,7 +371,7 @@ document.getElementById('email-input').value = "";
 document.getElementById('email-modal').style.display = "flex";
 }
 function closeEmailModal() { document.getElementById('email-modal').style.display = "none"; selectedEmailRecipe = null; }
-function sendEmailRequest() { /* 생략 없이 기존 이메일 발송 코드 유지됨 */
+function sendEmailRequest() {
 const emailInput = document.getElementById('email-input').value.trim();
 if (!emailInput || !emailInput.includes('@')) { alert("이메일을 입력해주세요."); return; }
 const btn = document.getElementById('btn-send-email');
@@ -385,7 +405,7 @@ if(data.result === 'success') { alert('메일 발송 성공!'); closeEmailModal(
 }).catch(err => { btn.innerHTML = '전송하기'; btn.disabled = false; alert('오류가 발생했습니다.'); });
 }
 
-/* --- 레시피 검색 기능 (기존 유지) --- */
+/* --- 레시피 검색 기능 --- */
 document.getElementById('recipeInput').addEventListener('keypress', e => { if(e.key==='Enter') loadRecipe(document.getElementById('recipeInput').value); });
 function loadRecipe(keywordStr) {
 const area = document.getElementById('recipe-list');
