@@ -56,7 +56,6 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 .nav-icon { font-size: 20px; margin-bottom: 4px; }
 .nav-text { font-size: 10px; font-weight: 700; }
 .loading-text { text-align: center; padding: 40px; font-size: 14px; font-weight: 700; color: #94a3b8; }
-/* 메일 모달창 CSS */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
 .modal-box { background: white; width: 90%; max-width: 360px; border-radius: 16px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
 .modal-title { font-size: 18px; font-weight: 900; margin-bottom: 8px; color: #1e293b; }
@@ -67,8 +66,9 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 .modal-btn { padding: 10px 20px; border-radius: 8px; font-weight: 900; font-size: 14px; cursor: pointer; }
 .btn-cancel { background: #f1f5f9; color: #64748b; border: none; }
 .btn-send { background: var(--primary); color: white; border: none; }
-/* 공통 데이터 리스트 렌더링 영역 */
 .module-content-area { padding: 15px; flex: 1; overflow-y: auto; background: var(--bg); }
+/* 재고 달력 스타일 */
+.inv-date-picker { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 16px; font-weight: 900; color: #4f46e5; text-align: center; outline: none; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
 </style></head><body><div id="root-container">
 <div id="main-view" class="workspace" style="display: flex;">
 <div class="main-hero">
@@ -86,43 +86,23 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 <div class="grid-item" onclick="openModule('600')"><div class="grid-icon" style="background:#64748b"><i class="fas fa-bullhorn"></i></div><span class="grid-text">공지</span></div>
 </div></div></div><div id="workspace-100" class="workspace">
 <header class="app-header">
-<div class="header-title">
-<i class="fas fa-chevron-left back-btn" onclick="goMain()"></i>
-<span>Recipe Master</span>
-</div></header><div class="search-container shadow-sm">
+<div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>Recipe Master</span></div></header><div class="search-container shadow-sm">
 <div class="search-box">
 <input type="text" id="recipeInput" class="search-input" placeholder="메뉴 검색 (예: 닭갈비, JAP-Seafood)">
 <button class="search-btn" onclick="loadRecipe(document.getElementById('recipeInput').value)">GO</button>
 </div></div><div class="category-wrapper border-b">
 <div class="cat-title">국가별 (Country)</div>
 <div class="tag-group">
-<div class="tag-btn" onclick="loadRecipe('KOR')">한식(KOR)</div>
-<div class="tag-btn" onclick="loadRecipe('JAP')">일식(JAP)</div>
-<div class="tag-btn" onclick="loadRecipe('WST')">양식(WST)</div>
-<div class="tag-btn" onclick="loadRecipe('CHN')">중식(CHN)</div>
-<div class="tag-btn" onclick="loadRecipe('SEA')">동남아(SEA)</div>
-<div class="tag-btn" onclick="loadRecipe('ETC')">기타(ETC)</div>
+<div class="tag-btn" onclick="loadRecipe('KOR')">한식(KOR)</div><div class="tag-btn" onclick="loadRecipe('JAP')">일식(JAP)</div><div class="tag-btn" onclick="loadRecipe('WST')">양식(WST)</div><div class="tag-btn" onclick="loadRecipe('CHN')">중식(CHN)</div><div class="tag-btn" onclick="loadRecipe('SEA')">동남아(SEA)</div><div class="tag-btn" onclick="loadRecipe('ETC')">기타(ETC)</div>
 </div><div class="cat-title">식재료별 (Ingredient)</div>
 <div class="tag-group">
-<div class="tag-btn" onclick="loadRecipe('Meat')">육류(Meat)</div>
-<div class="tag-btn" onclick="loadRecipe('Poultry')">가금류(Poultry)</div>
-<div class="tag-btn" onclick="loadRecipe('Seafood')">해산물(Seafood)</div>
-<div class="tag-btn" onclick="loadRecipe('Veg')">채소(Veg)</div>
-<div class="tag-btn" onclick="loadRecipe('Etc')">기타(Etc)</div>
+<div class="tag-btn" onclick="loadRecipe('Meat')">육류(Meat)</div><div class="tag-btn" onclick="loadRecipe('Poultry')">가금류(Poultry)</div><div class="tag-btn" onclick="loadRecipe('Seafood')">해산물(Seafood)</div><div class="tag-btn" onclick="loadRecipe('Veg')">채소(Veg)</div><div class="tag-btn" onclick="loadRecipe('Etc')">기타(Etc)</div>
 </div><div class="cat-title">요리분류 (Category)</div>
 <div class="tag-group">
-<div class="tag-btn" onclick="loadRecipe('Main')">메인(Main)</div>
-<div class="tag-btn" onclick="loadRecipe('App')">전채(App)</div>
-<div class="tag-btn" onclick="loadRecipe('Side')">사이드(Side)</div>
-<div class="tag-btn" onclick="loadRecipe('Sauce')">소스(Sauce)</div>
+<div class="tag-btn" onclick="loadRecipe('Main')">메인(Main)</div><div class="tag-btn" onclick="loadRecipe('App')">전채(App)</div><div class="tag-btn" onclick="loadRecipe('Side')">사이드(Side)</div><div class="tag-btn" onclick="loadRecipe('Sauce')">소스(Sauce)</div>
 </div><div class="cat-title">조리법별 (Method)</div>
 <div class="tag-group">
-<div class="tag-btn" onclick="loadRecipe('Steam')">찜(Steam)</div>
-<div class="tag-btn" onclick="loadRecipe('Boil')">데침/끓임(Boil)</div>
-<div class="tag-btn" onclick="loadRecipe('Smoke')">훈연(Smoke)</div>
-<div class="tag-btn" onclick="loadRecipe('Grill')">구이(Grill)</div>
-<div class="tag-btn" onclick="loadRecipe('Cold')">무침/절임(Cold)</div>
-<div class="tag-btn" onclick="loadRecipe('Fry')">튀김(Fry)</div>
+<div class="tag-btn" onclick="loadRecipe('Steam')">찜(Steam)</div><div class="tag-btn" onclick="loadRecipe('Boil')">데침/끓임(Boil)</div><div class="tag-btn" onclick="loadRecipe('Smoke')">훈연(Smoke)</div><div class="tag-btn" onclick="loadRecipe('Grill')">구이(Grill)</div><div class="tag-btn" onclick="loadRecipe('Cold')">무침/절임(Cold)</div><div class="tag-btn" onclick="loadRecipe('Fry')">튀김(Fry)</div>
 </div></div><div id="recipe-list" class="recipe-list-area flex-1 bg-slate-50">
 <div class="loading-text">위에서 카테고리를 선택하거나<br>검색어를 입력하세요.</div>
 </div></div><div id="workspace-010" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>자산재고</span></div></div><div id="content-010" class="module-content-area flex flex-col h-full overflow-hidden"></div></div>
@@ -147,8 +127,8 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 <button class="modal-btn btn-cancel" onclick="closeEmailModal()">취소</button>
 <button class="modal-btn btn-send" id="btn-send-email" onclick="sendEmailRequest()">전송하기</button>
 </div></div></div><script>const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
-let currentRecipesForEmail = [];
-let selectedEmailRecipe = null;
+let currentRecipesForEmail = []; let selectedEmailRecipe = null; let allInventoryData = [];
+
 function goMain() {
 document.querySelectorAll('.workspace').forEach(e=>e.style.display='none');
 document.getElementById('main-view').style.display='flex';
@@ -174,69 +154,89 @@ b.classList.remove('active');
 if(b.querySelector('.nav-text').innerText === txt) b.classList.add('active');
 });}
 
-/* --- 자산 및 재고관리(010) 전용 탭 렌더링 함수 --- */
-function fetchInventory(type) {
+// ★ [010] 자산재고: 달력 연동형 통합 데이터 렌더러
+function filterInventoryByDate() {
+  const selectedDate = document.getElementById("inv-date-picker").value;
   const area = document.getElementById("inv-data-area");
-  const btnStock = document.getElementById("btn-inv-stock");
-  const btnLog = document.getElementById("btn-inv-log");
   
-  if(type === 'stock') {
-     btnStock.className = "flex-1 py-2 rounded-xl text-sm font-black bg-indigo-600 text-white shadow-md transition-all";
-     btnLog.className = "flex-1 py-2 rounded-xl text-sm font-black bg-slate-200 text-slate-500 hover:bg-slate-300 transition-all";
-  } else {
-     btnLog.className = "flex-1 py-2 rounded-xl text-sm font-black bg-indigo-600 text-white shadow-md transition-all";
-     btnStock.className = "flex-1 py-2 rounded-xl text-sm font-black bg-slate-200 text-slate-500 hover:bg-slate-300 transition-all";
+  if (!allInventoryData || allInventoryData.length === 0) {
+    area.innerHTML = "<div class='loading-text'>등록된 데이터가 없습니다.</div>";
+    return;
   }
 
-  area.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2'></i><br>데이터를 불러오는 중입니다...</div>";
-  const action = type === 'stock' ? 'inventory' : 'inventory_log';
-  
-  fetch(`${gasUrl}?action=${action}`)
-  .then(r=>r.json())
-  .then(data => {
-    let h = "";
-    if(!data || data.length === 0) {
-      area.innerHTML = "<div class='loading-text'>등록된 내역이 없습니다.</div>";
-      return;
-    }
-    data.forEach(item => {
-      h += `<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-3">`;
-      let isOut = item["구분"] === "출고";
-      let isIn = item["구분"] === "매입" || item["구분"] === "기초재고";
-      
-      for(let key in item) {
-        if(key === 'row') continue;
-        let val = item[key] || "-";
-        let valColor = "text-slate-700";
-        if (key === "구분") {
-            if (isOut) valColor = "text-red-500";
-            else if (isIn) valColor = "text-blue-500";
-        }
-        h += `<div class="flex justify-between items-start border-b border-slate-100 py-2 last:border-0">
-                <span class="text-xs font-bold text-indigo-400 uppercase w-20 shrink-0">${key}</span>
-                <span class="text-sm font-bold break-words flex-1 ml-4 text-right ${valColor}">${val}</span>
-              </div>`;
-      }
-      h += `</div>`;
-    });
-    area.innerHTML = h;
-  }).catch(e => {
-    area.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.<br>구글 스크립트 연결을 확인하세요.</div>";
+  // 달력 날짜에 맞게 필터링 (날짜가 안 골라졌으면 전체 보기)
+  let filtered = allInventoryData.filter(item => {
+    if (!selectedDate) return true; 
+    return (item["입고일자"] === selectedDate || item["출고일자"] === selectedDate);
   });
+
+  if (filtered.length === 0) {
+    area.innerHTML = `<div class='loading-text'>${selectedDate} 일자의 입/출고 내역이 없습니다.<br><br><span class='text-xs text-slate-400'>날짜를 지우면 전체 목록이 보입니다.</span></div>`;
+    return;
+  }
+
+  let h = "";
+  filtered.forEach(item => {
+    h += `
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-4 overflow-hidden">
+        <div class="bg-indigo-50 border-b border-indigo-100 px-4 py-3 flex justify-between items-center">
+          <span class="font-black text-indigo-900 text-lg">${item["품목"]}</span>
+        </div>
+        <div class="p-4 grid grid-cols-2 gap-4">
+          <!-- 좌측: 입고 정보 -->
+          <div class="bg-blue-50/50 p-3 rounded-lg border border-blue-100">
+            <div class="text-[10px] font-black text-blue-500 mb-2 uppercase tracking-widest"><i class="fas fa-arrow-down mr-1"></i>입고 내역</div>
+            <div class="text-xs mb-1"><span class="font-bold text-slate-400 mr-2">일자</span><span class="font-black text-slate-700">${item["입고일자"] || "-"}</span></div>
+            <div class="text-xs mb-1"><span class="font-bold text-slate-400 mr-2">수량</span><span class="font-black text-blue-600">${item["입고량"]}</span></div>
+            <div class="text-xs"><span class="font-bold text-slate-400 mr-2">단가</span><span class="font-black text-slate-700">${item["단가"]}</span></div>
+          </div>
+          <!-- 우측: 출고 정보 -->
+          <div class="bg-red-50/50 p-3 rounded-lg border border-red-100">
+            <div class="text-[10px] font-black text-red-500 mb-2 uppercase tracking-widest"><i class="fas fa-arrow-up mr-1"></i>출고 내역</div>
+            <div class="text-xs mb-1"><span class="font-bold text-slate-400 mr-2">일자</span><span class="font-black text-slate-700">${item["출고일자"] || "-"}</span></div>
+            <div class="text-xs"><span class="font-bold text-slate-400 mr-2">수량</span><span class="font-black text-red-600">${item["출고량"]}</span></div>
+          </div>
+        </div>
+        <!-- 하단: 현재 잔량 및 총액 -->
+        <div class="bg-slate-50 px-4 py-3 border-t border-slate-200 flex justify-between items-center">
+          <div>
+            <div class="text-[10px] font-bold text-slate-400 mb-0.5">현재 잔량</div>
+            <div class="font-black text-slate-800 text-sm">${item["현재 잔량"]}</div>
+          </div>
+          <div class="text-right">
+            <div class="text-[10px] font-bold text-slate-400 mb-0.5">재고 총액</div>
+            <div class="font-black text-indigo-600 text-sm">${item["재고 총액"]}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  area.innerHTML = h;
 }
 
 function loadOtherModules(code) {
   let contentDiv = document.getElementById("content-" + code);
   
   if (code === '010') {
+    // 상단에 달력 픽업 창 렌더링
     contentDiv.innerHTML = `
-      <div class="flex gap-2 mb-4 shrink-0 px-1 pt-1">
-        <button id="btn-inv-stock" class="flex-1 py-2 rounded-xl text-sm font-black bg-indigo-600 text-white shadow-md transition-all" onclick="fetchInventory('stock')">현재 재고</button>
-        <button id="btn-inv-log" class="flex-1 py-2 rounded-xl text-sm font-black bg-slate-200 text-slate-500 hover:bg-slate-300 transition-all" onclick="fetchInventory('log')">수불 내역</button>
+      <div class="px-2 pt-2 pb-4 mb-2 border-b border-slate-200 shrink-0">
+        <input type="date" id="inv-date-picker" class="inv-date-picker" onchange="filterInventoryByDate()">
+        <div class="text-center text-[10px] font-bold text-slate-400 mt-2">날짜를 선택하면 해당 일자의 입/출고 흐름이 표시됩니다.</div>
       </div>
-      <div id="inv-data-area" class="flex-1 overflow-y-auto pb-10 px-1"></div>
+      <div id="inv-data-area" class="flex-1 overflow-y-auto pb-10 px-2"></div>
     `;
-    fetchInventory('stock');
+    const area = document.getElementById("inv-data-area");
+    area.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2'></i><br>전체 재고 연동 중...</div>";
+    
+    fetch(`${gasUrl}?action=inventory`)
+    .then(r=>r.json())
+    .then(data => {
+      allInventoryData = data; 
+      filterInventoryByDate(); // 전체 보기로 렌더링
+    }).catch(e => {
+      area.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.<br>구글 스크립트 연결을 확인하세요.</div>";
+    });
     return;
   }
   
@@ -265,7 +265,7 @@ function loadOtherModules(code) {
   <span class="text-xs font-bold text-indigo-400 uppercase w-20 shrink-0">${key}</span>
   <span class="text-sm font-bold text-slate-700 text-right break-words flex-1 ml-4">${val}</span>
   </div>`;}h += `</div>`;});contentDiv.innerHTML = h;
-  }).catch(e => {contentDiv.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.<br>구글 스크립트 연결을 확인하세요.</div>";
+  }).catch(e => {contentDiv.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.</div>";
   });}
 
 function openEmailModal(index) {
