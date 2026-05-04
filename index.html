@@ -6,14 +6,13 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-:root {--primary: #4f46e5;
---bg: #f8fafc;--white: #ffffff;--border: #e2e8f0;
---text: #1e293b;}* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; }
+:root {--primary: #4f46e5; --bg: #f8fafc; --white: #ffffff; --border: #e2e8f0; --text: #1e293b;}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; }
 body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); }
 #root-container { display: flex; flex-direction: column; height: 100vh; padding-bottom: 70px; }
 .workspace { display: none; flex-direction: column; height: 100%; overflow-y: auto; background: var(--bg); }
-.app-header { background: var(--white); px-4; py-3; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
-.header-title { font-size: 20px; font-weight: 900; font-style: italic; tracking-tighter; display: flex; align-items: center; gap: 10px; }
+.app-header { background: var(--white); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+.header-title { font-size: 20px; font-weight: 900; font-style: italic; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
 .back-btn { font-size: 24px; cursor: pointer; color: #94a3b8; }
 .main-hero { height: 160px; background: linear-gradient(rgba(79, 70, 229, 0.85), rgba(79, 70, 229, 0.85)), url('https://images.unsplash.com/photo-1556910103-1c02745a30bf') center/cover; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
 .hero-title { font-size: 26px; font-weight: 900; font-style: italic; margin: 0; }
@@ -35,7 +34,6 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 .recipe-list-area { padding: 10px 15px 30px 15px; }
 .recipe-card { background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s; }
 .recipe-card-head { padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-.recipe-card-head:active { background: #f8fafc; }
 .recipe-title { font-size: 16px; font-weight: 900; color: #1e293b; }
 .recipe-badge { display: inline-block; background: #eff6ff; color: #2563eb; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; border: 1px solid #bfdbfe; margin-left: 10px; vertical-align: middle; }
 .recipe-card-body { display: none; padding: 0 16px 16px 16px; background: white; position: relative; }
@@ -45,7 +43,6 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 .detail-content-box { background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 13px; font-weight: 600; color: #334155; white-space: pre-wrap; line-height: 1.6; }
 .recipe-thumb-box { width: 90px; height: 90px; flex-shrink: 0; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; background: #f1f5f9; }
 .recipe-thumb { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s; }
-.recipe-thumb:active { transform: scale(1.05); }
 .recipe-img-empty { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 10px; font-weight: 900; color: #94a3b8; text-align: center; }
 .info-grid { display: grid; grid-template-columns: 80px 1fr; gap: 4px 8px; font-size: 11px; }
 .info-label { font-weight: 900; color: #94a3b8; }
@@ -61,18 +58,20 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 .modal-title { font-size: 18px; font-weight: 900; margin-bottom: 8px; color: #1e293b; }
 .modal-desc { font-size: 13px; color: #64748b; margin-bottom: 20px; font-weight: 600; }
 .modal-input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; margin-bottom: 20px; outline: none; font-weight: 600; }
-.modal-input:focus { border-color: var(--primary); }
 .modal-btn-group { display: flex; gap: 10px; justify-content: flex-end; }
 .modal-btn { padding: 10px 20px; border-radius: 8px; font-weight: 900; font-size: 14px; cursor: pointer; }
 .btn-cancel { background: #f1f5f9; color: #64748b; border: none; }
 .btn-send { background: var(--primary); color: white; border: none; }
 .module-content-area { padding: 15px; flex: 1; overflow-y: auto; background: var(--bg); }
 .inv-date-picker { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 15px; font-weight: 900; color: #4f46e5; text-align: center; outline: none; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-/* 추가된 테이블 스타일 (가로 스크롤 허용) */
 .custom-table { width: 100%; min-width: 750px; text-align: left; border-collapse: collapse; }
 .custom-table th { background: #f8fafc; color: #64748b; padding: 12px; font-size: 11px; text-transform: uppercase; font-weight: 900; border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 10;}
 .custom-table td { padding: 12px; font-size: 13px; font-weight: 600; color: #334155; border-bottom: 1px solid #f1f5f9; white-space: nowrap; }
 .custom-table tr:hover td { background-color: #f8fafc; }
+/* 탭 활성화/비활성화 스타일 */
+.tab-btn { flex: 1; padding: 8px 0; border-radius: 8px; text-align: center; font-size: 12px; font-weight: 900; transition: all 0.2s; cursor: pointer; }
+.tab-active { background: var(--primary); color: white; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2); }
+.tab-inactive { background: #e2e8f0; color: #64748b; }
 </style></head><body><div id="root-container">
 <div id="main-view" class="workspace" style="display: flex;">
 <div class="main-hero">
@@ -113,7 +112,7 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 
 <!-- 자산재고 워크스페이스 -->
 <div id="workspace-010" class="workspace">
-  <div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>자산재고</span></div></div>
+  <div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>자산재고 현황</span></div></div>
   <div id="content-010" class="module-content-area flex flex-col h-full overflow-hidden p-0 bg-white"></div>
 </div>
 
@@ -137,8 +136,12 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 <div class="modal-btn-group">
 <button class="modal-btn btn-cancel" onclick="closeEmailModal()">취소</button>
 <button class="modal-btn btn-send" id="btn-send-email" onclick="sendEmailRequest()">전송하기</button>
-</div></div></div><script>const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
+</div></div></div>
+
+<script>
+const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
 let currentRecipesForEmail = []; let selectedEmailRecipe = null; let allInventoryData = [];
+let currentInvPeriod = 'daily'; // daily, weekly, monthly
 
 function goMain() {
 document.querySelectorAll('.workspace').forEach(e=>e.style.display='none');
@@ -165,7 +168,7 @@ b.classList.remove('active');
 if(b.querySelector('.nav-text').innerText === txt) b.classList.add('active');
 });}
 
-// ★ 스마트 날짜 파서
+// ★ 스마트 날짜 파서 (오타 교정)
 function parseDateString(val) {
   let digits = val.replace(/[^0-9]/g, '');
   if (digits.length < 4) return null;
@@ -186,7 +189,28 @@ function parseDateString(val) {
   return null;
 }
 
-// ★ 자산재고 테이블(표) 렌더러
+// 해당 날짜가 속한 주의 월~일요일 범위 구하기
+function getWeekRange(dateStr) {
+  let d = new Date(dateStr);
+  let day = d.getDay() || 7; 
+  d.setHours(0,0,0,0);
+  let start = new Date(d);
+  start.setDate(d.getDate() - day + 1); 
+  let end = new Date(start);
+  end.setDate(start.getDate() + 6); 
+  return {start: start, end: end};
+}
+
+// 탭 변경 시 호출
+function setInvPeriod(period) {
+  currentInvPeriod = period;
+  document.getElementById('tab-daily').className = (period === 'daily') ? 'tab-btn tab-active' : 'tab-btn tab-inactive';
+  document.getElementById('tab-weekly').className = (period === 'weekly') ? 'tab-btn tab-active' : 'tab-btn tab-inactive';
+  document.getElementById('tab-monthly').className = (period === 'monthly') ? 'tab-btn tab-active' : 'tab-btn tab-inactive';
+  filterInventoryByDate();
+}
+
+// ★ 자산재고 테이블 필터링 및 렌더러
 function filterInventoryByDate() {
   let inputEl = document.getElementById("inv-date-picker");
   let selectedDate = inputEl.value.trim();
@@ -202,16 +226,46 @@ function filterInventoryByDate() {
     if (parsedDate) {
       selectedDate = parsedDate;
       inputEl.value = selectedDate; 
+    } else {
+      area.innerHTML = "<div class='loading-text text-red-500'>올바른 날짜를 입력해주세요.</div>";
+      return;
     }
+  } else {
+    // 날짜가 비어있으면 오늘 날짜로 자동 세팅
+    let today = new Date();
+    selectedDate = today.getFullYear() + "-" + String(today.getMonth()+1).padStart(2,'0') + "-" + String(today.getDate()).padStart(2,'0');
+    inputEl.value = selectedDate;
   }
 
+  let refDate = new Date(selectedDate);
+  let weekRange = getWeekRange(selectedDate);
+
   let filtered = allInventoryData.filter(item => {
-    if (!selectedDate) return true; 
-    return (item["입고일자"] === selectedDate || item["출고일자"] === selectedDate);
+    let inD = item["입고일자"]; let outD = item["출고일자"];
+    
+    // 검사할 타겟 날짜 셋 (입고일, 출고일 중 하나라도 조건에 맞으면 표시)
+    let checkDates = [];
+    if(inD && inD !== "-") checkDates.push(inD);
+    if(outD && outD !== "-") checkDates.push(outD);
+
+    if (checkDates.length === 0) return false;
+
+    return checkDates.some(dStr => {
+      let d = new Date(dStr);
+      if (currentInvPeriod === 'daily') {
+        return dStr === selectedDate;
+      } else if (currentInvPeriod === 'weekly') {
+        return d >= weekRange.start && d <= weekRange.end;
+      } else if (currentInvPeriod === 'monthly') {
+        return d.getFullYear() === refDate.getFullYear() && d.getMonth() === refDate.getMonth();
+      }
+      return false;
+    });
   });
 
   if (filtered.length === 0) {
-    area.innerHTML = `<div class='loading-text'>${selectedDate} 일자의 입/출고 내역이 없습니다.<br><br><span class='text-xs text-slate-400'>입력창을 비우고 검색하면 전체 목록이 보입니다.</span></div>`;
+    let periodText = currentInvPeriod === 'daily' ? "일간" : currentInvPeriod === 'weekly' ? "주간" : "월간";
+    area.innerHTML = `<div class='loading-text'>해당 ${periodText} 기준 입/출고 및 재고 내역이 없습니다.</div>`;
     return;
   }
 
@@ -261,11 +315,15 @@ function loadOtherModules(code) {
   if (code === '010') {
     contentDiv.innerHTML = `
       <div class="px-4 py-4 bg-slate-50 border-b border-slate-200 shrink-0">
-        <div class="relative max-w-lg mx-auto">
-          <input type="text" id="inv-date-picker" class="inv-date-picker" placeholder="날짜 검색 (예: 20260504)" onkeyup="if(event.key==='Enter') filterInventoryByDate()">
-          <button onclick="filterInventoryByDate()" class="absolute right-2 top-2 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md transition-colors">조회</button>
+        <div class="relative max-w-lg mx-auto mb-3">
+          <input type="text" id="inv-date-picker" class="inv-date-picker" placeholder="기준 날짜 입력 (예: 20260504)" onkeyup="if(event.key==='Enter') filterInventoryByDate()">
+          <button onclick="filterInventoryByDate()" class="absolute right-2 top-2 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow-md transition-colors">조회</button>
         </div>
-        <div class="text-center text-[10px] font-bold text-slate-400 mt-2">입력하신 날짜의 입출고 흐름이 표시됩니다. (빈칸 검색 시 전체 조회)</div>
+        <div class="flex gap-2 max-w-lg mx-auto">
+            <button id="tab-daily" onclick="setInvPeriod('daily')" class="tab-btn tab-active">일간(오늘의 입출고)</button>
+            <button id="tab-weekly" onclick="setInvPeriod('weekly')" class="tab-btn tab-inactive">주간 재고 현황</button>
+            <button id="tab-monthly" onclick="setInvPeriod('monthly')" class="tab-btn tab-inactive">월간 재고 현황</button>
+        </div>
       </div>
       <div id="inv-data-area" class="flex-1 overflow-y-auto p-4 bg-slate-100"></div>
     `;
@@ -276,6 +334,10 @@ function loadOtherModules(code) {
     .then(r=>r.json())
     .then(data => {
       allInventoryData = data; 
+      currentInvPeriod = 'daily'; // 모듈 처음 열 때 기본값
+      // 오늘 날짜 기본 세팅
+      let today = new Date();
+      document.getElementById("inv-date-picker").value = today.getFullYear() + "-" + String(today.getMonth()+1).padStart(2,'0') + "-" + String(today.getDate()).padStart(2,'0');
       filterInventoryByDate();
     }).catch(e => {
       area.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.<br>구글 스크립트 연결을 확인하세요.</div>";
@@ -284,7 +346,7 @@ function loadOtherModules(code) {
   }
   
   let action = "";
-  contentDiv.className = "module-content-area"; // 초기화
+  contentDiv.className = "module-content-area"; 
   contentDiv.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2'></i><br>데이터를 불러오는 중입니다...</div>";
   if(code === '020') action = "get_sales";
   else if(code === '030') action = "manual";
