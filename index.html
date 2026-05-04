@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ko">
 <head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -125,7 +125,7 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 <div class="tag-btn" onclick="loadRecipe('Fry')">튀김(Fry)</div>
 </div></div><div id="recipe-list" class="recipe-list-area flex-1 bg-slate-50">
 <div class="loading-text">위에서 카테고리를 선택하거나<br>검색어를 입력하세요.</div>
-</div></div><div id="workspace-010" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>자산재고</span></div></div><div id="content-010" class="module-content-area"></div></div>
+</div></div><div id="workspace-010" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>자산재고</span></div></div><div id="content-010" class="module-content-area flex flex-col h-full overflow-hidden"></div></div>
 <div id="workspace-020" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>손익관리</span></div></div><div id="content-020" class="module-content-area"></div></div>
 <div id="workspace-400" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>연구노트</span></div></div><div id="content-400" class="module-content-area"></div></div>
 <div id="workspace-030" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>직원교육</span></div></div><div id="content-030" class="module-content-area"></div></div>
@@ -173,34 +173,101 @@ document.querySelectorAll('.nav-item').forEach(b=>{
 b.classList.remove('active');
 if(b.querySelector('.nav-text').innerText === txt) b.classList.add('active');
 });}
+
+/* --- 자산 및 재고관리(010) 전용 탭 렌더링 함수 --- */
+function fetchInventory(type) {
+  const area = document.getElementById("inv-data-area");
+  const btnStock = document.getElementById("btn-inv-stock");
+  const btnLog = document.getElementById("btn-inv-log");
+  
+  if(type === 'stock') {
+     btnStock.className = "flex-1 py-2 rounded-xl text-sm font-black bg-indigo-600 text-white shadow-md transition-all";
+     btnLog.className = "flex-1 py-2 rounded-xl text-sm font-black bg-slate-200 text-slate-500 hover:bg-slate-300 transition-all";
+  } else {
+     btnLog.className = "flex-1 py-2 rounded-xl text-sm font-black bg-indigo-600 text-white shadow-md transition-all";
+     btnStock.className = "flex-1 py-2 rounded-xl text-sm font-black bg-slate-200 text-slate-500 hover:bg-slate-300 transition-all";
+  }
+
+  area.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2'></i><br>데이터를 불러오는 중입니다...</div>";
+  const action = type === 'stock' ? 'inventory' : 'inventory_log';
+  
+  fetch(`${gasUrl}?action=${action}`)
+  .then(r=>r.json())
+  .then(data => {
+    let h = "";
+    if(!data || data.length === 0) {
+      area.innerHTML = "<div class='loading-text'>등록된 내역이 없습니다.</div>";
+      return;
+    }
+    data.forEach(item => {
+      h += `<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-3">`;
+      let isOut = item["구분"] === "출고";
+      let isIn = item["구분"] === "매입" || item["구분"] === "기초재고";
+      
+      for(let key in item) {
+        if(key === 'row') continue;
+        let val = item[key] || "-";
+        let valColor = "text-slate-700";
+        if (key === "구분") {
+            if (isOut) valColor = "text-red-500";
+            else if (isIn) valColor = "text-blue-500";
+        }
+        h += `<div class="flex justify-between items-start border-b border-slate-100 py-2 last:border-0">
+                <span class="text-xs font-bold text-indigo-400 uppercase w-20 shrink-0">${key}</span>
+                <span class="text-sm font-bold break-words flex-1 ml-4 text-right ${valColor}">${val}</span>
+              </div>`;
+      }
+      h += `</div>`;
+    });
+    area.innerHTML = h;
+  }).catch(e => {
+    area.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.<br>구글 스크립트 연결을 확인하세요.</div>";
+  });
+}
+
 function loadOtherModules(code) {
-let action = "";let contentDiv = document.getElementById("content-" + code);
-contentDiv.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2'></i><br>데이터를 불러오는 중입니다...</div>";
-if(code === '010') action = "inventory";
-else if(code === '020') action = "get_sales";
-else if(code === '030') action = "manual";
-else if(code === '400') action = "rnd";
-else if(code === '500') action = "get_schedule";
-else if(code === '600') action = "get_notice";
-else if(code === '900') action = "archive";
-fetch(`${gasUrl}?action=${action}`)
-.then(r=>r.json())
-.then(data => {let h = "";if(!data || data.length === 0) {
-contentDiv.innerHTML = "<div class='loading-text'>등록된 데이터가 없습니다.</div>";
-return;}
-data.forEach(item => {
-h += `<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-3">`;
-for(let key in item) {
-if(key === 'row') continue; 
-let val = item[key] || "-";
-if(typeof val === 'string' && val.startsWith('http')) {
-val = `<a href="${val}" target="_blank" class="text-blue-500 underline font-bold truncate block max-w-full">링크 열기</a>`;
-}h += `<div class="flex justify-between items-start border-b border-slate-100 py-2 last:border-0">
-<span class="text-xs font-bold text-indigo-400 uppercase w-20 shrink-0">${key}</span>
-<span class="text-sm font-bold text-slate-700 text-right break-words flex-1 ml-4">${val}</span>
-</div>`;}h += `</div>`;});contentDiv.innerHTML = h;
-}).catch(e => {contentDiv.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.<br>구글 스크립트 연결을 확인하세요.</div>";
-});}
+  let contentDiv = document.getElementById("content-" + code);
+  
+  if (code === '010') {
+    contentDiv.innerHTML = `
+      <div class="flex gap-2 mb-4 shrink-0 px-1 pt-1">
+        <button id="btn-inv-stock" class="flex-1 py-2 rounded-xl text-sm font-black bg-indigo-600 text-white shadow-md transition-all" onclick="fetchInventory('stock')">현재 재고</button>
+        <button id="btn-inv-log" class="flex-1 py-2 rounded-xl text-sm font-black bg-slate-200 text-slate-500 hover:bg-slate-300 transition-all" onclick="fetchInventory('log')">수불 내역</button>
+      </div>
+      <div id="inv-data-area" class="flex-1 overflow-y-auto pb-10 px-1"></div>
+    `;
+    fetchInventory('stock');
+    return;
+  }
+  
+  let action = "";
+  contentDiv.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2'></i><br>데이터를 불러오는 중입니다...</div>";
+  if(code === '020') action = "get_sales";
+  else if(code === '030') action = "manual";
+  else if(code === '400') action = "rnd";
+  else if(code === '500') action = "get_schedule";
+  else if(code === '600') action = "get_notice";
+  else if(code === '900') action = "archive";
+
+  fetch(`${gasUrl}?action=${action}`)
+  .then(r=>r.json())
+  .then(data => {let h = "";if(!data || data.length === 0) {
+  contentDiv.innerHTML = "<div class='loading-text'>등록된 데이터가 없습니다.</div>";
+  return;}
+  data.forEach(item => {
+  h += `<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-3">`;
+  for(let key in item) {
+  if(key === 'row') continue; 
+  let val = item[key] || "-";
+  if(typeof val === 'string' && val.startsWith('http')) {
+  val = `<a href="${val}" target="_blank" class="text-blue-500 underline font-bold truncate block max-w-full">링크 열기</a>`;
+  }h += `<div class="flex justify-between items-start border-b border-slate-100 py-2 last:border-0">
+  <span class="text-xs font-bold text-indigo-400 uppercase w-20 shrink-0">${key}</span>
+  <span class="text-sm font-bold text-slate-700 text-right break-words flex-1 ml-4">${val}</span>
+  </div>`;}h += `</div>`;});contentDiv.innerHTML = h;
+  }).catch(e => {contentDiv.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.<br>구글 스크립트 연결을 확인하세요.</div>";
+  });}
+
 function openEmailModal(index) {
 selectedEmailRecipe = currentRecipesForEmail[index];
 document.getElementById('modal-recipe-name').innerText = "요리명: " + selectedEmailRecipe.name;
