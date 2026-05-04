@@ -63,7 +63,6 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 .btn-cancel { background: #f1f5f9; color: #64748b; border: none; }
 .btn-send { background: var(--primary); color: white; border: none; }
 .module-content-area { padding: 15px; flex: 1; overflow-y: auto; background: var(--bg); }
-.inv-date-picker { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 15px; font-weight: 900; color: #4f46e5; text-align: center; outline: none; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
 .custom-table { width: 100%; min-width: 800px; text-align: left; border-collapse: collapse; }
 .custom-table th { background: #f8fafc; color: #64748b; padding: 12px; font-size: 11px; text-transform: uppercase; font-weight: 900; border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 10;}
 .custom-table td { padding: 12px; font-size: 13px; font-weight: 600; color: #334155; border-bottom: 1px solid #f1f5f9; white-space: nowrap; }
@@ -72,7 +71,19 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 .tab-active { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2); }
 .tab-inactive { background: white; color: #64748b; border-color: #e2e8f0; }
 
-/* 일정 달력 전용 스타일 */
+/* 셰프님 맞춤형 재고관리 미니 달력 UI */
+.inv-cal-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: white; font-weight: 900; font-size: 16px; border-bottom: 1px solid #e2e8f0; }
+.inv-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); background: #e2e8f0; gap: 1px; border-bottom: 1px solid #e2e8f0; }
+.inv-cal-day-name { background: #f8fafc; text-align: center; padding: 8px 0; font-size: 10px; font-weight: 900; color: #64748b; }
+.inv-cal-cell { background: white; min-height: 50px; padding: 4px; cursor: pointer; transition: background 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+.inv-cal-cell:active { background: #f1f5f9; }
+.inv-cal-date { font-size: 12px; font-weight: 900; margin-bottom: 2px; display: inline-block; width: 24px; height: 24px; text-align: center; line-height: 24px; border-radius: 50%; }
+.inv-cal-cell.selected .inv-cal-date { background: var(--primary); color: white; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3); }
+.inv-cal-cell.today .inv-cal-date { border: 2px solid var(--primary); color: var(--primary); line-height: 20px; }
+.inv-cal-cell.selected.today .inv-cal-date { background: var(--primary); color: white; border: none; line-height: 24px; }
+.inv-cal-dot { width: 5px; height: 5px; background: #ef4444; border-radius: 50%; margin-top: 2px; } 
+
+/* 일정관리 전용 캘린더 */
 .calendar-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: white; font-weight: 900; font-size: 18px; border-bottom: 1px solid #e2e8f0; }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); background: #e2e8f0; gap: 1px; border-bottom: 1px solid #e2e8f0; }
 .calendar-day-name { background: #f8fafc; text-align: center; padding: 10px 0; font-size: 11px; font-weight: 900; color: #64748b; }
@@ -151,7 +162,7 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 <div class="nav-item" onclick="openModule('100')"><i class="fas fa-book nav-icon"></i><span class="nav-text">RECIPE</span></div>
 <div class="nav-item" onclick="openModule('400')"><i class="fas fa-flask nav-icon"></i><span class="nav-text">R&D</span></div>
 <div class="nav-item" onclick="openModule('900')"><i class="fas fa-folder nav-icon"></i><span class="nav-text">FILE</span></div>
-<div class="nav-item" onclick="openModule('500')"><i class="fas fa-calendar-check nav-icon"></i><span class="nav-text">SCHD</span></div>
+<div class="nav-item" onclick="openModule('010')"><i class="fas fa-chart-pie nav-icon"></i><span class="nav-text">MNG</span></div>
 </nav></div>
 
 <!-- 레시피 이메일 모달 -->
@@ -165,7 +176,7 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 <button class="modal-btn btn-send" id="btn-send-email" onclick="sendEmailRequest()">전송하기</button>
 </div></div></div>
 
-<!-- 일정관리 전용 팝업 모달 -->
+<!-- 일정관리 팝업 -->
 <div id="schedule-modal" class="modal-overlay">
   <div class="modal-box w-11/12 max-w-md bg-white rounded-2xl">
     <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
@@ -176,10 +187,7 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
        <div class="text-[11px] font-black tracking-widest text-indigo-500 mb-2 uppercase">새 일정 추가</div>
        <select id="new-sch-type" class="w-full p-2.5 mb-2 border border-slate-300 rounded-lg outline-none text-sm font-bold text-slate-700 bg-white">
-         <option value="일반">일반</option>
-         <option value="중요">중요</option>
-         <option value="회의">회의</option>
-         <option value="휴무">휴무</option>
+         <option value="일반">일반</option><option value="중요">중요</option><option value="회의">회의</option><option value="휴무">휴무</option>
        </select>
        <input type="text" id="new-sch-content" class="w-full p-2.5 mb-3 border border-slate-300 rounded-lg outline-none text-sm font-bold text-slate-700" placeholder="일정 내용을 입력하세요">
        <button onclick="saveNewSchedule(event)" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-lg shadow-md transition-colors">일정 등록하기</button>
@@ -189,12 +197,10 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 
 <script>
 const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
-let currentRecipesForEmail = []; let selectedEmailRecipe = null; let allInventoryData = [];
-let currentInvPeriod = 'daily'; 
+let currentRecipesForEmail = []; let selectedEmailRecipe = null; 
+let allInventoryData = []; let currentInvPeriod = 'daily'; 
+let currentInvCalDate = new Date(); let selectedInvDate = "";
 
-/* ==========================================
-   공통 라우팅 및 네비게이션
-========================================== */
 function goMain() {
 document.querySelectorAll('.workspace').forEach(e=>e.style.display='none');
 document.getElementById('main-view').style.display='flex';
@@ -221,38 +227,76 @@ b.classList.remove('active');
 if(b.querySelector('.nav-text').innerText === txt) b.classList.add('active');
 });}
 
-/* ==========================================
-   스마트 날짜 파서
-========================================== */
-function parseDateString(val) {
-  let digits = val.replace(/[^0-9]/g, '');
-  if (digits.length < 4) return null;
-  let y, m, d;
-  if (digits.length === 4) { y = new Date().getFullYear(); m = digits.substring(0,2); d = digits.substring(2,4); }
-  else if (digits.length === 6) { y = "20" + digits.substring(0,2); m = digits.substring(2,4); d = digits.substring(4,6); }
-  else if (digits.length === 8) { y = digits.substring(0,4); m = digits.substring(4,6); d = digits.substring(6,8); }
-  else if (digits.length > 8) {
-    y = digits.substring(0,4);
-    let rest = digits.substring(4);
-    m = rest.substring(0, rest.length-2); d = rest.slice(-2);
-    if(parseInt(m,10)>12) { m = rest.substring(0,2); d = rest.substring(2); }
-  }
-  let month = parseInt(m, 10); let day = parseInt(d, 10);
-  if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-    return y + "-" + String(month).padStart(2, '0') + "-" + String(day).padStart(2, '0');
-  }
-  return null;
-}
 function getWeekRange(dateStr) {
   let d = new Date(dateStr);
   let day = d.getDay() || 7; 
   d.setHours(0,0,0,0);
-  let start = new Date(d);
-  start.setDate(d.getDate() - day + 1); 
-  let end = new Date(start);
-  end.setDate(start.getDate() + 6); 
+  let start = new Date(d); start.setDate(d.getDate() - day + 1); 
+  let end = new Date(start); end.setDate(start.getDate() + 6); 
   return {start: start, end: end};
 }
+
+/* ==========================================
+   자산재고 (010) 달력 및 테이블 엔진
+========================================== */
+function renderInvCalendar() {
+  const year = currentInvCalDate.getFullYear();
+  const month = currentInvCalDate.getMonth();
+  document.getElementById('inv-cal-month-year').innerText = `${year}년 ${month + 1}월`;
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevMonthDays = new Date(year, month, 0).getDate();
+
+  let h = "";
+  for(let i = firstDay - 1; i >= 0; i--) {
+    h += `<div class="inv-cal-cell other-month"><span class="inv-cal-date text-slate-300">${prevMonthDays - i}</span></div>`;
+  }
+  
+  let today = new Date();
+  let todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  
+  // 입출고 내역이 있는 날짜 추출
+  let activeDates = new Set();
+  allInventoryData.forEach(item => {
+     if(item["입고일자"] && item["입고일자"] !== "-") activeDates.add(item["입고일자"]);
+     if(item["출고일자"] && item["출고일자"] !== "-") activeDates.add(item["출고일자"]);
+  });
+
+  for(let i = 1; i <= daysInMonth; i++) {
+    let dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+    let isSelected = (dateStr === selectedInvDate) ? 'selected' : '';
+    let isToday = (dateStr === todayStr) ? 'today' : '';
+    let dayOfWeek = new Date(year, month, i).getDay();
+    let dayClass = dayOfWeek === 0 ? 'sun text-red-500' : (dayOfWeek === 6 ? 'sat text-blue-500' : '');
+    let dot = activeDates.has(dateStr) ? '<div class="inv-cal-dot"></div>' : '';
+
+    h += `<div class="inv-cal-cell ${isSelected} ${isToday}" onclick="selectInvDate('${dateStr}')">
+            <span class="inv-cal-date ${dayClass}">${i}</span>
+            ${dot}
+          </div>`;
+  }
+  
+  const totalCells = firstDay + daysInMonth;
+  let nextDays = 42 - totalCells; 
+  if (totalCells <= 35) nextDays = 35 - totalCells; 
+  for(let i = 1; i <= nextDays; i++) {
+    h += `<div class="inv-cal-cell other-month"><span class="inv-cal-date text-slate-300">${i}</span></div>`;
+  }
+  document.getElementById('inv-cal-grid-content').innerHTML = h;
+}
+
+function changeInvMonth(diff) {
+  currentInvCalDate.setMonth(currentInvCalDate.getMonth() + diff);
+  renderInvCalendar();
+}
+
+function selectInvDate(dateStr) {
+  selectedInvDate = dateStr;
+  renderInvCalendar(); // 달력 UI 갱신 (선택 효과)
+  filterInventoryByDate(); // 표 데이터 갱신
+}
+
 function setInvPeriod(period) {
   currentInvPeriod = period;
   document.getElementById('tab-daily').className = (period === 'daily') ? 'tab-btn tab-active' : 'tab-btn tab-inactive';
@@ -261,30 +305,15 @@ function setInvPeriod(period) {
   filterInventoryByDate();
 }
 
-/* ==========================================
-   자산재고 (010) 엔진
-========================================== */
 function filterInventoryByDate() {
-  let inputEl = document.getElementById("inv-date-picker");
-  let selectedDate = inputEl.value.trim();
   const area = document.getElementById("inv-data-area");
-  
   if (!allInventoryData || allInventoryData.length === 0) {
     area.innerHTML = "<div class='loading-text'>등록된 데이터가 없습니다.</div>";
     return;
   }
-  if (selectedDate) {
-    let parsedDate = parseDateString(selectedDate);
-    if (parsedDate) { selectedDate = parsedDate; inputEl.value = selectedDate; } 
-    else { area.innerHTML = "<div class='loading-text text-red-500'>올바른 기준 날짜를 입력해주세요.</div>"; return; }
-  } else {
-    let today = new Date();
-    selectedDate = today.getFullYear() + "-" + String(today.getMonth()+1).padStart(2,'0') + "-" + String(today.getDate()).padStart(2,'0');
-    inputEl.value = selectedDate;
-  }
 
-  let refDate = new Date(selectedDate);
-  let weekRange = getWeekRange(selectedDate);
+  let refDate = new Date(selectedInvDate);
+  let weekRange = getWeekRange(selectedInvDate);
   let aggregated = {};
   let globalStock = {};
 
@@ -311,8 +340,8 @@ function filterInventoryByDate() {
 
     let isInPeriod = false; let isOutPeriod = false;
     if (currentInvPeriod === 'daily') {
-      if (inDStr === selectedDate) isInPeriod = true;
-      if (outDStr === selectedDate) isOutPeriod = true;
+      if (inDStr === selectedInvDate) isInPeriod = true;
+      if (outDStr === selectedInvDate) isOutPeriod = true;
     } else if (currentInvPeriod === 'weekly') {
       if (inD && inD >= weekRange.start && inD <= weekRange.end) isInPeriod = true;
       if (outD && outD >= weekRange.start && outD <= weekRange.end) isOutPeriod = true;
@@ -360,7 +389,7 @@ function filterInventoryByDate() {
     let avgPrice = agg.inQty > 0 ? Math.round(agg.totalCost / agg.inQty) : latestPrice;
 
     let dateLabel = "";
-    if(currentInvPeriod === 'daily') dateLabel = selectedDate;
+    if(currentInvPeriod === 'daily') dateLabel = selectedInvDate;
     else if(currentInvPeriod === 'weekly') dateLabel = `${String(weekRange.start.getMonth()+1).padStart(2,'0')}.${String(weekRange.start.getDate()).padStart(2,'0')} ~ ${String(weekRange.end.getMonth()+1).padStart(2,'0')}.${String(weekRange.end.getDate()).padStart(2,'0')}`;
     else if(currentInvPeriod === 'monthly') dateLabel = `${refDate.getFullYear()}.${String(refDate.getMonth()+1).padStart(2,'0')}월`;
 
@@ -404,15 +433,12 @@ function renderCalendar() {
   const prevMonthDays = new Date(year, month, 0).getDate();
 
   let h = "";
-  for(let i = firstDay - 1; i >= 0; i--) {
-    h += `<div class="calendar-cell other-month"><span class="calendar-date">${prevMonthDays - i}</span></div>`;
-  }
+  for(let i = firstDay - 1; i >= 0; i--) { h += `<div class="calendar-cell other-month"><span class="calendar-date">${prevMonthDays - i}</span></div>`; }
   let today = new Date();
   for(let i = 1; i <= daysInMonth; i++) {
     let isToday = (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) ? 'today' : '';
     let dayOfWeek = new Date(year, month, i).getDay();
     let dayClass = dayOfWeek === 0 ? 'sun' : (dayOfWeek === 6 ? 'sat' : '');
-
     let dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
     let daySchedules = allSchedules.filter(s => s.date === dateStr);
 
@@ -425,96 +451,47 @@ function renderCalendar() {
        badges += `<div class="schedule-badge ${badgeColor}">${s.content}</div>`;
     });
 
-    h += `<div class="calendar-cell ${isToday} ${dayClass}" onclick="openScheduleDay('${dateStr}')">
-            <span class="calendar-date">${i}</span>
-            <div class="flex flex-col gap-1 w-full flex-1 overflow-hidden">${badges}</div>
-          </div>`;
+    h += `<div class="calendar-cell ${isToday} ${dayClass}" onclick="openScheduleDay('${dateStr}')"><span class="calendar-date">${i}</span><div class="flex flex-col gap-1 w-full flex-1 overflow-hidden">${badges}</div></div>`;
   }
   
   const totalCells = firstDay + daysInMonth;
   let nextDays = 42 - totalCells; 
   if (totalCells <= 35) nextDays = 35 - totalCells; 
-  for(let i = 1; i <= nextDays; i++) {
-    h += `<div class="calendar-cell other-month"><span class="calendar-date">${i}</span></div>`;
-  }
+  for(let i = 1; i <= nextDays; i++) { h += `<div class="calendar-cell other-month"><span class="calendar-date">${i}</span></div>`; }
   document.getElementById('cal-grid-content').innerHTML = h;
 }
-
-function changeMonth(diff) {
-  currentCalDate.setMonth(currentCalDate.getMonth() + diff);
-  renderCalendar();
-}
-
+function changeMonth(diff) { currentCalDate.setMonth(currentCalDate.getMonth() + diff); renderCalendar(); }
 function openScheduleDay(dateStr) {
-  selectedSchDate = dateStr;
-  document.getElementById('schedule-modal-date').innerText = dateStr + " 일정";
-  document.getElementById('new-sch-content').value = "";
-
+  selectedSchDate = dateStr; document.getElementById('schedule-modal-date').innerText = dateStr + " 일정"; document.getElementById('new-sch-content').value = "";
   let daySchedules = allSchedules.filter(s => s.date === dateStr);
   let h = "";
-  if(daySchedules.length === 0) {
-    h = "<div class='text-sm font-bold text-slate-400 text-center py-6 bg-slate-50 rounded-lg'>등록된 일정이 없습니다.</div>";
-  } else {
+  if(daySchedules.length === 0) h = "<div class='text-sm font-bold text-slate-400 text-center py-6 bg-slate-50 rounded-lg'>등록된 일정이 없습니다.</div>";
+  else {
     daySchedules.forEach(s => {
       let badgeColor = "bg-slate-200 text-slate-600";
       if(s.type === "회의" || s.type.includes("미팅")) badgeColor = "bg-blue-100 text-blue-600";
       else if(s.type === "중요" || s.type.includes("결제")) badgeColor = "bg-red-100 text-red-600";
       else if(s.type === "휴무" || s.type.includes("휴가")) badgeColor = "bg-green-100 text-green-600";
-      
-      h += `<div class="flex items-center justify-between mb-2 p-3 bg-white border border-slate-200 rounded-lg shadow-sm">
-              <div class="flex items-center gap-3">
-                <span class="text-[11px] font-black px-2 py-1 rounded-md ${badgeColor}">${s.type}</span>
-                <span class="text-sm font-bold text-slate-700">${s.content}</span>
-              </div>
-              <i class="fas fa-trash-alt text-red-300 hover:text-red-500 cursor-pointer p-1 transition-colors" onclick="deleteSchedule(${s.row}, '${dateStr}')"></i>
-            </div>`;
+      h += `<div class="flex items-center justify-between mb-2 p-3 bg-white border border-slate-200 rounded-lg shadow-sm"><div class="flex items-center gap-3"><span class="text-[11px] font-black px-2 py-1 rounded-md ${badgeColor}">${s.type}</span><span class="text-sm font-bold text-slate-700">${s.content}</span></div><i class="fas fa-trash-alt text-red-300 hover:text-red-500 cursor-pointer p-1 transition-colors" onclick="deleteSchedule(${s.row}, '${dateStr}')"></i></div>`;
     });
   }
-  document.getElementById('schedule-day-list').innerHTML = h;
-  document.getElementById('schedule-modal').style.display = "flex";
+  document.getElementById('schedule-day-list').innerHTML = h; document.getElementById('schedule-modal').style.display = "flex";
 }
-
-function closeScheduleModal() {
-  document.getElementById('schedule-modal').style.display = "none";
-}
-
+function closeScheduleModal() { document.getElementById('schedule-modal').style.display = "none"; }
 function saveNewSchedule(e) {
-  const content = document.getElementById('new-sch-content').value.trim();
-  const type = document.getElementById('new-sch-type').value;
+  const content = document.getElementById('new-sch-content').value.trim(); const type = document.getElementById('new-sch-type').value;
   if(!content) return alert("일정 내용을 입력하세요.");
-
-  const btn = e.target;
-  const originalText = btn.innerText;
-  btn.innerText = "등록 중...";
-  btn.disabled = true;
-
-  fetch(`${gasUrl}?action=save_schedule&date=${selectedSchDate}&content=${encodeURIComponent(content)}&type=${encodeURIComponent(type)}`)
-  .then(r => r.text())
-  .then(res => {
-    fetch(`${gasUrl}?action=get_schedule`).then(r=>r.json()).then(data => {
-      allSchedules = data;
-      renderCalendar();
-      openScheduleDay(selectedSchDate); 
-      btn.innerText = originalText;
-      btn.disabled = false;
-    });
-  })
-  .catch(e => { alert("오류가 발생했습니다."); btn.innerText = originalText; btn.disabled = false; });
+  const btn = e.target; const originalText = btn.innerText; btn.innerText = "등록 중..."; btn.disabled = true;
+  fetch(`${gasUrl}?action=save_schedule&date=${selectedSchDate}&content=${encodeURIComponent(content)}&type=${encodeURIComponent(type)}`).then(r => r.text()).then(res => {
+    fetch(`${gasUrl}?action=get_schedule`).then(r=>r.json()).then(data => { allSchedules = data; renderCalendar(); openScheduleDay(selectedSchDate); btn.innerText = originalText; btn.disabled = false; });
+  }).catch(e => { alert("오류가 발생했습니다."); btn.innerText = originalText; btn.disabled = false; });
 }
-
 function deleteSchedule(row, dateStr) {
   if(!confirm("이 일정을 삭제하시겠습니까?")) return;
-  fetch(`${gasUrl}?action=delete_item&sheetName=일정관리&row=${row}`)
-  .then(r => r.text())
-  .then(res => {
-     fetch(`${gasUrl}?action=get_schedule`).then(r=>r.json()).then(data => {
-      allSchedules = data;
-      renderCalendar();
-      openScheduleDay(dateStr);
-    });
+  fetch(`${gasUrl}?action=delete_item&sheetName=일정관리&row=${row}`).then(r => r.text()).then(res => {
+     fetch(`${gasUrl}?action=get_schedule`).then(r=>r.json()).then(data => { allSchedules = data; renderCalendar(); openScheduleDay(dateStr); });
   });
 }
-
 
 /* ==========================================
    모듈 로더
@@ -524,15 +501,22 @@ function loadOtherModules(code) {
   
   if (code === '010') {
     contentDiv.innerHTML = `
-      <div class="px-4 py-4 bg-slate-50 border-b border-slate-200 shrink-0">
-        <div class="relative max-w-lg mx-auto mb-4">
-          <input type="text" id="inv-date-picker" class="inv-date-picker" placeholder="기준 날짜 입력 (예: 20260504)" onkeyup="if(event.key==='Enter') filterInventoryByDate()">
-          <button onclick="filterInventoryByDate()" class="absolute right-2 top-2 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow-md transition-colors">조회</button>
+      <div id="inv-calendar-wrapper" class="bg-white border-b border-slate-200 shrink-0">
+        <div class="inv-cal-header">
+          <button onclick="changeInvMonth(-1)" class="p-2 text-slate-400 hover:text-indigo-500"><i class="fas fa-chevron-left"></i></button>
+          <span id="inv-cal-month-year" class="text-indigo-900 tracking-wider"></span>
+          <button onclick="changeInvMonth(1)" class="p-2 text-slate-400 hover:text-indigo-500"><i class="fas fa-chevron-right"></i></button>
         </div>
+        <div class="inv-cal-grid">
+          <div class="inv-cal-day-name sun text-red-500">일</div><div class="inv-cal-day-name">월</div><div class="inv-cal-day-name">화</div><div class="inv-cal-day-name">수</div><div class="inv-cal-day-name">목</div><div class="inv-cal-day-name">금</div><div class="inv-cal-day-name sat text-blue-500">토</div>
+        </div>
+        <div id="inv-cal-grid-content" class="inv-cal-grid" style="grid-auto-rows: minmax(50px, 1fr);"></div>
+      </div>
+      <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 shrink-0">
         <div class="flex gap-2 max-w-lg mx-auto">
-            <button id="tab-daily" onclick="setInvPeriod('daily')" class="tab-btn tab-active">일간 (오늘의 입출고)</button>
-            <button id="tab-weekly" onclick="setInvPeriod('weekly')" class="tab-btn tab-inactive">주간 재고 현황</button>
-            <button id="tab-monthly" onclick="setInvPeriod('monthly')" class="tab-btn tab-inactive">월간 재고 현황</button>
+            <button id="tab-daily" onclick="setInvPeriod('daily')" class="tab-btn tab-active">일간 (선택일자)</button>
+            <button id="tab-weekly" onclick="setInvPeriod('weekly')" class="tab-btn tab-inactive">주간 재고</button>
+            <button id="tab-monthly" onclick="setInvPeriod('monthly')" class="tab-btn tab-inactive">월간 재고</button>
         </div>
       </div>
       <div id="inv-data-area" class="flex-1 overflow-y-auto bg-slate-100 p-0"></div>
@@ -544,13 +528,17 @@ function loadOtherModules(code) {
     .then(r=>r.json())
     .then(data => {
       allInventoryData = data; 
+      let today = new Date();
+      selectedInvDate = today.getFullYear() + "-" + String(today.getMonth()+1).padStart(2,'0') + "-" + String(today.getDate()).padStart(2,'0');
+      currentInvCalDate = new Date();
       currentInvPeriod = 'daily'; 
+      renderInvCalendar(); 
       filterInventoryByDate(); 
     }).catch(e => { area.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.</div>"; });
     return;
   }
 
-  // 달력 모듈 (500)
+  // 일정관리 모듈 (500)
   if (code === '500') {
     contentDiv.innerHTML = `
       <div class="calendar-header">
@@ -565,172 +553,42 @@ function loadOtherModules(code) {
     `;
     currentCalDate = new Date();
     document.getElementById('cal-grid-content').innerHTML = "<div style='grid-column: span 7;' class='loading-text'><i class='fas fa-spinner fa-spin text-2xl mb-2 text-indigo-500'></i><br>일정 데이터를 불러오는 중...</div>";
-    fetch(`${gasUrl}?action=get_schedule`)
-    .then(r=>r.json())
-    .then(data => {
-       allSchedules = data;
-       renderCalendar();
-    });
+    fetch(`${gasUrl}?action=get_schedule`).then(r=>r.json()).then(data => { allSchedules = data; renderCalendar(); });
     return;
   }
   
   let action = "";
   contentDiv.className = "module-content-area"; 
   contentDiv.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2'></i><br>데이터를 불러오는 중입니다...</div>";
-  if(code === '020') action = "get_sales";
-  else if(code === '030') action = "manual";
-  else if(code === '400') action = "rnd";
-  else if(code === '600') action = "get_notice";
-  else if(code === '900') action = "archive";
+  if(code === '020') action = "get_sales"; else if(code === '030') action = "manual"; else if(code === '400') action = "rnd"; else if(code === '600') action = "get_notice"; else if(code === '900') action = "archive";
 
   fetch(`${gasUrl}?action=${action}`)
   .then(r=>r.json())
-  .then(data => {let h = "";if(!data || data.length === 0) {
-  contentDiv.innerHTML = "<div class='loading-text'>등록된 데이터가 없습니다.</div>";
-  return;}
+  .then(data => {let h = "";if(!data || data.length === 0) { contentDiv.innerHTML = "<div class='loading-text'>등록된 데이터가 없습니다.</div>"; return;}
   data.forEach(item => {
   h += `<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-3">`;
-  for(let key in item) {
-  if(key === 'row') continue; 
-  let val = item[key] || "-";
-  if(typeof val === 'string' && val.startsWith('http')) {
-  val = `<a href="${val}" target="_blank" class="text-blue-500 underline font-bold truncate block max-w-full">링크 열기</a>`;
-  }h += `<div class="flex justify-between items-start border-b border-slate-100 py-2 last:border-0">
-  <span class="text-xs font-bold text-indigo-400 uppercase w-20 shrink-0">${key}</span>
-  <span class="text-sm font-bold text-slate-700 text-right break-words flex-1 ml-4">${val}</span>
-  </div>`;}h += `</div>`;});contentDiv.innerHTML = h;
-  }).catch(e => {contentDiv.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.</div>";
-  });}
+  for(let key in item) { if(key === 'row') continue; let val = item[key] || "-";
+  if(typeof val === 'string' && val.startsWith('http')) { val = `<a href="${val}" target="_blank" class="text-blue-500 underline font-bold truncate block max-w-full">링크 열기</a>`; }
+  h += `<div class="flex justify-between items-start border-b border-slate-100 py-2 last:border-0"><span class="text-xs font-bold text-indigo-400 uppercase w-20 shrink-0">${key}</span><span class="text-sm font-bold text-slate-700 text-right break-words flex-1 ml-4">${val}</span></div>`;}
+  h += `</div>`;});contentDiv.innerHTML = h;
+  }).catch(e => {contentDiv.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.</div>"; });
+}
 
 function openEmailModal(index) {
-selectedEmailRecipe = currentRecipesForEmail[index];
-document.getElementById('modal-recipe-name').innerText = "요리명: " + selectedEmailRecipe.name;
-document.getElementById('email-input').value = "";
-document.getElementById('email-modal').style.display = "flex";
-}function closeEmailModal() {
-document.getElementById('email-modal').style.display = "none";
-selectedEmailRecipe = null;
+selectedEmailRecipe = currentRecipesForEmail[index]; document.getElementById('modal-recipe-name').innerText = "요리명: " + selectedEmailRecipe.name; document.getElementById('email-input').value = ""; document.getElementById('email-modal').style.display = "flex";
+}function closeEmailModal() { document.getElementById('email-modal').style.display = "none"; selectedEmailRecipe = null;
 }function sendEmailRequest() {
-const emailInput = document.getElementById('email-input').value.trim();
-if (!emailInput || !emailInput.includes('@')) {
-alert("정확한 이메일 주소를 입력해주세요.");
-return;}const btn = document.getElementById('btn-send-email');
-btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 전송중...';
-btn.disabled = true;
-const r = selectedEmailRecipe;
-const subject = `[CHEF D.S. KIM] 레시피 공유: ${r.name}`;
-let htmlBody = `<div style="font-family: 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background-color: #ffffff;">`;
-htmlBody += `<div style="background: #4f46e5; color: white; padding: 25px 20px; text-align: center;"><h2 style="margin: 0; font-size: 24px; font-style: italic; font-weight: 900;">CHEF D.S. KIM</h2><p style="margin: 5px 0 0 0; font-size: 12px; font-weight: 700; opacity: 0.8;">SMART KITCHEN SYSTEM</p></div>`;
-htmlBody += `<div style="padding: 25px;">`;
-htmlBody += `<h3 style="margin: 0 0 20px 0; font-size: 20px; color: #1e293b; font-weight: 900;">${r.name}</h3>`;
-htmlBody += `<table style="width:100%; border-collapse: collapse; margin-bottom: 25px; font-size: 13px;">`;
-htmlBody += `<tr><td style="padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; font-weight: bold; color: #64748b; width: 80px;">관리코드</td><td style="padding: 10px; border: 1px solid #e2e8f0; color: #4f46e5; font-weight: bold;">${r.code}</td></tr>`;
-htmlBody += `<tr><td style="padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; font-weight: bold; color: #64748b;">수정일</td><td style="padding: 10px; border: 1px solid #e2e8f0; color: #334155; font-weight: bold;">${r.date}</td></tr>`;
-htmlBody += `<tr><td style="padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; font-weight: bold; color: #64748b;">작성자</td><td style="padding: 10px; border: 1px solid #e2e8f0; color: #334155; font-weight: bold;">${r.author}</td></tr>`;
-htmlBody += `<tr><td style="padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; font-weight: bold; color: #64748b;">인분수</td><td style="padding: 10px; border: 1px solid #e2e8f0; color: #ea580c; font-weight: bold;">${r.serving}</td></tr>`;
-htmlBody += `</table>`;
-r.details.forEach(d => {
-htmlBody += `<div style="margin-bottom: 20px;">`;
-htmlBody += `<div style="font-size: 12px; font-weight: 900; color: #4f46e5; margin-bottom: 6px; border-left: 3px solid #4f46e5; padding-left: 8px;">${d.cat}</div>`;
-let txt = d.text;let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
-if (driveMatch) {let m = driveMatch[0].match(/[-\w]{25,}/);
-if (m) {let viewSrc = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`;
-let orgLink = `https://drive.google.com/file/d/${m[0]}/view`;
-let imgTag = `<div style="margin-top: 10px; margin-bottom: 10px;"><a href="${orgLink}" target="_blank"><img src="${viewSrc}" style="width: 100%; max-width: 400px; border-radius: 8px; border: 1px solid #e2e8f0;" alt="사진"></a></div>`;
-txt = txt.replace(driveMatch[0], imgTag);
-}} else if(txt.includes("http")) {
-txt = txt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" style="color: #3b82f6;">[링크 열기]</a>`);
-}let cleanTxt = txt.replace(/<[^>]*>?/gm, '').trim();
-if(cleanTxt !== "" || txt.includes("<img")) {
-htmlBody += `<div style="background: #f8fafc; padding: 16px; border-radius: 12px; font-size: 13px; color: #334155; white-space: pre-wrap; border: 1px solid #e2e8f0; line-height: 1.6;">${txt}</div>`;
-}htmlBody += `</div>`;
-});htmlBody += `</div></div>`;
-fetch(gasUrl, {method: 'POST',headers: { "Content-Type": "text/plain;charset=utf-8" },
-body: JSON.stringify({ action: 'sendEmail', toEmail: emailInput, subject: subject, htmlBody: htmlBody })
-}).then(res => res.json()).then(data => {
-btn.innerHTML = '전송하기'; btn.disabled = false;
-if(data.result === 'success') { alert('성공적으로 메일을 발송했습니다!'); closeEmailModal(); }
-else { alert('발송 실패: ' + data.message); }
-}).catch(err => {btn.innerHTML = '전송하기'; btn.disabled = false;
-alert('오류가 발생했습니다.');
-});}
-document.getElementById('recipeInput').addEventListener('keypress', e => {
-if(e.key==='Enter') loadRecipe(document.getElementById('recipeInput').value);
-});function loadRecipe(keywordStr) {
-const area = document.getElementById('recipe-list');
-area.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl mb-2 text-indigo-500'></i><br>데이터를 불러오는 중입니다...</div>";
-document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
-try {if(window.event && window.event.target && window.event.target.classList.contains('tag-btn')) {
-window.event.target.classList.add('active');
-}} catch(e) {}let safeKeyword = (keywordStr || "").trim();
-fetch(`${gasUrl}?action=recipe&keyword=${encodeURIComponent(safeKeyword)}`)
-.then(r=>r.json())
-.then(l => {let h = ""; let count = 0;
-currentRecipesForEmail = [];
-const codeSegments = [
-'KOR', 'JAP', 'WST', 'CHN', 'SEA', 'ETC',
-'MEAT', 'POULTRY', 'SEAFOOD', 'VEG',
-'MAIN', 'APP', 'SIDE', 'SAUCE',
-'STEAM', 'BOIL', 'SMOKE', 'GRILL', 'COLD', 'FRY'
-];const isCodeSearch = codeSegments.includes(safeKeyword.toUpperCase());
-l.forEach((i) => {let code = "-", date = "-", author = "-", serving = "-";
-let materialsStr = ""; let processStr = ""; let mainPhotoHtml = "";
-let recipeDataForEmail = { name: i.name || "이름없음", type: i.type || "-", code: "-", date: "-", author: "-", serving: "-", details: [] };
-const safeDetails = i.details || [];
-safeDetails.forEach(d => {
-let txt = d.text || ""; let cleanCat = (d.cat || "").replace(/\s/g, "");
-if (cleanCat.includes("관리코드")) { code = txt; recipeDataForEmail.code = txt; }
-else if (cleanCat.includes("수정일") || cleanCat.includes("날짜")) { date = txt; recipeDataForEmail.date = txt; }
-else if (cleanCat.includes("작성자")) { author = txt; recipeDataForEmail.author = txt; }
-else if (cleanCat.includes("인분") || cleanCat.includes("수량")) { serving = txt; recipeDataForEmail.serving = txt; }
-});safeDetails.forEach(d => {
-let txt = d.text || ""; let cleanCat = (d.cat || "").replace(/\s/g, "");
-let isTopInfo = false;
-if (cleanCat.includes("관리코드") || cleanCat.includes("수정일") || cleanCat.includes("날짜") || cleanCat.includes("작성자") || cleanCat.includes("인분") || cleanCat.includes("수량")) { isTopInfo = true; }
-if (!isTopInfo) { recipeDataForEmail.details.push({ cat: d.cat || "-", text: txt }); }
-if (isTopInfo) return;
-let htmlTxt = txt;let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/);
-if (driveMatch) {let m = driveMatch[0].match(/[-\w]{25,}/);
-if (m) {let viewSrc = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`;
-let orgLink = `https://drive.google.com/file/d/${m[0]}/view`;
-mainPhotoHtml = `<div class="w-full max-w-[400px] shrink-0 rounded-xl overflow-hidden border border-slate-200 shadow-sm cursor-pointer" onclick="window.open('${orgLink}', '_blank')"><img src="${viewSrc}" style="width: 100%; height: auto; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"></div>`;
-htmlTxt = htmlTxt.replace(driveMatch[0], "").trim();
-}} else if(htmlTxt.includes("http")) {
-htmlTxt = htmlTxt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`);
-}if(htmlTxt === "") return;
-const sectionHtml = `<div class="detail-section"><div class="detail-label">${d.cat || "-"}</div><div class="detail-content-box">${htmlTxt}</div></div>`;
-let isMaterial = cleanCat.includes("재료") || cleanCat.includes("양념") || cleanCat.includes("드레싱");
-if (isMaterial) { materialsStr += sectionHtml; } else { processStr += sectionHtml; }
-});if (isCodeSearch) {
-const codeUpper = code.toUpperCase(); const typeUpper = (i.type || "").toUpperCase(); const kwUpper = safeKeyword.toUpperCase();
-if (!codeUpper.includes(kwUpper) && !typeUpper.includes(kwUpper)) return;
-}const currentIndex = currentRecipesForEmail.length;
-currentRecipesForEmail.push(recipeDataForEmail);
-let thumbHtml = `<div class="recipe-img-empty"><i class="fas fa-image text-xl mb-1"></i>NO IMG</div>`;
-if (i.img && i.img.includes("http")) {
-let src = i.img; let link = i.img;
-if (src.includes("drive.google.com")) {
-let m = src.match(/[-\w]{25,}/);
-if(m) { src = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`; link = `https://drive.google.com/file/d/${m[0]}/view`; }
-}thumbHtml = `<div class="recipe-thumb-box" onclick="window.open('${link}', '_blank')"><img src="${src}" class="recipe-thumb" onerror="this.parentElement.innerHTML='<div class=\\'recipe-img-empty\\'><i class=\\'fas fa-ban text-red-400 text-xl mb-1\\'></i>권한오류</div>'"></div>`;
-}h += `<div class="recipe-card" onclick="this.classList.toggle('open')">
-<div class="recipe-card-head">
-<div><span class="recipe-title">${i.name || "이름없음"}</span><span class="recipe-badge">${i.type || "-"}</span></div>
-<i class="fas fa-chevron-down text-slate-300"></i>
-</div><div class="recipe-card-body" onclick="event.stopPropagation()">
-<div class="flex gap-4 items-start mb-6 pb-6 border-b border-dashed border-slate-200">
-${thumbHtml}<div class="flex-1 bg-white border border-slate-100 shadow-sm rounded-xl p-3 relative">
-<button onclick="openEmailModal(${currentIndex}); event.stopPropagation();" class="absolute top-3 right-3 text-indigo-500 bg-indigo-50 px-3 py-1.5 rounded-lg text-xs font-bold border border-indigo-100 active:bg-indigo-100 transition-colors">
-<i class="fas fa-paper-plane mr-1"></i>보내기
-</button><div class="info-grid pr-16">
-<div class="info-label">📋 관리코드</div><div class="info-value text-indigo-600">${code}</div>
-<div class="info-label">📅 수정일</div><div class="info-value">${date}</div>
-<div class="info-label">👨‍🍳 작성자</div><div class="info-value">${author}</div>
-<div class="info-label">🍽️ 인분수</div><div class="info-value text-orange-600">${serving}</div>
-</div></div></div><div class="flex flex-col md:flex-row gap-6 mb-6">
-${mainPhotoHtml}
-<div class="flex-1 min-w-0">${materialsStr}</div>
-</div><div class="w-full">${processStr}</div>
-</div></div>`;count++;});area.innerHTML = count > 0 ? h : "<div class='loading-text'>검색 결과가 없습니다.</div>";
-}).catch(e => {console.error(e);area.innerHTML = "<div class='loading-text text-red-500'>오류가 발생했습니다.</div>";
-});}</script></body></html>
+const emailInput = document.getElementById('email-input').value.trim(); if (!emailInput || !emailInput.includes('@')) { alert("정확한 이메일 주소를 입력해주세요."); return;}
+const btn = document.getElementById('btn-send-email'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 전송중...'; btn.disabled = true; const r = selectedEmailRecipe; const subject = `[CHEF D.S. KIM] 레시피 공유: ${r.name}`;
+let htmlBody = `<div style="font-family: 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background-color: #ffffff;"><div style="background: #4f46e5; color: white; padding: 25px 20px; text-align: center;"><h2 style="margin: 0; font-size: 24px; font-style: italic; font-weight: 900;">CHEF D.S. KIM</h2><p style="margin: 5px 0 0 0; font-size: 12px; font-weight: 700; opacity: 0.8;">SMART KITCHEN SYSTEM</p></div><div style="padding: 25px;"><h3 style="margin: 0 0 20px 0; font-size: 20px; color: #1e293b; font-weight: 900;">${r.name}</h3><table style="width:100%; border-collapse: collapse; margin-bottom: 25px; font-size: 13px;"><tr><td style="padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; font-weight: bold; color: #64748b; width: 80px;">관리코드</td><td style="padding: 10px; border: 1px solid #e2e8f0; color: #4f46e5; font-weight: bold;">${r.code}</td></tr><tr><td style="padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; font-weight: bold; color: #64748b;">수정일</td><td style="padding: 10px; border: 1px solid #e2e8f0; color: #334155; font-weight: bold;">${r.date}</td></tr><tr><td style="padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; font-weight: bold; color: #64748b;">작성자</td><td style="padding: 10px; border: 1px solid #e2e8f0; color: #334155; font-weight: bold;">${r.author}</td></tr><tr><td style="padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; font-weight: bold; color: #64748b;">인분수</td><td style="padding: 10px; border: 1px solid #e2e8f0; color: #ea580c; font-weight: bold;">${r.serving}</td></tr></table>`;
+r.details.forEach(d => { htmlBody += `<div style="margin-bottom: 20px;"><div style="font-size: 12px; font-weight: 900; color: #4f46e5; margin-bottom: 6px; border-left: 3px solid #4f46e5; padding-left: 8px;">${d.cat}</div>`; let txt = d.text;let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/); if (driveMatch) {let m = driveMatch[0].match(/[-\w]{25,}/); if (m) {let viewSrc = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`; let orgLink = `https://drive.google.com/file/d/${m[0]}/view`; let imgTag = `<div style="margin-top: 10px; margin-bottom: 10px;"><a href="${orgLink}" target="_blank"><img src="${viewSrc}" style="width: 100%; max-width: 400px; border-radius: 8px; border: 1px solid #e2e8f0;" alt="사진"></a></div>`; txt = txt.replace(driveMatch[0], imgTag); }} else if(txt.includes("http")) { txt = txt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" style="color: #3b82f6;">[링크 열기]</a>`); }let cleanTxt = txt.replace(/<[^>]*>?/gm, '').trim(); if(cleanTxt !== "" || txt.includes("<img")) { htmlBody += `<div style="background: #f8fafc; padding: 16px; border-radius: 12px; font-size: 13px; color: #334155; white-space: pre-wrap; border: 1px solid #e2e8f0; line-height: 1.6;">${txt}</div>`; }htmlBody += `</div>`;});htmlBody += `</div></div>`;
+fetch(gasUrl, {method: 'POST',headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: 'sendEmail', toEmail: emailInput, subject: subject, htmlBody: htmlBody })
+}).then(res => res.json()).then(data => { btn.innerHTML = '전송하기'; btn.disabled = false; if(data.result === 'success') { alert('성공적으로 메일을 발송했습니다!'); closeEmailModal(); } else { alert('발송 실패: ' + data.message); }
+}).catch(err => {btn.innerHTML = '전송하기'; btn.disabled = false; alert('오류가 발생했습니다.'); });}
+document.getElementById('recipeInput').addEventListener('keypress', e => { if(e.key==='Enter') loadRecipe(document.getElementById('recipeInput').value);});
+function loadRecipe(keywordStr) {
+const area = document.getElementById('recipe-list'); area.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl mb-2 text-indigo-500'></i><br>데이터를 불러오는 중입니다...</div>"; document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active')); try {if(window.event && window.event.target && window.event.target.classList.contains('tag-btn')) { window.event.target.classList.add('active'); }} catch(e) {}let safeKeyword = (keywordStr || "").trim();
+fetch(`${gasUrl}?action=recipe&keyword=${encodeURIComponent(safeKeyword)}`).then(r=>r.json()).then(l => {let h = ""; let count = 0; currentRecipesForEmail = []; const codeSegments = ['KOR', 'JAP', 'WST', 'CHN', 'SEA', 'ETC', 'MEAT', 'POULTRY', 'SEAFOOD', 'VEG', 'MAIN', 'APP', 'SIDE', 'SAUCE', 'STEAM', 'BOIL', 'SMOKE', 'GRILL', 'COLD', 'FRY'];const isCodeSearch = codeSegments.includes(safeKeyword.toUpperCase());
+l.forEach((i) => {let code = "-", date = "-", author = "-", serving = "-"; let materialsStr = ""; let processStr = ""; let mainPhotoHtml = ""; let recipeDataForEmail = { name: i.name || "이름없음", type: i.type || "-", code: "-", date: "-", author: "-", serving: "-", details: [] }; const safeDetails = i.details || []; safeDetails.forEach(d => { let txt = d.text || ""; let cleanCat = (d.cat || "").replace(/\s/g, ""); if (cleanCat.includes("관리코드")) { code = txt; recipeDataForEmail.code = txt; } else if (cleanCat.includes("수정일") || cleanCat.includes("날짜")) { date = txt; recipeDataForEmail.date = txt; } else if (cleanCat.includes("작성자")) { author = txt; recipeDataForEmail.author = txt; } else if (cleanCat.includes("인분") || cleanCat.includes("수량")) { serving = txt; recipeDataForEmail.serving = txt; } });safeDetails.forEach(d => { let txt = d.text || ""; let cleanCat = (d.cat || "").replace(/\s/g, ""); let isTopInfo = false; if (cleanCat.includes("관리코드") || cleanCat.includes("수정일") || cleanCat.includes("날짜") || cleanCat.includes("작성자") || cleanCat.includes("인분") || cleanCat.includes("수량")) { isTopInfo = true; } if (!isTopInfo) { recipeDataForEmail.details.push({ cat: d.cat || "-", text: txt }); } if (isTopInfo) return; let htmlTxt = txt;let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/); if (driveMatch) {let m = driveMatch[0].match(/[-\w]{25,}/); if (m) {let viewSrc = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`; let orgLink = `https://drive.google.com/file/d/${m[0]}/view`; mainPhotoHtml = `<div class="w-full max-w-[400px] shrink-0 rounded-xl overflow-hidden border border-slate-200 shadow-sm cursor-pointer" onclick="window.open('${orgLink}', '_blank')"><img src="${viewSrc}" style="width: 100%; height: auto; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"></div>`; htmlTxt = htmlTxt.replace(driveMatch[0], "").trim(); }} else if(htmlTxt.includes("http")) { htmlTxt = htmlTxt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`); }if(htmlTxt === "") return; const sectionHtml = `<div class="detail-section"><div class="detail-label">${d.cat || "-"}</div><div class="detail-content-box">${htmlTxt}</div></div>`; let isMaterial = cleanCat.includes("재료") || cleanCat.includes("양념") || cleanCat.includes("드레싱"); if (isMaterial) { materialsStr += sectionHtml; } else { processStr += sectionHtml; } });if (isCodeSearch) { const codeUpper = code.toUpperCase(); const typeUpper = (i.type || "").toUpperCase(); const kwUpper = safeKeyword.toUpperCase(); if (!codeUpper.includes(kwUpper) && !typeUpper.includes(kwUpper)) return; }const currentIndex = currentRecipesForEmail.length; currentRecipesForEmail.push(recipeDataForEmail); let thumbHtml = `<div class="recipe-img-empty"><i class="fas fa-image text-xl mb-1"></i>NO IMG</div>`; if (i.img && i.img.includes("http")) { let src = i.img; let link = i.img; if (src.includes("drive.google.com")) { let m = src.match(/[-\w]{25,}/); if(m) { src = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`; link = `https://drive.google.com/file/d/${m[0]}/view`; } }thumbHtml = `<div class="recipe-thumb-box" onclick="window.open('${link}', '_blank')"><img src="${src}" class="recipe-thumb" onerror="this.parentElement.innerHTML='<div class=\\'recipe-img-empty\\'><i class=\\'fas fa-ban text-red-400 text-xl mb-1\\'></i>권한오류</div>'"></div>`; }h += `<div class="recipe-card" onclick="this.classList.toggle('open')"><div class="recipe-card-head"><div><span class="recipe-title">${i.name || "이름없음"}</span><span class="recipe-badge">${i.type || "-"}</span></div><i class="fas fa-chevron-down text-slate-300"></i></div><div class="recipe-card-body" onclick="event.stopPropagation()"><div class="flex gap-4 items-start mb-6 pb-6 border-b border-dashed border-slate-200">${thumbHtml}<div class="flex-1 bg-white border border-slate-100 shadow-sm rounded-xl p-3 relative"><button onclick="openEmailModal(${currentIndex}); event.stopPropagation();" class="absolute top-3 right-3 text-indigo-500 bg-indigo-50 px-3 py-1.5 rounded-lg text-xs font-bold border border-indigo-100 active:bg-indigo-100 transition-colors"><i class="fas fa-paper-plane mr-1"></i>보내기</button><div class="info-grid pr-16"><div class="info-label">📋 관리코드</div><div class="info-value text-indigo-600">${code}</div><div class="info-label">📅 수정일</div><div class="info-value">${date}</div><div class="info-label">👨‍🍳 작성자</div><div class="info-value">${author}</div><div class="info-label">🍽️ 인분수</div><div class="info-value text-orange-600">${serving}</div></div></div></div><div class="flex flex-col md:flex-row gap-6 mb-6">${mainPhotoHtml}<div class="flex-1 min-w-0">${materialsStr}</div></div><div class="w-full">${processStr}</div></div></div>`;count++;});area.innerHTML = count > 0 ? h : "<div class='loading-text'>검색 결과가 없습니다.</div>";
+}).catch(e => {console.error(e);area.innerHTML = "<div class='loading-text text-red-500'>오류가 발생했습니다.</div>"; });}
+</script></body></html>
