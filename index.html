@@ -67,8 +67,7 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 .btn-cancel { background: #f1f5f9; color: #64748b; border: none; }
 .btn-send { background: var(--primary); color: white; border: none; }
 .module-content-area { padding: 15px; flex: 1; overflow-y: auto; background: var(--bg); }
-/* 재고 달력 스타일 */
-.inv-date-picker { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 16px; font-weight: 900; color: #4f46e5; text-align: center; outline: none; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+.inv-date-picker { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 15px; font-weight: 900; color: #4f46e5; text-align: center; outline: none; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
 </style></head><body><div id="root-container">
 <div id="main-view" class="workspace" style="display: flex;">
 <div class="main-hero">
@@ -154,9 +153,30 @@ b.classList.remove('active');
 if(b.querySelector('.nav-text').innerText === txt) b.classList.add('active');
 });}
 
-// ★ [010] 자산재고: 달력 연동형 통합 데이터 렌더러
+// ★ 앱 프론트엔드용 스마트 날짜 파서 (오타 교정기)
+function parseDateString(val) {
+  let digits = val.replace(/[^0-9]/g, '');
+  if (digits.length < 4) return null;
+  let y, m, d;
+  if (digits.length === 4) { y = new Date().getFullYear(); m = digits.substring(0,2); d = digits.substring(2,4); }
+  else if (digits.length === 6) { y = "20" + digits.substring(0,2); m = digits.substring(2,4); d = digits.substring(4,6); }
+  else if (digits.length === 8) { y = digits.substring(0,4); m = digits.substring(4,6); d = digits.substring(6,8); }
+  else if (digits.length > 8) {
+    y = digits.substring(0,4);
+    let rest = digits.substring(4);
+    m = rest.substring(0, rest.length-2); d = rest.slice(-2);
+    if(parseInt(m,10)>12) { m = rest.substring(0,2); d = rest.substring(2); }
+  }
+  let month = parseInt(m, 10); let day = parseInt(d, 10);
+  if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+    return y + "-" + String(month).padStart(2, '0') + "-" + String(day).padStart(2, '0');
+  }
+  return null;
+}
+
 function filterInventoryByDate() {
-  const selectedDate = document.getElementById("inv-date-picker").value;
+  let inputEl = document.getElementById("inv-date-picker");
+  let selectedDate = inputEl.value.trim();
   const area = document.getElementById("inv-data-area");
   
   if (!allInventoryData || allInventoryData.length === 0) {
@@ -164,14 +184,22 @@ function filterInventoryByDate() {
     return;
   }
 
-  // 달력 날짜에 맞게 필터링 (날짜가 안 골라졌으면 전체 보기)
+  // 검색창에 숫자가 입력되었다면 스마트 파싱 적용
+  if (selectedDate) {
+    let parsedDate = parseDateString(selectedDate);
+    if (parsedDate) {
+      selectedDate = parsedDate;
+      inputEl.value = selectedDate; // 사용자가 편하게 볼 수 있도록 오타 교정하여 UI에 반영
+    }
+  }
+
   let filtered = allInventoryData.filter(item => {
     if (!selectedDate) return true; 
     return (item["입고일자"] === selectedDate || item["출고일자"] === selectedDate);
   });
 
   if (filtered.length === 0) {
-    area.innerHTML = `<div class='loading-text'>${selectedDate} 일자의 입/출고 내역이 없습니다.<br><br><span class='text-xs text-slate-400'>날짜를 지우면 전체 목록이 보입니다.</span></div>`;
+    area.innerHTML = `<div class='loading-text'>${selectedDate} 일자의 입/출고 내역이 없습니다.<br><br><span class='text-xs text-slate-400'>입력창을 비우고 검색하면 전체 목록이 보입니다.</span></div>`;
     return;
   }
 
@@ -218,11 +246,13 @@ function loadOtherModules(code) {
   let contentDiv = document.getElementById("content-" + code);
   
   if (code === '010') {
-    // 상단에 달력 픽업 창 렌더링
     contentDiv.innerHTML = `
       <div class="px-2 pt-2 pb-4 mb-2 border-b border-slate-200 shrink-0">
-        <input type="date" id="inv-date-picker" class="inv-date-picker" onchange="filterInventoryByDate()">
-        <div class="text-center text-[10px] font-bold text-slate-400 mt-2">날짜를 선택하면 해당 일자의 입/출고 흐름이 표시됩니다.</div>
+        <div class="relative">
+          <input type="text" id="inv-date-picker" class="inv-date-picker" placeholder="날짜 검색 (예: 20260504)" onkeyup="if(event.key==='Enter') filterInventoryByDate()">
+          <button onclick="filterInventoryByDate()" class="absolute right-2 top-2 bg-indigo-500 text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow-md">조회</button>
+        </div>
+        <div class="text-center text-[10px] font-bold text-slate-400 mt-2">입력하신 날짜의 입출고 흐름이 표시됩니다. (오타 자동교정 적용)</div>
       </div>
       <div id="inv-data-area" class="flex-1 overflow-y-auto pb-10 px-2"></div>
     `;
@@ -233,7 +263,7 @@ function loadOtherModules(code) {
     .then(r=>r.json())
     .then(data => {
       allInventoryData = data; 
-      filterInventoryByDate(); // 전체 보기로 렌더링
+      filterInventoryByDate();
     }).catch(e => {
       area.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.<br>구글 스크립트 연결을 확인하세요.</div>";
     });
