@@ -68,6 +68,11 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 .btn-send { background: var(--primary); color: white; border: none; }
 .module-content-area { padding: 15px; flex: 1; overflow-y: auto; background: var(--bg); }
 .inv-date-picker { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 15px; font-weight: 900; color: #4f46e5; text-align: center; outline: none; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+/* 추가된 테이블 스타일 (가로 스크롤 허용) */
+.custom-table { width: 100%; min-width: 750px; text-align: left; border-collapse: collapse; }
+.custom-table th { background: #f8fafc; color: #64748b; padding: 12px; font-size: 11px; text-transform: uppercase; font-weight: 900; border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 10;}
+.custom-table td { padding: 12px; font-size: 13px; font-weight: 600; color: #334155; border-bottom: 1px solid #f1f5f9; white-space: nowrap; }
+.custom-table tr:hover td { background-color: #f8fafc; }
 </style></head><body><div id="root-container">
 <div id="main-view" class="workspace" style="display: flex;">
 <div class="main-hero">
@@ -104,7 +109,14 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 <div class="tag-btn" onclick="loadRecipe('Steam')">찜(Steam)</div><div class="tag-btn" onclick="loadRecipe('Boil')">데침/끓임(Boil)</div><div class="tag-btn" onclick="loadRecipe('Smoke')">훈연(Smoke)</div><div class="tag-btn" onclick="loadRecipe('Grill')">구이(Grill)</div><div class="tag-btn" onclick="loadRecipe('Cold')">무침/절임(Cold)</div><div class="tag-btn" onclick="loadRecipe('Fry')">튀김(Fry)</div>
 </div></div><div id="recipe-list" class="recipe-list-area flex-1 bg-slate-50">
 <div class="loading-text">위에서 카테고리를 선택하거나<br>검색어를 입력하세요.</div>
-</div></div><div id="workspace-010" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>자산재고</span></div></div><div id="content-010" class="module-content-area flex flex-col h-full overflow-hidden"></div></div>
+</div></div>
+
+<!-- 자산재고 워크스페이스 -->
+<div id="workspace-010" class="workspace">
+  <div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>자산재고</span></div></div>
+  <div id="content-010" class="module-content-area flex flex-col h-full overflow-hidden p-0 bg-white"></div>
+</div>
+
 <div id="workspace-020" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>손익관리</span></div></div><div id="content-020" class="module-content-area"></div></div>
 <div id="workspace-400" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>연구노트</span></div></div><div id="content-400" class="module-content-area"></div></div>
 <div id="workspace-030" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>직원교육</span></div></div><div id="content-030" class="module-content-area"></div></div>
@@ -153,7 +165,7 @@ b.classList.remove('active');
 if(b.querySelector('.nav-text').innerText === txt) b.classList.add('active');
 });}
 
-// ★ 앱 프론트엔드용 스마트 날짜 파서 (오타 교정기)
+// ★ 스마트 날짜 파서
 function parseDateString(val) {
   let digits = val.replace(/[^0-9]/g, '');
   if (digits.length < 4) return null;
@@ -174,6 +186,7 @@ function parseDateString(val) {
   return null;
 }
 
+// ★ 자산재고 테이블(표) 렌더러
 function filterInventoryByDate() {
   let inputEl = document.getElementById("inv-date-picker");
   let selectedDate = inputEl.value.trim();
@@ -184,12 +197,11 @@ function filterInventoryByDate() {
     return;
   }
 
-  // 검색창에 숫자가 입력되었다면 스마트 파싱 적용
   if (selectedDate) {
     let parsedDate = parseDateString(selectedDate);
     if (parsedDate) {
       selectedDate = parsedDate;
-      inputEl.value = selectedDate; // 사용자가 편하게 볼 수 있도록 오타 교정하여 UI에 반영
+      inputEl.value = selectedDate; 
     }
   }
 
@@ -203,42 +215,43 @@ function filterInventoryByDate() {
     return;
   }
 
-  let h = "";
+  // 엑셀 형태의 1줄 Table HTML 생성 (가로 스크롤 가능)
+  let h = `
+    <div class="w-full overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>품목</th>
+            <th>입고일자</th>
+            <th class="text-blue-600">입고량</th>
+            <th>단가</th>
+            <th>출고일자</th>
+            <th class="text-red-600">출고량</th>
+            <th class="text-slate-800">현재재고</th>
+            <th class="text-indigo-600">재고총액</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+  
   filtered.forEach(item => {
     h += `
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-4 overflow-hidden">
-        <div class="bg-indigo-50 border-b border-indigo-100 px-4 py-3 flex justify-between items-center">
-          <span class="font-black text-indigo-900 text-lg">${item["품목"]}</span>
-        </div>
-        <div class="p-4 grid grid-cols-2 gap-4">
-          <!-- 좌측: 입고 정보 -->
-          <div class="bg-blue-50/50 p-3 rounded-lg border border-blue-100">
-            <div class="text-[10px] font-black text-blue-500 mb-2 uppercase tracking-widest"><i class="fas fa-arrow-down mr-1"></i>입고 내역</div>
-            <div class="text-xs mb-1"><span class="font-bold text-slate-400 mr-2">일자</span><span class="font-black text-slate-700">${item["입고일자"] || "-"}</span></div>
-            <div class="text-xs mb-1"><span class="font-bold text-slate-400 mr-2">수량</span><span class="font-black text-blue-600">${item["입고량"]}</span></div>
-            <div class="text-xs"><span class="font-bold text-slate-400 mr-2">단가</span><span class="font-black text-slate-700">${item["단가"]}</span></div>
-          </div>
-          <!-- 우측: 출고 정보 -->
-          <div class="bg-red-50/50 p-3 rounded-lg border border-red-100">
-            <div class="text-[10px] font-black text-red-500 mb-2 uppercase tracking-widest"><i class="fas fa-arrow-up mr-1"></i>출고 내역</div>
-            <div class="text-xs mb-1"><span class="font-bold text-slate-400 mr-2">일자</span><span class="font-black text-slate-700">${item["출고일자"] || "-"}</span></div>
-            <div class="text-xs"><span class="font-bold text-slate-400 mr-2">수량</span><span class="font-black text-red-600">${item["출고량"]}</span></div>
-          </div>
-        </div>
-        <!-- 하단: 현재 잔량 및 총액 -->
-        <div class="bg-slate-50 px-4 py-3 border-t border-slate-200 flex justify-between items-center">
-          <div>
-            <div class="text-[10px] font-bold text-slate-400 mb-0.5">현재 잔량</div>
-            <div class="font-black text-slate-800 text-sm">${item["현재 잔량"]}</div>
-          </div>
-          <div class="text-right">
-            <div class="text-[10px] font-bold text-slate-400 mb-0.5">재고 총액</div>
-            <div class="font-black text-indigo-600 text-sm">${item["재고 총액"]}</div>
-          </div>
-        </div>
-      </div>
+      <tr>
+        <td class="font-black text-slate-800">${item["품목"]}</td>
+        <td class="text-slate-500">${item["입고일자"] || "-"}</td>
+        <td class="font-bold text-blue-600">${item["입고량"]}</td>
+        <td class="text-slate-600">${item["단가"]}</td>
+        <td class="text-slate-500">${item["출고일자"] || "-"}</td>
+        <td class="font-bold text-red-600">${item["출고량"]}</td>
+        <td class="font-black text-slate-800 bg-slate-50">${item["현재 잔량"]}</td>
+        <td class="font-black text-indigo-600 bg-indigo-50/30">${item["재고 총액"]}</td>
+        <td class="text-xs text-slate-400">${item["비고"]}</td>
+      </tr>
     `;
   });
+  
+  h += `</tbody></table></div>`;
   area.innerHTML = h;
 }
 
@@ -247,14 +260,14 @@ function loadOtherModules(code) {
   
   if (code === '010') {
     contentDiv.innerHTML = `
-      <div class="px-2 pt-2 pb-4 mb-2 border-b border-slate-200 shrink-0">
-        <div class="relative">
+      <div class="px-4 py-4 bg-slate-50 border-b border-slate-200 shrink-0">
+        <div class="relative max-w-lg mx-auto">
           <input type="text" id="inv-date-picker" class="inv-date-picker" placeholder="날짜 검색 (예: 20260504)" onkeyup="if(event.key==='Enter') filterInventoryByDate()">
-          <button onclick="filterInventoryByDate()" class="absolute right-2 top-2 bg-indigo-500 text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow-md">조회</button>
+          <button onclick="filterInventoryByDate()" class="absolute right-2 top-2 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md transition-colors">조회</button>
         </div>
-        <div class="text-center text-[10px] font-bold text-slate-400 mt-2">입력하신 날짜의 입출고 흐름이 표시됩니다. (오타 자동교정 적용)</div>
+        <div class="text-center text-[10px] font-bold text-slate-400 mt-2">입력하신 날짜의 입출고 흐름이 표시됩니다. (빈칸 검색 시 전체 조회)</div>
       </div>
-      <div id="inv-data-area" class="flex-1 overflow-y-auto pb-10 px-2"></div>
+      <div id="inv-data-area" class="flex-1 overflow-y-auto p-4 bg-slate-100"></div>
     `;
     const area = document.getElementById("inv-data-area");
     area.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2'></i><br>전체 재고 연동 중...</div>";
@@ -271,6 +284,7 @@ function loadOtherModules(code) {
   }
   
   let action = "";
+  contentDiv.className = "module-content-area"; // 초기화
   contentDiv.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2'></i><br>데이터를 불러오는 중입니다...</div>";
   if(code === '020') action = "get_sales";
   else if(code === '030') action = "manual";
