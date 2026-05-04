@@ -32,13 +32,56 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 .main-cal-cell.today .main-cal-date { background: var(--primary); color: white; }
 .dot-container { display: flex; gap: 3px; justify-content: center; }
 .dot { width: 6px; height: 6px; border-radius: 50%; }
-.dot-sch { background-color: #3b82f6; } /* 파란점: 일정 */
-.dot-noti { background-color: #ef4444; } /* 빨간점: 공지 */
+.dot-sch { background-color: #3b82f6; } 
+.dot-noti { background-color: #ef4444; } 
 
-/* 모달/팝업 스타일 */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
-.modal-box { background: white; width: 90%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-.modal-input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; margin-bottom: 20px; outline: none; font-weight: 600; }
+/* 레시피 전용 스타일 (태그 복구) */
+.search-container { padding: 15px; background: white; border-bottom: 1px solid var(--border); }
+.search-box { display: flex; gap: 10px; }
+.search-input { flex: 1; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 14px; font-weight: 700; outline: none; transition: all 0.2s; }
+.search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+.search-btn { background: var(--primary); color: white; padding: 0 20px; border-radius: 12px; font-weight: 900; font-size: 14px; box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2); }
+.category-wrapper { max-height: 220px; overflow-y: auto; padding: 15px; background: white; margin-bottom: 10px; }
+.cat-title { font-size: 11px; font-weight: 900; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; margin-top: 12px; }
+.cat-title:first-child { margin-top: 0; }
+.tag-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag-btn { background: #f1f5f9; color: #475569; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s; }
+.tag-btn:active, .tag-btn.active { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; font-weight: 900; }
+.recipe-list-area { padding: 10px 15px 30px 15px; }
+.recipe-card { background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s; }
+.recipe-card-head { padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+.recipe-card-head:active { background: #f8fafc; }
+.recipe-title { font-size: 16px; font-weight: 900; color: #1e293b; }
+.recipe-badge { display: inline-block; background: #eff6ff; color: #2563eb; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; border: 1px solid #bfdbfe; margin-left: 10px; vertical-align: middle; }
+.recipe-card-body { display: none; padding: 0 16px 16px 16px; background: white; position: relative; }
+.recipe-card.open .recipe-card-body { display: block; border-top: 1px dashed #e2e8f0; padding-top: 16px; }
+.detail-section { margin-bottom: 12px; }
+.detail-label { font-size: 11px; font-weight: 900; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; border-left: 3px solid var(--primary); padding-left: 6px; }
+.detail-content-box { background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 13px; font-weight: 600; color: #334155; white-space: pre-wrap; line-height: 1.6; }
+.recipe-thumb-box { width: 90px; height: 90px; flex-shrink: 0; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; background: #f1f5f9; }
+.recipe-thumb { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s; }
+.info-grid { display: grid; grid-template-columns: 80px 1fr; gap: 4px 8px; font-size: 11px; }
+.info-label { font-weight: 900; color: #94a3b8; }
+.info-value { font-weight: 700; color: #334155; }
+
+/* 일정관리(500) 전용 달력 스타일 (복구본) */
+.calendar-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: white; font-weight: 900; font-size: 18px; border-bottom: 1px solid #e2e8f0; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); background: #e2e8f0; gap: 1px; border-bottom: 1px solid #e2e8f0; }
+.calendar-day-name { background: #f8fafc; text-align: center; padding: 10px 0; font-size: 11px; font-weight: 900; color: #64748b; }
+.calendar-day-name.sun { color: #ef4444; }
+.calendar-day-name.sat { color: #3b82f6; }
+.calendar-cell { background: white; min-height: 85px; padding: 6px; cursor: pointer; transition: background 0.2s; display: flex; flex-direction: column; }
+.calendar-cell:active { background: #f1f5f9; }
+.calendar-date { font-size: 12px; font-weight: 900; margin-bottom: 4px; display: inline-block; width: 22px; height: 22px; text-align: center; line-height: 22px; border-radius: 50%; }
+.calendar-cell.today .calendar-date { background: var(--primary); color: white; }
+.calendar-cell.sun .calendar-date { color: #ef4444; }
+.calendar-cell.sat .calendar-date { color: #3b82f6; }
+.calendar-cell.other-month { background: #f8fafc; opacity: 0.5; }
+.schedule-badge { font-size: 10px; padding: 3px 4px; border-radius: 4px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; width: 100%; }
+.badge-red { background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; }
+.badge-blue { background: #dbeafe; color: #3b82f6; border: 1px solid #93c5fd; }
+.badge-green { background: #d1fae5; color: #10b981; border: 1px solid #6ee7b7; }
+.badge-gray { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
 
 /* 자산재고 테이블 스타일 */
 .custom-table { width: 100%; min-width: 800px; text-align: left; border-collapse: collapse; }
@@ -50,13 +93,17 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 .tab-inactive { background: white; color: #64748b; border-color: #e2e8f0; }
 .inv-date-picker { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 15px; font-weight: 900; color: #4f46e5; text-align: center; outline: none; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
 
-/* 하단 네비게이션 */
+/* 모달 및 공통 */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+.modal-box { background: white; width: 90%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+.modal-input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; margin-bottom: 20px; outline: none; font-weight: 600; }
 .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
 .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; width: 60px; height: 50px; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
 .nav-item.active { color: var(--primary); background: #eef2ff; font-weight: 900; }
 .nav-icon { font-size: 20px; margin-bottom: 4px; }
 .nav-text { font-size: 10px; font-weight: 700; }
 .module-content-area { padding: 15px; flex: 1; overflow-y: auto; background: var(--bg); }
+.loading-text { text-align: center; padding: 40px; font-size: 14px; font-weight: 700; color: #94a3b8; }
 </style></head><body><div id="root-container">
 
 <!-- [메인 화면] -->
@@ -95,14 +142,49 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
   </div>
 </div>
 
+<!-- ★ 레시피 워크스페이스 (카테고리 100% 복구본) -->
+<div id="workspace-100" class="workspace">
+  <header class="app-header">
+    <div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>Recipe Master</span></div>
+  </header>
+  <div class="search-container shadow-sm">
+    <div class="search-box">
+      <input type="text" id="recipeInput" class="search-input" placeholder="메뉴 검색 (예: 닭갈비, JAP-Seafood)" onkeyup="if(event.key==='Enter') loadRecipe(this.value)">
+      <button class="search-btn" onclick="loadRecipe(document.getElementById('recipeInput').value)">GO</button>
+    </div>
+  </div>
+  <div class="category-wrapper border-b">
+    <div class="cat-title">국가별 (Country)</div>
+    <div class="tag-group">
+      <div class="tag-btn" onclick="loadRecipe('KOR')">한식(KOR)</div><div class="tag-btn" onclick="loadRecipe('JAP')">일식(JAP)</div><div class="tag-btn" onclick="loadRecipe('WST')">양식(WST)</div><div class="tag-btn" onclick="loadRecipe('CHN')">중식(CHN)</div><div class="tag-btn" onclick="loadRecipe('SEA')">동남아(SEA)</div><div class="tag-btn" onclick="loadRecipe('ETC')">기타(ETC)</div>
+    </div>
+    <div class="cat-title">식재료별 (Ingredient)</div>
+    <div class="tag-group">
+      <div class="tag-btn" onclick="loadRecipe('Meat')">육류(Meat)</div><div class="tag-btn" onclick="loadRecipe('Poultry')">가금류(Poultry)</div><div class="tag-btn" onclick="loadRecipe('Seafood')">해산물(Seafood)</div><div class="tag-btn" onclick="loadRecipe('Veg')">채소(Veg)</div><div class="tag-btn" onclick="loadRecipe('Etc')">기타(Etc)</div>
+    </div>
+    <div class="cat-title">요리분류 (Category)</div>
+    <div class="tag-group">
+      <div class="tag-btn" onclick="loadRecipe('Main')">메인(Main)</div><div class="tag-btn" onclick="loadRecipe('App')">전채(App)</div><div class="tag-btn" onclick="loadRecipe('Side')">사이드(Side)</div><div class="tag-btn" onclick="loadRecipe('Sauce')">소스(Sauce)</div>
+    </div>
+    <div class="cat-title">조리법별 (Method)</div>
+    <div class="tag-group">
+      <div class="tag-btn" onclick="loadRecipe('Steam')">찜(Steam)</div><div class="tag-btn" onclick="loadRecipe('Boil')">데침/끓임(Boil)</div><div class="tag-btn" onclick="loadRecipe('Smoke')">훈연(Smoke)</div><div class="tag-btn" onclick="loadRecipe('Grill')">구이(Grill)</div><div class="tag-btn" onclick="loadRecipe('Cold')">무침/절임(Cold)</div><div class="tag-btn" onclick="loadRecipe('Fry')">튀김(Fry)</div>
+    </div>
+  </div>
+  <div id="recipe-list" class="recipe-list-area flex-1 bg-slate-50">
+    <div class="loading-text">위에서 카테고리를 선택하거나<br>검색어를 입력하세요.</div>
+  </div>
+</div>
+
 <!-- 나머지 모듈 워크스페이스 -->
-<div id="workspace-100" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>Recipe Master</span></div></div><div class="p-4 bg-white"><input type="text" id="recipeInput" class="search-input w-full" placeholder="메뉴 검색 (예: 닭갈비)" onkeyup="if(event.key==='Enter') loadRecipe(this.value)"></div><div id="recipe-list" class="recipe-list-area flex-1 bg-slate-50"></div></div>
 <div id="workspace-010" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>자산재고 원장</span></div></div><div id="content-010" class="module-content-area flex flex-col h-full overflow-hidden p-0 bg-white"></div></div>
 <div id="workspace-020" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>손익관리</span></div></div><div id="content-020" class="module-content-area"></div></div>
 <div id="workspace-400" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>연구노트</span></div></div><div id="content-400" class="module-content-area"></div></div>
 <div id="workspace-030" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>직원교육</span></div></div><div id="content-030" class="module-content-area"></div></div>
 <div id="workspace-900" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>자료실</span></div></div><div id="content-900" class="module-content-area"></div></div>
-<div id="workspace-500" class="workspace bg-white"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>일정관리</span></div></div><div id="content-500" class="flex flex-col h-full overflow-y-auto pb-20"></div></div>
+
+<!-- ★ 일정관리 전용 워크스페이스 (복구본) -->
+<div id="workspace-500" class="workspace bg-white"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>일정관리</span></div></div><div id="content-500" class="flex flex-col h-full overflow-y-auto pb-20 bg-white"></div></div>
 <div id="workspace-600" class="workspace"><div class="app-header"><div class="header-title"><i class="fas fa-chevron-left back-btn" onclick="goMain()"></i><span>공지사항</span></div></div><div id="content-600" class="module-content-area"></div></div>
 
 <!-- 하단 네비게이션 -->
@@ -111,33 +193,40 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 <div class="nav-item" onclick="openModule('100')"><i class="fas fa-book nav-icon"></i><span class="nav-text">RECIPE</span></div>
 <div class="nav-item" onclick="openModule('400')"><i class="fas fa-flask nav-icon"></i><span class="nav-text">R&D</span></div>
 <div class="nav-item" onclick="openModule('900')"><i class="fas fa-folder nav-icon"></i><span class="nav-text">FILE</span></div>
-<div class="nav-item" onclick="openModule('010')"><i class="fas fa-chart-pie nav-icon"></i><span class="nav-text">MNG</span></div>
+<div class="nav-item" onclick="openModule('500')"><i class="fas fa-calendar-check nav-icon"></i><span class="nav-text">SCHD</span></div>
 </nav></div>
 
-<!-- ★ 메인 화면 달력 클릭 시 뜨는 통합 다이렉트 팝업 -->
+<!-- 모달 팝업들 -->
+<div id="email-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title"><i class="fas fa-envelope text-indigo-500 mr-2"></i>레시피 공유</div>
+    <div class="modal-desc" id="modal-recipe-name">요리명: -</div>
+    <input type="email" id="email-input" class="modal-input" placeholder="받을 분의 이메일 주소 입력">
+    <div class="flex gap-2 justify-end">
+      <button class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-bold" onclick="document.getElementById('email-modal').style.display='none'">취소</button>
+      <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-bold" id="btn-send-email" onclick="sendEmailRequest()">전송하기</button>
+    </div>
+  </div>
+</div>
+
 <div id="main-action-modal" class="modal-overlay">
   <div class="modal-box w-11/12 max-w-md bg-white rounded-2xl p-5">
     <div class="flex justify-between items-center mb-5 border-b border-slate-100 pb-3">
       <div class="text-xl font-black text-indigo-900 m-0" id="main-action-date">2026-05-04</div>
       <i class="fas fa-times text-2xl text-slate-300 hover:text-slate-500 cursor-pointer" onclick="document.getElementById('main-action-modal').style.display='none'"></i>
     </div>
-    
-    <!-- 폴더 다이렉트 이동 버튼 -->
     <div class="grid grid-cols-2 gap-3 mb-5">
       <button onclick="navFromMainTo('010')" class="bg-slate-800 text-white font-bold py-3 rounded-xl shadow-sm flex flex-col items-center gap-1 hover:bg-slate-700 transition">
-        <i class="fas fa-boxes text-lg text-indigo-300"></i> 자산재고 바로가기
+        <i class="fas fa-boxes text-lg text-indigo-300"></i> 자산재고 조회
       </button>
       <button onclick="navFromMainTo('020')" class="bg-slate-800 text-white font-bold py-3 rounded-xl shadow-sm flex flex-col items-center gap-1 hover:bg-slate-700 transition">
-        <i class="fas fa-chart-pie text-lg text-red-300"></i> 손익관리 바로가기
+        <i class="fas fa-chart-pie text-lg text-red-300"></i> 손익관리 조회
       </button>
     </div>
-
-    <!-- 해당일 일정/공지 리스트 -->
     <div id="main-action-lists"></div>
   </div>
 </div>
 
-<!-- (기존) 일정관리 팝업 -->
 <div id="schedule-modal" class="modal-overlay">
   <div class="modal-box w-11/12 max-w-md bg-white rounded-2xl">
     <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
@@ -159,26 +248,24 @@ body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 <script>
 const gasUrl = "https://script.google.com/macros/s/AKfycbwtNgSrgkjEiaJm4bPIXjddIlU19IYUCgZvx6WIRPLCCar7QndBmiEG-EIaRk3yXLUa/exec";
 
-// 전역 데이터 캐싱
 let globalSchedules = [];
 let globalNotices = [];
 let allInventoryData = []; 
+let currentRecipesForEmail = []; 
+let selectedEmailRecipe = null;
 
-// 전역 상태
 let currentMainCalDate = new Date();
-let currentClickedDate = ""; // 메인 달력에서 클릭한 날짜
+let currentClickedDate = ""; 
 let selectedInvDate = "";
 let currentInvPeriod = 'daily'; 
 let currentCalDate = new Date();
 let selectedSchDate = "";
 
 /* ==========================================
-   초기 실행 (메인 달력 데이터 로드)
+   초기 실행
 ========================================== */
 function initApp() {
   document.getElementById('main-cal-grid-content').innerHTML = "<div style='grid-column: span 7;' class='text-center py-6 text-sm font-bold text-indigo-500'><i class='fas fa-spinner fa-spin mr-2'></i>시스템 데이터 동기화 중...</div>";
-  
-  // 백그라운드에서 일정과 공지 데이터를 미리 가져와서 메인 달력에 뱃지(점)를 표시함
   Promise.all([
     fetch(`${gasUrl}?action=get_schedule`).then(r=>r.json()).catch(()=>[]),
     fetch(`${gasUrl}?action=get_notice`).then(r=>r.json()).catch(()=>[])
@@ -191,132 +278,6 @@ function initApp() {
 window.onload = initApp;
 
 /* ==========================================
-   ★ 메인 화면 통합 달력 로직
-========================================== */
-function renderMainCalendar() {
-  const year = currentMainCalDate.getFullYear();
-  const month = currentMainCalDate.getMonth();
-  document.getElementById('main-cal-month-year').innerText = `${String(year).slice(2)}. ${String(month + 1).padStart(2,'0')}`;
-
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const prevMonthDays = new Date(year, month, 0).getDate();
-
-  let h = "";
-  for(let i = firstDay - 1; i >= 0; i--) {
-    h += `<div class="main-cal-cell bg-slate-50"><span class="main-cal-date text-slate-300">${prevMonthDays - i}</span></div>`;
-  }
-  
-  let today = new Date();
-  
-  for(let i = 1; i <= daysInMonth; i++) {
-    let dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-    let isToday = (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) ? 'today' : '';
-    let dayOfWeek = new Date(year, month, i).getDay();
-    let txtColor = dayOfWeek === 0 ? 'text-red-500' : (dayOfWeek === 6 ? 'text-blue-500' : 'text-slate-700');
-
-    // 일정(파란점), 공지(빨간점) 유무 체크
-    let hasSch = globalSchedules.some(s => s.date === dateStr);
-    let hasNoti = globalNotices.some(n => n.date === dateStr);
-    
-    let dots = "";
-    if(hasSch || hasNoti) {
-      dots = `<div class="dot-container mt-1">
-                ${hasSch ? '<div class="dot dot-sch"></div>' : ''}
-                ${hasNoti ? '<div class="dot dot-noti"></div>' : ''}
-              </div>`;
-    }
-
-    h += `<div class="main-cal-cell ${isToday}" onclick="openMainCalPopup('${dateStr}')">
-            <span class="main-cal-date ${txtColor}">${i}</span>
-            ${dots}
-          </div>`;
-  }
-  
-  const totalCells = firstDay + daysInMonth;
-  let nextDays = 42 - totalCells; 
-  if (totalCells <= 35) nextDays = 35 - totalCells; 
-  for(let i = 1; i <= nextDays; i++) {
-    h += `<div class="main-cal-cell bg-slate-50"><span class="main-cal-date text-slate-300">${i}</span></div>`;
-  }
-  document.getElementById('main-cal-grid-content').innerHTML = h;
-}
-
-function changeMainMonth(diff) {
-  currentMainCalDate.setMonth(currentMainCalDate.getMonth() + diff);
-  renderMainCalendar();
-}
-
-// 메인 달력 날짜 클릭 시 팝업
-function openMainCalPopup(dateStr) {
-  currentClickedDate = dateStr;
-  let d = new Date(dateStr);
-  let days = ['일','월','화','수','목','금','토'];
-  document.getElementById('main-action-date').innerText = `${dateStr} (${days[d.getDay()]})`;
-
-  let sList = globalSchedules.filter(s => s.date === dateStr);
-  let nList = globalNotices.filter(n => n.date === dateStr);
-
-  let h = "";
-  
-  // 1. 해당일 일정 리스트
-  if(sList.length > 0) {
-    h += `<div class="mb-4">
-            <div class="text-xs font-black text-slate-400 mb-2 uppercase flex justify-between">
-              <span><i class="fas fa-calendar-check text-blue-500 mr-1"></i>등록된 일정</span>
-            </div>`;
-    sList.forEach(s => {
-      h += `<div onclick="navFromMainTo('500')" class="bg-blue-50 border border-blue-100 p-3 rounded-lg mb-2 cursor-pointer hover:bg-blue-100">
-              <span class="text-xs font-bold text-blue-600 bg-white px-2 py-0.5 rounded mr-2 border border-blue-200">${s.type}</span>
-              <span class="text-sm font-bold text-slate-700">${s.content}</span>
-            </div>`;
-    });
-    h += `</div>`;
-  }
-  
-  // 2. 해당일 공지 리스트
-  if(nList.length > 0) {
-    h += `<div class="mb-2">
-            <div class="text-xs font-black text-slate-400 mb-2 uppercase">
-              <i class="fas fa-bullhorn text-red-500 mr-1"></i>등록된 공지
-            </div>`;
-    nList.forEach(n => {
-      h += `<div onclick="navFromMainTo('600')" class="bg-red-50 border border-red-100 p-3 rounded-lg mb-2 cursor-pointer hover:bg-red-100">
-              <span class="text-sm font-bold text-slate-700">${n.title}</span>
-            </div>`;
-    });
-    h += `</div>`;
-  }
-
-  if(sList.length === 0 && nList.length === 0) {
-    h += `<div class="text-center py-6 text-sm font-bold text-slate-400 bg-slate-50 rounded-xl">이 날짜에 등록된 일정이나 공지가 없습니다.</div>`;
-  }
-
-  document.getElementById('main-action-lists').innerHTML = h;
-  document.getElementById('main-action-modal').style.display = 'flex';
-}
-
-// 팝업 안에서 모듈로 다이렉트 이동하는 라우터
-function navFromMainTo(moduleCode) {
-  document.getElementById('main-action-modal').style.display = 'none';
-  if(moduleCode === '010') {
-    // 자산재고로 갈 때는 사용자가 클릭한 날짜를 기본 세팅해줌
-    selectedInvDate = currentClickedDate;
-    currentInvPeriod = 'daily';
-    openModule('010');
-  } else if (moduleCode === '020') {
-    openModule('020');
-  } else if (moduleCode === '500') {
-    openModule('500');
-    // 일정관리로 이동한 후 해당 날짜 팝업 자동으로 띄워줌
-    currentCalDate = new Date(currentClickedDate);
-    setTimeout(() => openScheduleDay(currentClickedDate), 800);
-  } else if (moduleCode === '600') {
-    openModule('600');
-  }
-}
-
-/* ==========================================
    공통 화면 네비게이션
 ========================================== */
 function goMain() {
@@ -324,7 +285,7 @@ function goMain() {
   document.getElementById('main-view').style.display='flex';
   window.scrollTo(0,0);
   updateNav('HOME');
-  initApp(); // 메인화면 돌아올 때 달력 뱃지 갱신
+  initApp();
 }
 function openModule(code) {
   document.querySelectorAll('.workspace').forEach(e=>e.style.display='none');
@@ -346,7 +307,83 @@ function updateNav(txt){
 }
 
 /* ==========================================
-   자산재고 (010) 엔진 (다 쓴 재고 숨김 포함)
+   메인 화면 통합 달력 로직
+========================================== */
+function renderMainCalendar() {
+  const year = currentMainCalDate.getFullYear();
+  const month = currentMainCalDate.getMonth();
+  document.getElementById('main-cal-month-year').innerText = `${String(year).slice(2)}. ${String(month + 1).padStart(2,'0')}`;
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevMonthDays = new Date(year, month, 0).getDate();
+
+  let h = "";
+  for(let i = firstDay - 1; i >= 0; i--) { h += `<div class="main-cal-cell bg-slate-50"><span class="main-cal-date text-slate-300">${prevMonthDays - i}</span></div>`; }
+  
+  let today = new Date();
+  for(let i = 1; i <= daysInMonth; i++) {
+    let dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+    let isToday = (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) ? 'today' : '';
+    let dayOfWeek = new Date(year, month, i).getDay();
+    let txtColor = dayOfWeek === 0 ? 'text-red-500' : (dayOfWeek === 6 ? 'text-blue-500' : 'text-slate-700');
+
+    let hasSch = globalSchedules.some(s => s.date === dateStr);
+    let hasNoti = globalNotices.some(n => n.date === dateStr);
+    let dots = "";
+    if(hasSch || hasNoti) {
+      dots = `<div class="dot-container mt-1">${hasSch ? '<div class="dot dot-sch"></div>' : ''}${hasNoti ? '<div class="dot dot-noti"></div>' : ''}</div>`;
+    }
+    h += `<div class="main-cal-cell ${isToday}" onclick="openMainCalPopup('${dateStr}')"><span class="main-cal-date ${txtColor}">${i}</span>${dots}</div>`;
+  }
+  
+  const totalCells = firstDay + daysInMonth;
+  let nextDays = 42 - totalCells; 
+  if (totalCells <= 35) nextDays = 35 - totalCells; 
+  for(let i = 1; i <= nextDays; i++) { h += `<div class="main-cal-cell bg-slate-50"><span class="main-cal-date text-slate-300">${i}</span></div>`; }
+  document.getElementById('main-cal-grid-content').innerHTML = h;
+}
+
+function changeMainMonth(diff) {
+  currentMainCalDate.setMonth(currentMainCalDate.getMonth() + diff);
+  renderMainCalendar();
+}
+
+function openMainCalPopup(dateStr) {
+  currentClickedDate = dateStr;
+  let d = new Date(dateStr); let days = ['일','월','화','수','목','금','토'];
+  document.getElementById('main-action-date').innerText = `${dateStr} (${days[d.getDay()]})`;
+
+  let sList = globalSchedules.filter(s => s.date === dateStr);
+  let nList = globalNotices.filter(n => n.date === dateStr);
+
+  let h = "";
+  if(sList.length > 0) {
+    h += `<div class="mb-4"><div class="text-xs font-black text-slate-400 mb-2 uppercase"><span><i class="fas fa-calendar-check text-blue-500 mr-1"></i>등록된 일정</span></div>`;
+    sList.forEach(s => { h += `<div onclick="navFromMainTo('500')" class="bg-blue-50 border border-blue-100 p-3 rounded-lg mb-2 cursor-pointer hover:bg-blue-100"><span class="text-xs font-bold text-blue-600 bg-white px-2 py-0.5 rounded mr-2 border border-blue-200">${s.type}</span><span class="text-sm font-bold text-slate-700">${s.content}</span></div>`; });
+    h += `</div>`;
+  }
+  if(nList.length > 0) {
+    h += `<div class="mb-2"><div class="text-xs font-black text-slate-400 mb-2 uppercase"><i class="fas fa-bullhorn text-red-500 mr-1"></i>등록된 공지</div>`;
+    nList.forEach(n => { h += `<div onclick="navFromMainTo('600')" class="bg-red-50 border border-red-100 p-3 rounded-lg mb-2 cursor-pointer hover:bg-red-100"><span class="text-sm font-bold text-slate-700">${n.title}</span></div>`; });
+    h += `</div>`;
+  }
+  if(sList.length === 0 && nList.length === 0) { h += `<div class="text-center py-6 text-sm font-bold text-slate-400 bg-slate-50 rounded-xl">이 날짜에 등록된 일정이나 공지가 없습니다.</div>`; }
+
+  document.getElementById('main-action-lists').innerHTML = h;
+  document.getElementById('main-action-modal').style.display = 'flex';
+}
+
+function navFromMainTo(moduleCode) {
+  document.getElementById('main-action-modal').style.display = 'none';
+  if(moduleCode === '010') { selectedInvDate = currentClickedDate; currentInvPeriod = 'daily'; openModule('010'); } 
+  else if (moduleCode === '020') { openModule('020'); } 
+  else if (moduleCode === '500') { openModule('500'); currentCalDate = new Date(currentClickedDate); setTimeout(() => openScheduleDay(currentClickedDate), 600); } 
+  else if (moduleCode === '600') { openModule('600'); }
+}
+
+/* ==========================================
+   자산재고 (010) 엔진 
 ========================================== */
 function parseDateString(val) {
   let digits = val.replace(/[^0-9]/g, ''); if (digits.length < 4) return null;
@@ -354,11 +391,7 @@ function parseDateString(val) {
   if (digits.length === 4) { y = new Date().getFullYear(); m = digits.substring(0,2); d = digits.substring(2,4); }
   else if (digits.length === 6) { y = "20" + digits.substring(0,2); m = digits.substring(2,4); d = digits.substring(4,6); }
   else if (digits.length === 8) { y = digits.substring(0,4); m = digits.substring(4,6); d = digits.substring(6,8); }
-  else if (digits.length > 8) {
-    y = digits.substring(0,4); let rest = digits.substring(4);
-    m = rest.substring(0, rest.length-2); d = rest.slice(-2);
-    if(parseInt(m,10)>12) { m = rest.substring(0,2); d = rest.substring(2); }
-  }
+  else if (digits.length > 8) { y = digits.substring(0,4); let rest = digits.substring(4); m = rest.substring(0, rest.length-2); d = rest.slice(-2); if(parseInt(m,10)>12) { m = rest.substring(0,2); d = rest.substring(2); } }
   let month = parseInt(m, 10); let day = parseInt(d, 10);
   if (month >= 1 && month <= 12 && day >= 1 && day <= 31) return y + "-" + String(month).padStart(2, '0') + "-" + String(day).padStart(2, '0');
   return null;
@@ -388,11 +421,7 @@ function filterInventoryByDate() {
     if (parsedDate) { inputVal = parsedDate; inputEl.value = inputVal; selectedInvDate = inputVal; } 
     else { area.innerHTML = "<div class='loading-text text-red-500'>올바른 기준 날짜를 입력해주세요.</div>"; return; }
   } else {
-    // 빈칸이면 팝업에서 전달된 날짜 쓰거나 오늘 날짜 세팅
-    if(!selectedInvDate) {
-      let today = new Date();
-      selectedInvDate = today.getFullYear() + "-" + String(today.getMonth()+1).padStart(2,'0') + "-" + String(today.getDate()).padStart(2,'0');
-    }
+    if(!selectedInvDate) { let today = new Date(); selectedInvDate = today.getFullYear() + "-" + String(today.getMonth()+1).padStart(2,'0') + "-" + String(today.getDate()).padStart(2,'0'); }
     inputEl.value = selectedInvDate;
   }
 
@@ -412,22 +441,14 @@ function filterInventoryByDate() {
   allInventoryData.forEach(item => {
     let name = item["품목"]; if (!name) return;
     let inDStr = item["입고일자"]; let outDStr = item["출고일자"];
-    let inD = (inDStr && inDStr !== "-") ? new Date(inDStr) : null;
-    let outD = (outDStr && outDStr !== "-") ? new Date(outDStr) : null;
-    let inQty = item["입고량"] !== "-" ? Number(item["입고량"]) : 0;
-    let outQty = item["출고량"] !== "-" ? Number(item["출고량"]) : 0;
+    let inD = (inDStr && inDStr !== "-") ? new Date(inDStr) : null; let outD = (outDStr && outDStr !== "-") ? new Date(outDStr) : null;
+    let inQty = item["입고량"] !== "-" ? Number(item["입고량"]) : 0; let outQty = item["출고량"] !== "-" ? Number(item["출고량"]) : 0;
     let price = item["단가"] !== "-" ? Number(String(item["단가"]).replace(/[^0-9]/g, '')) : 0;
 
     let isInPeriod = false; let isOutPeriod = false;
-    if (currentInvPeriod === 'daily') {
-      if (inDStr === selectedInvDate) isInPeriod = true; if (outDStr === selectedInvDate) isOutPeriod = true;
-    } else if (currentInvPeriod === 'weekly') {
-      if (inD && inD >= weekRange.start && inD <= weekRange.end) isInPeriod = true;
-      if (outD && outD >= weekRange.start && outD <= weekRange.end) isOutPeriod = true;
-    } else if (currentInvPeriod === 'monthly') {
-      if (inD && inD.getFullYear() === refDate.getFullYear() && inD.getMonth() === refDate.getMonth()) isInPeriod = true;
-      if (outD && outD.getFullYear() === refDate.getFullYear() && outD.getMonth() === refDate.getMonth()) isOutPeriod = true;
-    }
+    if (currentInvPeriod === 'daily') { if (inDStr === selectedInvDate) isInPeriod = true; if (outDStr === selectedInvDate) isOutPeriod = true; } 
+    else if (currentInvPeriod === 'weekly') { if (inD && inD >= weekRange.start && inD <= weekRange.end) isInPeriod = true; if (outD && outD >= weekRange.start && outD <= weekRange.end) isOutPeriod = true; } 
+    else if (currentInvPeriod === 'monthly') { if (inD && inD.getFullYear() === refDate.getFullYear() && inD.getMonth() === refDate.getMonth()) isInPeriod = true; if (outD && outD.getFullYear() === refDate.getFullYear() && outD.getMonth() === refDate.getMonth()) isOutPeriod = true; }
 
     if (isInPeriod || isOutPeriod) {
       if (!aggregated[name]) aggregated[name] = { name: name, inQty: 0, outQty: 0, totalCost: 0, note: "" };
@@ -439,10 +460,7 @@ function filterInventoryByDate() {
   });
 
   let resultKeys = Object.keys(aggregated);
-  if (resultKeys.length === 0) {
-    let periodText = currentInvPeriod === 'daily' ? "일간" : currentInvPeriod === 'weekly' ? "주간" : "월간";
-    area.innerHTML = `<div class='loading-text'>해당 ${periodText} 기준 입/출고 내역이 없습니다.</div>`; return;
-  }
+  if (resultKeys.length === 0) { let periodText = currentInvPeriod === 'daily' ? "일간" : currentInvPeriod === 'weekly' ? "주간" : "월간"; area.innerHTML = `<div class='loading-text'>해당 ${periodText} 기준 입/출고 내역이 없습니다.</div>`; return; }
 
   let h = `<div class="w-full overflow-x-auto bg-white shadow-sm border-t border-slate-200"><table class="custom-table"><thead><tr><th>품목</th><th>입고일자 (기간)</th><th class="text-blue-600">입고량</th><th>단가(평균)</th><th>출고일자 (기간)</th><th class="text-red-600">출고량</th><th class="text-slate-800">현재 재고</th><th class="text-indigo-600">재고 총액</th><th>비고</th></tr></thead><tbody>`;
   resultKeys.forEach(k => {
@@ -462,7 +480,7 @@ function filterInventoryByDate() {
 }
 
 /* ==========================================
-   일정관리 달력 (500) 엔진
+   일정관리 달력 (500) 엔진 (완벽 복구본)
 ========================================== */
 function renderCalendar() {
   const year = currentCalDate.getFullYear(); const month = currentCalDate.getMonth();
@@ -479,7 +497,9 @@ function renderCalendar() {
     let badges = "";
     daySchedules.forEach(s => {
        let badgeColor = "badge-gray";
-       if(s.type === "회의" || s.type.includes("미팅")) badgeColor = "badge-blue"; else if(s.type === "중요" || s.type.includes("결제")) badgeColor = "badge-red"; else if(s.type === "휴가" || s.type.includes("휴무")) badgeColor = "badge-green";
+       if(s.type === "회의" || s.type.includes("미팅")) badgeColor = "badge-blue"; 
+       else if(s.type === "중요" || s.type.includes("결제")) badgeColor = "badge-red"; 
+       else if(s.type === "휴무" || s.type.includes("휴가")) badgeColor = "badge-green";
        badges += `<div class="schedule-badge ${badgeColor}">${s.content}</div>`;
     });
     h += `<div class="calendar-cell ${isToday} ${dayClass}" onclick="openScheduleDay('${dateStr}')"><span class="calendar-date">${i}</span><div class="flex flex-col gap-1 w-full flex-1 overflow-hidden">${badges}</div></div>`;
@@ -488,7 +508,9 @@ function renderCalendar() {
   for(let i = 1; i <= nextDays; i++) { h += `<div class="calendar-cell other-month"><span class="calendar-date">${i}</span></div>`; }
   document.getElementById('cal-grid-content').innerHTML = h;
 }
+
 function changeMonth(diff) { currentCalDate.setMonth(currentCalDate.getMonth() + diff); renderCalendar(); }
+
 function openScheduleDay(dateStr) {
   selectedSchDate = dateStr; document.getElementById('schedule-modal-date').innerText = dateStr + " 일정"; document.getElementById('new-sch-content').value = "";
   let daySchedules = globalSchedules.filter(s => s.date === dateStr); let h = "";
@@ -496,24 +518,39 @@ function openScheduleDay(dateStr) {
   else {
     daySchedules.forEach(s => {
       let badgeColor = "bg-slate-200 text-slate-600";
-      if(s.type === "회의" || s.type.includes("미팅")) badgeColor = "bg-blue-100 text-blue-600"; else if(s.type === "중요" || s.type.includes("결제")) badgeColor = "bg-red-100 text-red-600"; else if(s.type === "휴무" || s.type.includes("휴가")) badgeColor = "bg-green-100 text-green-600";
+      if(s.type === "회의" || s.type.includes("미팅")) badgeColor = "bg-blue-100 text-blue-600"; 
+      else if(s.type === "중요" || s.type.includes("결제")) badgeColor = "bg-red-100 text-red-600"; 
+      else if(s.type === "휴무" || s.type.includes("휴가")) badgeColor = "bg-green-100 text-green-600";
       h += `<div class="flex items-center justify-between mb-2 p-3 bg-white border border-slate-200 rounded-lg shadow-sm"><div class="flex items-center gap-3"><span class="text-[11px] font-black px-2 py-1 rounded-md ${badgeColor}">${s.type}</span><span class="text-sm font-bold text-slate-700">${s.content}</span></div><i class="fas fa-trash-alt text-red-300 hover:text-red-500 cursor-pointer p-1 transition-colors" onclick="deleteSchedule(${s.row}, '${dateStr}')"></i></div>`;
     });
   }
   document.getElementById('schedule-day-list').innerHTML = h; document.getElementById('schedule-modal').style.display = "flex";
 }
+
 function saveNewSchedule(e) {
   const content = document.getElementById('new-sch-content').value.trim(); const type = document.getElementById('new-sch-type').value;
   if(!content) return alert("일정 내용을 입력하세요.");
   const btn = e.target; const originalText = btn.innerText; btn.innerText = "등록 중..."; btn.disabled = true;
   fetch(`${gasUrl}?action=save_schedule&date=${selectedSchDate}&content=${encodeURIComponent(content)}&type=${encodeURIComponent(type)}`).then(r => r.text()).then(res => {
-    fetch(`${gasUrl}?action=get_schedule`).then(r=>r.json()).then(data => { globalSchedules = data; renderCalendar(); renderMainCalendar(); openScheduleDay(selectedSchDate); btn.innerText = originalText; btn.disabled = false; });
+    fetch(`${gasUrl}?action=get_schedule`).then(r=>r.json()).then(data => { 
+      globalSchedules = data; 
+      renderCalendar(); 
+      renderMainCalendar(); 
+      openScheduleDay(selectedSchDate); 
+      btn.innerText = originalText; btn.disabled = false; 
+    });
   }).catch(e => { alert("오류가 발생했습니다."); btn.innerText = originalText; btn.disabled = false; });
 }
+
 function deleteSchedule(row, dateStr) {
   if(!confirm("이 일정을 삭제하시겠습니까?")) return;
   fetch(`${gasUrl}?action=delete_item&sheetName=일정관리&row=${row}`).then(r => r.text()).then(res => {
-     fetch(`${gasUrl}?action=get_schedule`).then(r=>r.json()).then(data => { globalSchedules = data; renderCalendar(); renderMainCalendar(); openScheduleDay(dateStr); });
+     fetch(`${gasUrl}?action=get_schedule`).then(r=>r.json()).then(data => { 
+       globalSchedules = data; 
+       renderCalendar(); 
+       renderMainCalendar(); 
+       openScheduleDay(dateStr); 
+     });
   });
 }
 
@@ -523,6 +560,7 @@ function deleteSchedule(row, dateStr) {
 function loadOtherModules(code) {
   let contentDiv = document.getElementById("content-" + code);
   
+  // 자산재고 모듈 렌더링
   if (code === '010') {
     contentDiv.innerHTML = `
       <div class="px-4 py-4 bg-slate-50 border-b border-slate-200 shrink-0">
@@ -541,23 +579,21 @@ function loadOtherModules(code) {
     const area = document.getElementById("inv-data-area");
     area.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2'></i><br>자산재고 원장 연결 중...</div>";
     
-    fetch(`${gasUrl}?action=inventory`)
-    .then(r=>r.json())
-    .then(data => {
+    fetch(`${gasUrl}?action=inventory`).then(r=>r.json()).then(data => {
       allInventoryData = data; 
-      // currentInvPeriod = 'daily'; // 이미 라우터에서 세팅됨
       filterInventoryByDate();
     }).catch(e => { area.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.</div>"; });
     return;
   }
 
+  // 일정관리 달력 렌더링
   if (code === '500') {
     contentDiv.innerHTML = `
       <div class="calendar-header"><button onclick="changeMonth(-1)" class="p-2 text-slate-400 hover:text-indigo-500"><i class="fas fa-chevron-left"></i></button><span id="cal-month-year" class="text-indigo-900 tracking-wider"></span><button onclick="changeMonth(1)" class="p-2 text-slate-400 hover:text-indigo-500"><i class="fas fa-chevron-right"></i></button></div>
       <div class="calendar-grid"><div class="calendar-day-name sun">일</div><div class="calendar-day-name">월</div><div class="calendar-day-name">화</div><div class="calendar-day-name">수</div><div class="calendar-day-name">목</div><div class="calendar-day-name">금</div><div class="calendar-day-name sat">토</div></div>
       <div id="cal-grid-content" class="calendar-grid flex-1" style="grid-auto-rows: minmax(85px, 1fr);"></div>
     `;
-    if(globalSchedules.length > 0) renderCalendar();
+    if(globalSchedules.length > 0) { renderCalendar(); }
     else {
       document.getElementById('cal-grid-content').innerHTML = "<div style='grid-column: span 7;' class='loading-text'><i class='fas fa-spinner fa-spin text-2xl mb-2 text-indigo-500'></i><br>일정 데이터를 불러오는 중...</div>";
       fetch(`${gasUrl}?action=get_schedule`).then(r=>r.json()).then(data => { globalSchedules = data; renderCalendar(); });
@@ -565,6 +601,7 @@ function loadOtherModules(code) {
     return;
   }
   
+  // 나머지 기타 모듈 렌더링
   let action = ""; contentDiv.className = "module-content-area"; 
   contentDiv.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2'></i><br>데이터를 불러오는 중입니다...</div>";
   if(code === '020') action = "get_sales"; else if(code === '030') action = "manual"; else if(code === '400') action = "rnd"; else if(code === '600') action = "get_notice"; else if(code === '900') action = "archive";
@@ -579,5 +616,24 @@ function loadOtherModules(code) {
     h += `</div>`;});contentDiv.innerHTML = h;
   }).catch(e => {contentDiv.innerHTML = "<div class='text-red-500 p-4 text-center font-bold'>오류가 발생했습니다.</div>"; });
 }
-function loadRecipe(keywordStr) { /* (레시피 코드는 기존과 동일 유지) */ }
+
+/* ==========================================
+   레시피(100) 모듈 엔진 (기존)
+========================================== */
+function sendEmailRequest() {
+  const emailInput = document.getElementById('email-input').value.trim(); if (!emailInput || !emailInput.includes('@')) { alert("정확한 이메일 주소를 입력해주세요."); return;}
+  const btn = document.getElementById('btn-send-email'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 전송중...'; btn.disabled = true; const r = selectedEmailRecipe; const subject = `[CHEF D.S. KIM] 레시피 공유: ${r.name}`;
+  let htmlBody = `<div style="font-family: 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background-color: #ffffff;"><div style="background: #4f46e5; color: white; padding: 25px 20px; text-align: center;"><h2 style="margin: 0; font-size: 24px; font-style: italic; font-weight: 900;">CHEF D.S. KIM</h2><p style="margin: 5px 0 0 0; font-size: 12px; font-weight: 700; opacity: 0.8;">SMART KITCHEN SYSTEM</p></div><div style="padding: 25px;"><h3 style="margin: 0 0 20px 0; font-size: 20px; color: #1e293b; font-weight: 900;">${r.name}</h3><table style="width:100%; border-collapse: collapse; margin-bottom: 25px; font-size: 13px;"><tr><td style="padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; font-weight: bold; color: #64748b; width: 80px;">관리코드</td><td style="padding: 10px; border: 1px solid #e2e8f0; color: #4f46e5; font-weight: bold;">${r.code}</td></tr><tr><td style="padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; font-weight: bold; color: #64748b;">수정일</td><td style="padding: 10px; border: 1px solid #e2e8f0; color: #334155; font-weight: bold;">${r.date}</td></tr><tr><td style="padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; font-weight: bold; color: #64748b;">작성자</td><td style="padding: 10px; border: 1px solid #e2e8f0; color: #334155; font-weight: bold;">${r.author}</td></tr><tr><td style="padding: 10px; border: 1px solid #e2e8f0; background: #f8fafc; font-weight: bold; color: #64748b;">인분수</td><td style="padding: 10px; border: 1px solid #e2e8f0; color: #ea580c; font-weight: bold;">${r.serving}</td></tr></table>`;
+  r.details.forEach(d => { htmlBody += `<div style="margin-bottom: 20px;"><div style="font-size: 12px; font-weight: 900; color: #4f46e5; margin-bottom: 6px; border-left: 3px solid #4f46e5; padding-left: 8px;">${d.cat}</div>`; let txt = d.text;let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/); if (driveMatch) {let m = driveMatch[0].match(/[-\w]{25,}/); if (m) {let viewSrc = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`; let orgLink = `https://drive.google.com/file/d/${m[0]}/view`; let imgTag = `<div style="margin-top: 10px; margin-bottom: 10px;"><a href="${orgLink}" target="_blank"><img src="${viewSrc}" style="width: 100%; max-width: 400px; border-radius: 8px; border: 1px solid #e2e8f0;" alt="사진"></a></div>`; txt = txt.replace(driveMatch[0], imgTag); }} else if(txt.includes("http")) { txt = txt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" style="color: #3b82f6;">[링크 열기]</a>`); }let cleanTxt = txt.replace(/<[^>]*>?/gm, '').trim(); if(cleanTxt !== "" || txt.includes("<img")) { htmlBody += `<div style="background: #f8fafc; padding: 16px; border-radius: 12px; font-size: 13px; color: #334155; white-space: pre-wrap; border: 1px solid #e2e8f0; line-height: 1.6;">${txt}</div>`; }htmlBody += `</div>`;});htmlBody += `</div></div>`;
+  fetch(gasUrl, {method: 'POST',headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: 'sendEmail', toEmail: emailInput, subject: subject, htmlBody: htmlBody })
+  }).then(res => res.json()).then(data => { btn.innerHTML = '전송하기'; btn.disabled = false; if(data.result === 'success') { alert('성공적으로 메일을 발송했습니다!'); document.getElementById('email-modal').style.display='none'; } else { alert('발송 실패: ' + data.message); }
+  }).catch(err => {btn.innerHTML = '전송하기'; btn.disabled = false; alert('오류가 발생했습니다.'); });
+}
+function openEmailModal(index) { selectedEmailRecipe = currentRecipesForEmail[index]; document.getElementById('modal-recipe-name').innerText = "요리명: " + selectedEmailRecipe.name; document.getElementById('email-input').value = ""; document.getElementById('email-modal').style.display = "flex"; }
+function loadRecipe(keywordStr) {
+  const area = document.getElementById('recipe-list'); area.innerHTML = "<div class='loading-text'><i class='fas fa-spinner fa-spin text-2xl mb-2 text-indigo-500'></i><br>데이터를 불러오는 중입니다...</div>"; document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active')); try {if(window.event && window.event.target && window.event.target.classList.contains('tag-btn')) { window.event.target.classList.add('active'); }} catch(e) {}let safeKeyword = (keywordStr || "").trim();
+  fetch(`${gasUrl}?action=recipe&keyword=${encodeURIComponent(safeKeyword)}`).then(r=>r.json()).then(l => {let h = ""; let count = 0; currentRecipesForEmail = []; const codeSegments = ['KOR', 'JAP', 'WST', 'CHN', 'SEA', 'ETC', 'MEAT', 'POULTRY', 'SEAFOOD', 'VEG', 'MAIN', 'APP', 'SIDE', 'SAUCE', 'STEAM', 'BOIL', 'SMOKE', 'GRILL', 'COLD', 'FRY'];const isCodeSearch = codeSegments.includes(safeKeyword.toUpperCase());
+  l.forEach((i) => {let code = "-", date = "-", author = "-", serving = "-"; let materialsStr = ""; let processStr = ""; let mainPhotoHtml = ""; let recipeDataForEmail = { name: i.name || "이름없음", type: i.type || "-", code: "-", date: "-", author: "-", serving: "-", details: [] }; const safeDetails = i.details || []; safeDetails.forEach(d => { let txt = d.text || ""; let cleanCat = (d.cat || "").replace(/\s/g, ""); if (cleanCat.includes("관리코드")) { code = txt; recipeDataForEmail.code = txt; } else if (cleanCat.includes("수정일") || cleanCat.includes("날짜")) { date = txt; recipeDataForEmail.date = txt; } else if (cleanCat.includes("작성자")) { author = txt; recipeDataForEmail.author = txt; } else if (cleanCat.includes("인분") || cleanCat.includes("수량")) { serving = txt; recipeDataForEmail.serving = txt; } });safeDetails.forEach(d => { let txt = d.text || ""; let cleanCat = (d.cat || "").replace(/\s/g, ""); let isTopInfo = false; if (cleanCat.includes("관리코드") || cleanCat.includes("수정일") || cleanCat.includes("날짜") || cleanCat.includes("작성자") || cleanCat.includes("인분") || cleanCat.includes("수량")) { isTopInfo = true; } if (!isTopInfo) { recipeDataForEmail.details.push({ cat: d.cat || "-", text: txt }); } if (isTopInfo) return; let htmlTxt = txt;let driveMatch = txt.match(/https:\/\/drive\.google\.com[^\s"']+/); if (driveMatch) {let m = driveMatch[0].match(/[-\w]{25,}/); if (m) {let viewSrc = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`; let orgLink = `https://drive.google.com/file/d/${m[0]}/view`; mainPhotoHtml = `<div class="w-full max-w-[400px] shrink-0 rounded-xl overflow-hidden border border-slate-200 shadow-sm cursor-pointer" onclick="window.open('${orgLink}', '_blank')"><img src="${viewSrc}" style="width: 100%; height: auto; display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"></div>`; htmlTxt = htmlTxt.replace(driveMatch[0], "").trim(); }} else if(htmlTxt.includes("http")) { htmlTxt = htmlTxt.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" class="text-blue-500 underline font-bold">[링크 바로가기]</a>`); }if(htmlTxt === "") return; const sectionHtml = `<div class="detail-section"><div class="detail-label">${d.cat || "-"}</div><div class="detail-content-box">${htmlTxt}</div></div>`; let isMaterial = cleanCat.includes("재료") || cleanCat.includes("양념") || cleanCat.includes("드레싱"); if (isMaterial) { materialsStr += sectionHtml; } else { processStr += sectionHtml; } });if (isCodeSearch) { const codeUpper = code.toUpperCase(); const typeUpper = (i.type || "").toUpperCase(); const kwUpper = safeKeyword.toUpperCase(); if (!codeUpper.includes(kwUpper) && !typeUpper.includes(kwUpper)) return; }const currentIndex = currentRecipesForEmail.length; currentRecipesForEmail.push(recipeDataForEmail); let thumbHtml = `<div class="recipe-img-empty"><i class="fas fa-image text-xl mb-1"></i>NO IMG</div>`; if (i.img && i.img.includes("http")) { let src = i.img; let link = i.img; if (src.includes("drive.google.com")) { let m = src.match(/[-\w]{25,}/); if(m) { src = `https://drive.google.com/thumbnail?id=${m[0]}&sz=w1000`; link = `https://drive.google.com/file/d/${m[0]}/view`; } }thumbHtml = `<div class="recipe-thumb-box" onclick="window.open('${link}', '_blank')"><img src="${src}" class="recipe-thumb" onerror="this.parentElement.innerHTML='<div class=\\'recipe-img-empty\\'><i class=\\'fas fa-ban text-red-400 text-xl mb-1\\'></i>권한오류</div>'"></div>`; }h += `<div class="recipe-card" onclick="this.classList.toggle('open')"><div class="recipe-card-head"><div><span class="recipe-title">${i.name || "이름없음"}</span><span class="recipe-badge">${i.type || "-"}</span></div><i class="fas fa-chevron-down text-slate-300"></i></div><div class="recipe-card-body" onclick="event.stopPropagation()"><div class="flex gap-4 items-start mb-6 pb-6 border-b border-dashed border-slate-200">${thumbHtml}<div class="flex-1 bg-white border border-slate-100 shadow-sm rounded-xl p-3 relative"><button onclick="openEmailModal(${currentIndex}); event.stopPropagation();" class="absolute top-3 right-3 text-indigo-500 bg-indigo-50 px-3 py-1.5 rounded-lg text-xs font-bold border border-indigo-100 active:bg-indigo-100 transition-colors"><i class="fas fa-paper-plane mr-1"></i>보내기</button><div class="info-grid pr-16"><div class="info-label">📋 관리코드</div><div class="info-value text-indigo-600">${code}</div><div class="info-label">📅 수정일</div><div class="info-value">${date}</div><div class="info-label">👨‍🍳 작성자</div><div class="info-value">${author}</div><div class="info-label">🍽️ 인분수</div><div class="info-value text-orange-600">${serving}</div></div></div></div><div class="flex flex-col md:flex-row gap-6 mb-6">${mainPhotoHtml}<div class="flex-1 min-w-0">${materialsStr}</div></div><div class="w-full">${processStr}</div></div></div>`;count++;});area.innerHTML = count > 0 ? h : "<div class='loading-text'>검색 결과가 없습니다.</div>";
+  }).catch(e => {console.error(e);area.innerHTML = "<div class='loading-text text-red-500'>오류가 발생했습니다.</div>"; });
+}
 </script></body></html>
